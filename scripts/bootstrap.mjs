@@ -21,7 +21,13 @@ const UNIX_VENV_PYTHON = ["bin", "python"];
 const PYTHON_ENVS = [
   {
     name: "spec-to-markdown",
-    scriptsDir: path.join(repoRoot, ".github", "skills", "spec-to-markdown", "scripts"),
+    scriptsDir: path.join(
+      repoRoot,
+      ".github",
+      "skills",
+      "spec-to-markdown",
+      "scripts",
+    ),
   },
   {
     name: "standard (auth_helper 等)",
@@ -55,6 +61,19 @@ function run(cmd, args, options = {}) {
   });
 }
 
+function runNpmVersion() {
+  if (!isWindows) {
+    return run("npm", ["--version"]);
+  }
+
+  return run(process.env.ComSpec || "cmd.exe", [
+    "/d",
+    "/s",
+    "/c",
+    "npm --version",
+  ]);
+}
+
 function firstNonEmpty(...values) {
   return values.find((v) => v && v.trim());
 }
@@ -66,11 +85,14 @@ function checkNodeAndNpm() {
   if (Number.isFinite(major) && major >= 18) {
     log("✅", `Node.js ${nodeVersion} (推奨: v18+)`);
   } else {
-    log("❌", `Node.js ${nodeVersion} は非推奨です — v18 以上を利用してください`);
+    log(
+      "❌",
+      `Node.js ${nodeVersion} は非推奨です — v18 以上を利用してください`,
+    );
     blockers.push("node");
   }
 
-  const npm = run("npm", ["--version"]);
+  const npm = runNpmVersion();
   if (npm.status === 0) {
     log("✅", `npm ${firstNonEmpty(npm.stdout, npm.stderr).trim()}`);
   } else {
@@ -81,8 +103,18 @@ function checkNodeAndNpm() {
 
 function findPython() {
   const candidates = [
-    { command: "python", argsPrefix: [], versionArgs: ["--version"], label: "python" },
-    { command: "py", argsPrefix: ["-3"], versionArgs: ["-3", "--version"], label: "py -3" },
+    {
+      command: "python",
+      argsPrefix: [],
+      versionArgs: ["--version"],
+      label: "python",
+    },
+    {
+      command: "py",
+      argsPrefix: ["-3"],
+      versionArgs: ["-3", "--version"],
+      label: "py -3",
+    },
   ];
 
   for (const c of candidates) {
@@ -99,14 +131,20 @@ function findPython() {
         major < MIN_PYTHON_MAJOR ||
         (major === MIN_PYTHON_MAJOR && minor < MIN_PYTHON_MINOR)
       ) {
-        log("❌", `Python ${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+ が必要です — 現在: ${text}`);
+        log(
+          "❌",
+          `Python ${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+ が必要です — 現在: ${text}`,
+        );
         blockers.push("python-version");
       }
       return c;
     }
   }
 
-  log("❌", "Python 3.10+ が見つかりません — `python --version` または `py -3 --version` を確認してください");
+  log(
+    "❌",
+    "Python 3.10+ が見つかりません — `python --version` または `py -3 --version` を確認してください",
+  );
   blockers.push("python");
   return null;
 }
@@ -117,21 +155,32 @@ function checkPip(python) {
     return false;
   }
 
-  const r = run(python.command, [...python.argsPrefix, "-m", "pip", "--version"]);
+  const r = run(python.command, [
+    ...python.argsPrefix,
+    "-m",
+    "pip",
+    "--version",
+  ]);
   if (r.status === 0) {
     log("✅", `pip (${firstNonEmpty(r.stdout, r.stderr).trim()})`);
     return true;
   }
 
-  log("❌", `pip が利用できません — \`${python.label} -m ensurepip --upgrade\` を実行してください`);
+  log(
+    "❌",
+    `pip が利用できません — \`${python.label} -m ensurepip --upgrade\` を実行してください`,
+  );
   blockers.push("pip");
   return false;
 }
 
 function checkPac() {
-  const r = run("pac", ["--version"]);
+  const r = run("pac", ["help"]);
   if (r.status === 0) {
-    log("✅", `PAC CLI (${firstNonEmpty(r.stdout, r.stderr).trim()})`);
+    const firstLine = firstNonEmpty(r.stdout, r.stderr)
+      .trim()
+      .split(/\r?\n/)[0];
+    log("✅", `PAC CLI (${firstLine})`);
     return;
   }
   log(
@@ -155,7 +204,12 @@ function checkPowerAppsCli() {
   }
 
   // node_modules に @microsoft/power-apps が存在するかフォールバック確認
-  const pkgDir = path.join(repoRoot, "node_modules", "@microsoft", "power-apps");
+  const pkgDir = path.join(
+    repoRoot,
+    "node_modules",
+    "@microsoft",
+    "power-apps",
+  );
   if (fs.existsSync(pkgDir)) {
     log("✅", "npx power-apps (パッケージ検出済み)");
     return;
@@ -170,7 +224,10 @@ function checkEnvFile() {
   if (fs.existsSync(envPath)) {
     log("✅", ".env ファイルを検出");
   } else if (fs.existsSync(examplePath)) {
-    log("⚠️", ".env が未作成です — `cp .env.example .env` で作成し、環境値を設定してください");
+    log(
+      "⚠️",
+      ".env が未作成です — `Copy-Item .env.example .env` で作成し、環境値を設定してください",
+    );
   }
 }
 
@@ -187,11 +244,18 @@ function setupPythonVenv(python, pipReady, { name, scriptsDir }) {
   const venvDir = path.join(scriptsDir, ".venv");
 
   if (!fs.existsSync(venvDir)) {
-    const r = run(python.command, [...python.argsPrefix, "-m", "venv", ".venv"], {
-      cwd: scriptsDir,
-    });
+    const r = run(
+      python.command,
+      [...python.argsPrefix, "-m", "venv", ".venv"],
+      {
+        cwd: scriptsDir,
+      },
+    );
     if (r.status !== 0) {
-      log("⚠️", `${name}: venv 作成失敗 — \`${python.label} -m venv .venv\` (in ${scriptsDir}) を手動実行`);
+      log(
+        "⚠️",
+        `${name}: venv 作成失敗 — \`${python.label} -m venv .venv\` (in ${scriptsDir}) を手動実行`,
+      );
       return;
     }
     log("✅", `${name}: venv を作成`);
@@ -203,14 +267,21 @@ function setupPythonVenv(python, pipReady, { name, scriptsDir }) {
     ? path.join(venvDir, ...WINDOWS_VENV_PYTHON)
     : path.join(venvDir, ...UNIX_VENV_PYTHON);
 
-  const install = run(venvPython, ["-m", "pip", "install", "-q", "-r", "requirements.txt"], {
-    cwd: scriptsDir,
-    timeout: 120_000,
-  });
+  const install = run(
+    venvPython,
+    ["-m", "pip", "install", "-q", "-r", "requirements.txt"],
+    {
+      cwd: scriptsDir,
+      timeout: 120_000,
+    },
+  );
   if (install.status === 0) {
     log("✅", `${name}: Python 依存をインストール`);
   } else {
-    log("⚠️", `${name}: 依存インストール失敗 — \`${venvPython} -m pip install -r requirements.txt\` を実行`);
+    log(
+      "⚠️",
+      `${name}: 依存インストール失敗 — \`${venvPython} -m pip install -r requirements.txt\` を実行`,
+    );
   }
 }
 
@@ -246,7 +317,9 @@ if (blockers.length > 0) {
   // postinstall/setup では npm install 全体を失敗させない
   if (mode !== "check") {
     console.log("");
-    console.log("⚠️  postinstall/setup では開発体験を優先し、blocker があっても終了コードは 0 のままです。");
+    console.log(
+      "⚠️  postinstall/setup では開発体験を優先し、blocker があっても終了コードは 0 のままです。",
+    );
   }
   console.log("");
 }
