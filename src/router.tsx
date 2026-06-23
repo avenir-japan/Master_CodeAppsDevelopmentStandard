@@ -1,5 +1,10 @@
 ﻿import { createBrowserRouter, Navigate } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import {
+  lazy,
+  Suspense,
+  type ComponentType,
+  type LazyExoticComponent,
+} from "react";
 import Layout from "@/pages/_layout";
 
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
@@ -28,9 +33,7 @@ const PageLoader = () => (
 );
 
 // Suspenseラッパー
-const withSuspense = (
-  Component: React.LazyExoticComponent<() => React.JSX.Element>,
-) => (
+const withSuspense = (Component: LazyExoticComponent<ComponentType>) => (
   <Suspense fallback={<PageLoader />}>
     <Component />
   </Suspense>
