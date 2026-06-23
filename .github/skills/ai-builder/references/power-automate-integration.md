@@ -78,6 +78,57 @@ clientdata = {
 }
 ```
 
+### ドキュメント入力（PDF/画像）のパラメータ形式（重要）
+
+AI Builder プロンプトの入力変数が `type: document` の場合、
+フロー定義でのパラメータ形式は特殊なオブジェクト形式が必要。
+
+#### よくあるエラー
+
+```
+Input parameter 'item' validation failed in workflow operation '...':
+The parameter with value '"@base64ToBinary(...)"' in path 'item/requestv2/receipt_file'
+with type/format 'String/binary' is not convertible to type/format 'Object'.
+```
+
+```
+The API operation 'PredictV2' is missing required property 'item/requestv2/receipt_file/base64Encoded'.
+```
+
+#### 正しい形式
+
+```python
+"parameters": {
+    "recordId": ai_model_id,
+    "item/requestv2/receipt_file": {
+        "$content-type": "application/octet-stream",
+        "$content": "@{triggerBody()['text_1']}",  # base64 文字列
+        "base64Encoded": True,  # ★ 必須
+    },
+},
+```
+
+#### ポイント
+
+| プロパティ      | 説明                                                  |
+| --------------- | ----------------------------------------------------- |
+| `$content-type` | MIME タイプ（`application/octet-stream` で汎用）      |
+| `$content`      | base64 エンコードされたファイルコンテンツ（式で参照） |
+| `base64Encoded` | **必須**。`True` を設定しないとエラー                 |
+
+#### ❌ 動作しない形式
+
+```python
+# 文字列として渡すとエラー
+"item/requestv2/receipt_file": "@base64ToBinary(triggerBody()?['text_1'])"
+
+# base64Encoded がないとエラー
+"item/requestv2/receipt_file": {
+    "$content-type": "application/octet-stream",
+    "$content": "@{triggerBody()['text_1']}",
+}
+```
+
 ### レスポンスの参照
 
 ```
@@ -104,6 +155,7 @@ parameters = {
 ```
 
 このバグはエラーメッセージが明確:
+
 ```
 does not contain a definition for parameter 'item/{PREFIX}_aiinsights'
 ```
@@ -185,11 +237,11 @@ requests.post(
 
 ## API スコープの使い分け（重要）
 
-| 操作 | スコープ |
-|------|----------|
-| Dataverse API（テーブル操作） | DATAVERSE_URL + `/.default`（auth_helper デフォルト） |
-| Flow API（環境一覧、フロー /start） | `https://service.flow.microsoft.com/.default` |
-| PowerApps API（接続検索） | `https://service.powerapps.com/.default` |
+| 操作                                | スコープ                                              |
+| ----------------------------------- | ----------------------------------------------------- |
+| Dataverse API（テーブル操作）       | DATAVERSE_URL + `/.default`（auth_helper デフォルト） |
+| Flow API（環境一覧、フロー /start） | `https://service.flow.microsoft.com/.default`         |
+| PowerApps API（接続検索）           | `https://service.powerapps.com/.default`              |
 
 ## Dataverse WebHook トリガー定義
 
@@ -259,19 +311,19 @@ if __name__ == "__main__":
 
 ### フロー有効化失敗
 
-| エラー | 原因 | 対策 |
-|--------|------|------|
-| `GetPredictionSchema failed with BadRequest` | Model が Draft | 先に AIModelPublish |
-| `does not contain a definition for parameter` | f-string 忘れ | dict キーを f"..." に |
-| `InvalidOpenApiFlow` (0x80060467) | 操作パラメータ不正 | 操作スキーマを確認 |
-| 504 Gateway Timeout（接続検索） | PowerApps API が遅い | 3回リトライ + timeout=120 |
+| エラー                                        | 原因                 | 対策                      |
+| --------------------------------------------- | -------------------- | ------------------------- |
+| `GetPredictionSchema failed with BadRequest`  | Model が Draft       | 先に AIModelPublish       |
+| `does not contain a definition for parameter` | f-string 忘れ        | dict キーを f"..." に     |
+| `InvalidOpenApiFlow` (0x80060467)             | 操作パラメータ不正   | 操作スキーマを確認        |
+| 504 Gateway Timeout（接続検索）               | PowerApps API が遅い | 3回リトライ + timeout=120 |
 
 ### 接続参照作成失敗
 
-| エラー | 原因 | 対策 |
-|--------|------|------|
-| 接続が見つからない | 環境に接続未作成 | Power Automate UI で事前作成 |
-| connectionid が空 | 接続ステータスが Connected でない | UI で再認証 |
+| エラー             | 原因                              | 対策                         |
+| ------------------ | --------------------------------- | ---------------------------- |
+| 接続が見つからない | 環境に接続未作成                  | Power Automate UI で事前作成 |
+| connectionid が空  | 接続ステータスが Connected でない | UI で再認証                  |
 
 ### Teams PostMessageToConversation 注意
 

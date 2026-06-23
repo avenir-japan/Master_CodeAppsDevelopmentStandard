@@ -270,3 +270,50 @@ console.log("[CopilotStudio] Full result:", JSON.stringify(fullResult));
 | 6 | **dataSourcesInfo 統合が必須** | フロー連携と同様、シングルトン問題を回避する統合版を使う |
 | 7 | **自動生成サービスのインポートパス変更** | `add-data-source` 再実行で戻るため、再実行後に確認 |
 | 8 | **レスポンスフィールド名の大文字小文字** | conversationId / ConversationId 両方に対応する |
+
+---
+
+## CORS エラーのトラブルシューティング
+
+### 症状
+
+`ExecuteCopilotAsyncV2` 呼び出し時に CORS エラーが発生:
+
+```
+Access to XMLHttpRequest at 'https://copilotstudio.microsoft.com/environments/...' 
+from origin 'https://apps.powerapps.com' has been blocked by CORS policy
+```
+
+### 原因と対処
+
+| 原因 | 確認方法 | 対処 |
+|---|---|---|
+| 接続が未承認 | Maker Portal でアプリの「データ」→「接続」を確認 | 接続を追加して OAuth 認証を完了 |
+| dataSourcesInfo 統合ミス | サービスファイルのインポートパスを確認 | 統合版 `src/lib/dataSourcesInfo.ts` を使用 |
+| エージェント未公開 | Copilot Studio でエージェントの公開状態を確認 | 「公開」ボタンで公開 |
+| デプロイ後に接続追加 | 接続追加後に再デプロイしたか確認 | `pac code push` で再デプロイ |
+
+### 接続承認の手順
+
+1. Power Apps Maker Portal でアプリを編集モードで開く
+2. 左メニュー「データ」→「接続」
+3. `Microsoft Copilot Studio` の接続状態を確認
+4. 「接続を追加」が必要な場合は OAuth 認証を完了
+5. 編集を保存
+6. ターミナルで `npm run build && pac code push -env {ENV_ID} -s {SOL_NAME}`
+
+### dataSourcesInfo 統合確認
+
+```typescript
+// src/generated/services/MicrosoftCopilotStudioService.ts を開き、
+// インポートパスが統合版になっているか確認:
+
+// ❌ 自動生成デフォルト（CORS エラーの原因になりうる）
+import { dataSourcesInfo } from '../../../.power/schemas/appschemas/dataSourcesInfo';
+
+// ✅ 統合版（推奨）
+import { dataSourcesInfo } from '../../lib/dataSourcesInfo';
+```
+
+> **注意**: `npx power-apps add-data-source` を再実行するとインポートパスが
+> デフォルトに戻るため、再実行後は必ず確認すること。

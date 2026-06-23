@@ -103,7 +103,9 @@ function getInitialDate(): string {
       var parsed = new Date(m[1] + "T00:00:00");
       if (!isNaN(parsed.getTime())) return m[1];
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {
+    /* ignore */
+  }
   return todayStr();
 }
 ```
@@ -155,7 +157,7 @@ function getInitialDate(): string {
 ```typescript
 // ❌ NG: アノテーション名を select に含める → サイレント 400 エラー
 var wos = await loadAllRows(api, "msdyn_workorder", {
-  select: ["msdyn_workorderid", "msdyn_workordertypename"],  // ← 存在しないカラム
+  select: ["msdyn_workorderid", "msdyn_workordertypename"], // ← 存在しないカラム
 });
 
 // ✅ OK: FK ID のみ select し、関連テーブルから名前マップを構築
@@ -166,7 +168,9 @@ var woTypes = await loadAllRows(api, "msdyn_workordertype", {
   select: ["msdyn_workordertypeid", "msdyn_name"],
 });
 var typeNameMap = new Map<string, string>();
-woTypes.forEach(function (t: any) { typeNameMap.set(fkId(t.msdyn_workordertypeid), t.msdyn_name || ""); });
+woTypes.forEach(function (t: any) {
+  typeNameMap.set(fkId(t.msdyn_workordertypeid), t.msdyn_name || "");
+});
 ```
 
 > **見分け方**: カラム名が `_xxx_value` の形式なら FK ID（select 可能）。`xxxname` の形式なら OData アノテーション（select 不可）。確実に確認するには `RuntimeTypes.ts` を参照する。
@@ -175,15 +179,18 @@ woTypes.forEach(function (t: any) { typeNameMap.set(fkId(t.msdyn_workordertypeid
 
 ```typescript
 // ❌ NG: WO Product の createdon は投入日であり、実作業の月と一致しない
-var period = product.createdon.substring(0, 7);  // "2026-05" (投入日)
+var period = product.createdon.substring(0, 7); // "2026-05" (投入日)
 
 // ✅ OK: 親 WO の createdon から期間を取得
 var woDateMap = new Map<string, string>();
 workorders.forEach(function (wo: any) {
-  woDateMap.set(fkId(wo.msdyn_workorderid), wo.createdon ? wo.createdon.substring(0, 7) : "");
+  woDateMap.set(
+    fkId(wo.msdyn_workorderid),
+    wo.createdon ? wo.createdon.substring(0, 7) : "",
+  );
 });
 var woId = fkId(product._msdyn_workorder_value);
-var period = woDateMap.get(woId) || "";  // "2026-04" (実作業月)
+var period = woDateMap.get(woId) || ""; // "2026-04" (実作業月)
 ```
 
 33. **スタック横棒は `d3.stack()` を使わず手動配置** — `d3.stack()` は全行で同一カテゴリセットを前提とし、カテゴリの欠落があるとバグが出やすい。単一ファイル構成の GenPage では、メンバーごとに `forEach` + `x0 += segWidth` で手動積み上げするほうがデバッグが容易で安全
@@ -202,11 +209,21 @@ var period = woDateMap.get(woId) || "";  // "2026-04" (実作業月)
 > モデル駆動型アプリを作成する。**
 
 手順:
+
 1. `model-driven-app` スキルを読み込む
 2. モデル駆動型アプリの設計をユーザーに提示（アプリ名・SiteMap 構成・含めるテーブル）
 3. ユーザー承認後、アプリを Dataverse Web API で作成・公開
 4. 作成されたアプリの `app-id` を取得（`pac model list` で確認）
 5. その `app-id` を使って Generative Page をデプロイする
+
+## 関連スキル
+
+| スキル                                           | 連携内容                                           |
+| ------------------------------------------------ | -------------------------------------------------- |
+| [architecture](../architecture/SKILL.md)         | Generative Page を UI 方式として採用するか判断する |
+| [standard](../standard/SKILL.md)                 | 共通認証・ソリューション・公開運用を揃える         |
+| [dataverse](../dataverse/SKILL.md)               | 参照するテーブル・列・Choice を先に整備する        |
+| [model-driven-app](../model-driven-app/SKILL.md) | 配置先のモデル駆動型アプリを先に作成する           |
 
 ### Step 1: 前提確認
 
@@ -578,10 +595,8 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 >
 > 1. **何を管理・可視化したいですか？**
 >    例: 設備の稼働状況、営業パイプライン、プロジェクト進捗、人員配置...
->
 > 2. **主な利用者は誰ですか？**
 >    例: 現場担当者、マネージャー、経営層...
->
 > 3. **以下のどのパターンに近いですか？**
 >    A) **入力ウィザード** — ステップ形式でデータ入力・登録をガイド
 >    B) **KPI ダッシュボード** — 数値指標・チャートで全体像を俯瞰
@@ -590,7 +605,6 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 >    E) **日本地図ダッシュボード** — 都道府県別データの地図可視化・地域分析（SVG 方式 / Google Maps 方式）
 >    G) **分析レポート** — 多軸データの期間別集計・メンバー別比較・予実対比チャート
 >    F) **オブジェクトフロー** — 特定レコード中心に関連エンティティのフロー・因果関係を可視化
->
 > 4. **特に見たいチャートや UI はありますか？**（任意）
 >    例: トレンドライン、ドーナツ、ガントチャート、地図、ヒートマップ...
 
@@ -598,14 +612,14 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 
 ユーザーの回答に基づき、6 つの構築パターンから最適なものを選ぶ:
 
-| パターン | 向いている場面 | 代表的コンポーネント |
-|---|---|---|
-| **A) 入力ウィザード** | データ登録・申請フォーム・セットアップ手順 | ステッププログレス、フォームセクション、バリデーション、プレビュー |
-| **B) KPI ダッシュボード** | 経営層・マネージャー向け、全体像の俯瞰 | KPIカード、トレンドライン、ドーナツ、ゲージ、混合チャート |
-| **C) カンバンボード** | タスク管理、案件管理、承認フロー | 4列レーン、DnDカード、ステータスサマリー、WIPリミット |
-| **D) スケジュール管理（ガントチャート）** | 工程管理、メンテナンス計画、リソース割当 | D3横棒タイムライン、ズームコントロール、今日マーカー、依存線 |
-| **E) 日本地図ダッシュボード** | 地域別パフォーマンス分析、都道府県データ可視化 | SVG日本地図 or Google Maps iframe、都道府県クリック、地方フィルタ、バブルオーバーレイ |
-| **F) オブジェクトフロー** | 特定レコード中心の関連エンティティフロー可視化 | レコードセレクター、3列フロー図(D3)、詳細サイドバー、レコードモーダル、関連ハイライト |
+| パターン                                  | 向いている場面                                 | 代表的コンポーネント                                                                  |
+| ----------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **A) 入力ウィザード**                     | データ登録・申請フォーム・セットアップ手順     | ステッププログレス、フォームセクション、バリデーション、プレビュー                    |
+| **B) KPI ダッシュボード**                 | 経営層・マネージャー向け、全体像の俯瞰         | KPIカード、トレンドライン、ドーナツ、ゲージ、混合チャート                             |
+| **C) カンバンボード**                     | タスク管理、案件管理、承認フロー               | 4列レーン、DnDカード、ステータスサマリー、WIPリミット                                 |
+| **D) スケジュール管理（ガントチャート）** | 工程管理、メンテナンス計画、リソース割当       | D3横棒タイムライン、ズームコントロール、今日マーカー、依存線                          |
+| **E) 日本地図ダッシュボード**             | 地域別パフォーマンス分析、都道府県データ可視化 | SVG日本地図 or Google Maps iframe、都道府県クリック、地方フィルタ、バブルオーバーレイ |
+| **F) オブジェクトフロー**                 | 特定レコード中心の関連エンティティフロー可視化 | レコードセレクター、3列フロー図(D3)、詳細サイドバー、レコードモーダル、関連ハイライト |
 
 選んだパターンのレイアウト・使用コンポーネントを提案し、承認を得る。
 
@@ -623,6 +637,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 4. ウィンドウキャッシュ（ページ遷移時のデータ保持）
 
 **パターン F 固有の Tier 1 要素:**
+
 - レコードセレクター (Dropdown + URLハッシュ初期値)
 - 詳細データロード (`cancelled` フラグで競合防止)
 - 3列フロー図 (D3 SVG + `<pattern>` ドットグリッド + ベジェエッジ)
@@ -638,40 +653,42 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 > デプロイが完了しました！ さらに強化するなら、以下がおすすめです:
 >
 > 📊 **ビジュアル強化**
->   - アニメーション（fadeIn/scaleIn）で体感品質を向上
->   - ツールチップの統一デザインを適用
->   - カードのホバーエフェクト
+>
+> - アニメーション（fadeIn/scaleIn）で体感品質を向上
+> - ツールチップの統一デザインを適用
+> - カードのホバーエフェクト
 >
 > 📈 **チャート追加**（パターンに合わせて提案）
->   [パターンA: 入力ウィザード] バリデーション強化 / プレビューステップ / 条件分岐ステップ
->   [パターンB: KPI] トレンドライン / ゲージメーター / ウォーターフォール
->   [パターンC: カンバン] ドラッグ＆ドロップ / WIPリミット / スイムレーン
->   [パターンD: ガントチャート] ズーム切替 / 依存関係線 / 進捗率オーバーレイ
->   [パターンF: オブジェクトフロー] エンティティ一覧タブ / 分析チャート / フィルター
+> [パターンA: 入力ウィザード] バリデーション強化 / プレビューステップ / 条件分岐ステップ
+> [パターンB: KPI] トレンドライン / ゲージメーター / ウォーターフォール
+> [パターンC: カンバン] ドラッグ＆ドロップ / WIPリミット / スイムレーン
+> [パターンD: ガントチャート] ズーム切替 / 依存関係線 / 進捗率オーバーレイ
+> [パターンF: オブジェクトフロー] エンティティ一覧タブ / 分析チャート / フィルター
 >
 > どれを追加しますか？
 
 ### Step 4: 高度な UI（Tier 3 — さらなる提案）
 
 > 視覚的な改善を適用しました。さらに改善するなら:
->   - 日本地図表示（D3 geoMercator + バブルマーカー）
->   - ダークモード対応（themeToVars パターン）
->   - リフレッシュボタン（スピンアニメーション付き）
->   - 追加チャート（業務要件に応じてカタログから選定）
+>
+> - 日本地図表示（D3 geoMercator + バブルマーカー）
+> - ダークモード対応（themeToVars パターン）
+> - リフレッシュボタン（スピンアニメーション付き）
+> - 追加チャート（業務要件に応じてカタログから選定）
 >
 > どれを追加しますか？
 
 ### テンプレート参照
 
-| ファイル | 内容 |
-|---|---|
-| [design-template.md](references/design-template.md) | 6構築パターン（入力ウィザード/KPI/カンバン/ガント/日本地図/オブジェクトフロー）、UIカタログ、チャート選定ガイド |
-| [genpage-design-system.md](references/genpage-design-system.md) | モダンデザインシステム（カラーパレット・セクションカード・ピル型バッジ・グラデーションボタン・ガント D3 バー・ツールチップ・トースト・日付ナビゲーション） |
-| [japan-map-pattern.md](references/japan-map-pattern.md) | 日本地図パターン（SVG 方式 / Google Maps iframe 方式・都道府県別データ可視化・色分け・地方フィルタ・Dataverse 連携） |
-| [objectflow-example.tsx](references/objectflow-example.tsx) | Pattern F 完全実装例（オブジェクトフロー：3列フロー図・詳細サイドバー・レコードモーダル・関連ハイライト） |
-| [objectflow-RuntimeTypes.ts](references/objectflow-RuntimeTypes.ts) | Pattern F 用 Dataverse 型定義（account・opportunity・quote・salesorder 等） |
-| [code-patterns.md](references/code-patterns.md) | DataAPI・D3 チャート・DataGrid のコードパターン |
-| [troubleshooting.md](references/troubleshooting.md) | ランタイムエラー・デプロイ問題の対処法 |
+| ファイル                                                            | 内容                                                                                                                                                       |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [design-template.md](references/design-template.md)                 | 6構築パターン（入力ウィザード/KPI/カンバン/ガント/日本地図/オブジェクトフロー）、UIカタログ、チャート選定ガイド                                            |
+| [genpage-design-system.md](references/genpage-design-system.md)     | モダンデザインシステム（カラーパレット・セクションカード・ピル型バッジ・グラデーションボタン・ガント D3 バー・ツールチップ・トースト・日付ナビゲーション） |
+| [japan-map-pattern.md](references/japan-map-pattern.md)             | 日本地図パターン（SVG 方式 / Google Maps iframe 方式・都道府県別データ可視化・色分け・地方フィルタ・Dataverse 連携）                                       |
+| [objectflow-example.tsx](references/objectflow-example.tsx)         | Pattern F 完全実装例（オブジェクトフロー：3列フロー図・詳細サイドバー・レコードモーダル・関連ハイライト）                                                  |
+| [objectflow-RuntimeTypes.ts](references/objectflow-RuntimeTypes.ts) | Pattern F 用 Dataverse 型定義（account・opportunity・quote・salesorder 等）                                                                                |
+| [code-patterns.md](references/code-patterns.md)                     | DataAPI・D3 チャート・DataGrid のコードパターン                                                                                                            |
+| [troubleshooting.md](references/troubleshooting.md)                 | ランタイムエラー・デプロイ問題の対処法                                                                                                                     |
 
 ## 反復開発のベストプラクティス
 

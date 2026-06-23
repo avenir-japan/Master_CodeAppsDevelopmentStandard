@@ -40,15 +40,16 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 
 ## サブリファレンス（必要に応じて参照）
 
-| リファレンス | 内容 |
-|---|---|
-| [構築リファレンス](references/build-reference.md) | 構築手順の詳細・Instructions テンプレート・スクリプトコード |
-| [外部トリガー](references/trigger.md) | メール受信・Teams メッセージ・スケジュール等のトリガー追加 |
-| [トリガーパターン](references/trigger-patterns.md) | トリガーの設定パターン集 |
-| [トリガートラブルシューティング](references/trigger-troubleshooting.md) | トリガー関連のトラブルシューティング |
-| [ニュース配信エージェント](references/market-research-report.md) | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
-| [ニュース配信デプロイガイド](references/market-research-deployment-guide.md) | ニュース配信エージェントのデプロイ手順 |
-| [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート |
+| リファレンス                                                                   | 内容                                                                 |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [構築リファレンス](references/build-reference.md)                              | 構築手順の詳細・Instructions テンプレート・スクリプトコード          |
+| [外部トリガー](references/trigger.md)                                          | メール受信・Teams メッセージ・スケジュール等のトリガー追加           |
+| [トリガーパターン](references/trigger-patterns.md)                             | トリガーの設定パターン集                                             |
+| [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
+| [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
+| [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
+| [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
+| [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
 
 ## 前提: 設計フェーズ完了後に構築に入る（必須）
 
@@ -81,20 +82,30 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 
 ## 大前提: 一つのソリューション内に開発
 
-Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio エージェントは **すべて同一のソリューション内** に含める。
+共通の `.env`、認証、ソリューション運用の正本は [standard スキル](../standard/SKILL.md) とする。
 
-```
-SOLUTION_NAME=IncidentManagement  ← .env で定義。全フェーズで同じ値を使用
-PUBLISHER_PREFIX=geek              ← ソリューション発行者の prefix
-```
-
-- API ヘッダーに `MSCRM.SolutionName: {SOLUTION_NAME}` を付けることでソリューション内に作成
-
-> **認証**: Python スクリプトの認証は `standard` スキルの `auth_helper.py` を使用。
-> `from auth_helper import get_token, get_session, api_get, api_post, api_patch` で利用する。
-
-- Bot 作成時（Copilot Studio UI）は「エージェント設定」でソリューションを明示的に選択
+- Copilot Studio でも Dataverse テーブル、Code Apps、Power Automate フローと同じ `SOLUTION_NAME` / `PUBLISHER_PREFIX` を使う
+- Bot 作成時（Copilot Studio UI）は対象ソリューションを明示的に選択する
 - ソリューション外で作成したコンポーネントはリリース管理・環境間移行ができない
+
+## 納品時の切り分け
+
+Copilot Studio の納品、環境移送、顧客環境へのインポートに関する相談を受けた場合は、**何が自動整理できて、何が半自動で反映できて、何が顧客環境でしか完了できないか** を先に切り分ける。
+
+| 論点                  | Copilot で自動整理                                  | スクリプトで半自動                       | 顧客管理者が実施                                  |
+| --------------------- | --------------------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| ナレッジ URL 差し替え | 変数化方針、環境変数名、差し替え対象 URL 一覧の提案 | 補助ファイル、設定値、手順書の更新       | 顧客環境の実 URL 確定と現在値投入                 |
+| チャネル設定          | 必要チャネルと公開手順の整理                        | 説明文、配布手順、補助ドキュメントの整備 | Teams / M365 Copilot / Web の実公開設定           |
+| 認証設定              | 必要な認証方式、前提条件、確認項目の整理            | 設定雛形、手順書、入力項目一覧の整備     | Entra ID SSO、OAuth、シークレット投入、管理者同意 |
+
+Copilot は次を既定動作とする。
+
+1. ナレッジ URL は固定値のままにせず、まず変数化または差し替え手順を提案する
+2. チャネル設定と認証設定は、ソリューション import だけで完了するように見せず、`納品先での別作業` と明示する
+3. 顧客テナントでしか分からない URL、テナント ID、クライアント ID、シークレット、管理者承認有無は、Copilot が仮決めしない
+4. マネージド案件では、Instructions やナレッジ設定の軽微変更も顧客側編集前提にせず、再提供運用を優先して案内する
+
+詳細な制約は [納品時制約](references/managed-solution-constraints.md) を参照。
 
 ## 絶対遵守ルール
 
@@ -118,7 +129,7 @@ PUBLISHER_PREFIX=geek              ← ソリューション発行者の prefix
 2. **configuration を PATCH する際は既存値をディープマージする**
    - `configuration` を丸ごと上書きすると `gPTSettings.defaultSchemaName` やモデル設定が消える
    - 必ず GET → ディープマージ → PATCH
-   - `optInUseLatestModels` は明示的に `False` を設定 — `True` だと UI で選択した基盤モデル（Claude Sonnet 等）が GPT に強制変更される
+   - `optInUseLatestModels` は明示的に `False` を設定 — `True` だと UI で選択した基盤モデルが別モデルへ強制変更される
    - `aISettings` も丸ごと上書きせずディープマージで既存のモデル選択を保持
 
 3. **余分な GPT コンポーネントは削除する**
@@ -202,11 +213,11 @@ PVA は GPT コンポーネントの `data` YAML 末尾に基盤モデル情報�
 ```yaml
 aISettings:
   model:
-    modelNameHint: Sonnet46
+    modelNameHint: <UI で選択したモデル識別子>
 ```
 
 GPT コンポーネントの `data` を上書きすると、この `aISettings` セクションが消えて
-デフォルトモデル（GPT 4.1）に戻る。
+UI で選択したモデル設定が失われる。
 
 ```python
 # ✅ 更新前に既存データから aISettings セクションを抽出 → 新 YAML の末尾に付加
@@ -236,7 +247,6 @@ if ai_idx >= 0:
 → 対策: publish 後に description を別途 PATCH する
 ```
 
-
 ## 構築手順
 
 詳細な構築手順・スクリプトコードは [構築リファレンス](references/build-reference.md) を参照。
@@ -263,3 +273,13 @@ PUBLISHER_PREFIX=prefix
 BOT_ID=https://copilotstudio.../bots/xxxxxxxx-xxxx-.../overview
 # ↑ Copilot Studio URL をそのまま貼り付け可。GUID だけでも OK
 ```
+
+## 関連スキル
+
+| スキル                                           | 連携内容                                           |
+| ------------------------------------------------ | -------------------------------------------------- |
+| [architecture](../architecture/SKILL.md)         | 対話型エージェントを入れるべきかを先に判断する     |
+| [standard](../standard/SKILL.md)                 | 認証・ソリューション・共通運用の土台               |
+| [power-automate](../power-automate/SKILL.md)     | 外部トリガーや補助処理をフローで担う               |
+| [ai-builder](../ai-builder/SKILL.md)             | エージェントのツールとして AI プロンプトを追加する |
+| [spec-to-markdown](../spec-to-markdown/SKILL.md) | エージェント要件やナレッジ元文書を事前整理する     |

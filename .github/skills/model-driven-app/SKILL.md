@@ -26,10 +26,10 @@ Dataverse Web API（`appmodules` / `sitemaps` テーブル）でモデル駆動�
 
 ## 大前提: 一つのソリューション内に開発
 
-Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio エージェント・**モデル駆動型アプリ** は **すべて同一のソリューション内** に含める。
-`.env` の `SOLUTION_NAME` と `PUBLISHER_PREFIX` を全フェーズで統一して使用する。
+共通の `.env`、認証、ソリューション運用の正本は [standard スキル](../standard/SKILL.md) とする。
 
-> **認証**: Python スクリプトの認証は `standard` スキルの `auth_helper.py` を使用。
+- モデル駆動型アプリも同じ `SOLUTION_NAME` / `PUBLISHER_PREFIX` を使い、同一ソリューション内に含める
+- Dataverse テーブルやロールとの環境間移行はソリューション単位で扱う
 
 ## 前提: 設計フェーズ完了後にデプロイに入る（必須）
 
@@ -125,12 +125,12 @@ webresourceid: アイコン用 WebResource ID
 
 ### SiteMap XML 必須属性一覧
 
-| 要素    | 必須属性                                               | 説明                                              |
-| ------- | ------------------------------------------------------ | ------------------------------------------------- |
-| SiteMap | `IntroducedVersion="7.0.0.0"`                          | バージョニング用。Unified Interface で必要        |
-| Area    | `ShowGroups="true"`, `IntroducedVersion="7.0.0.0"`     | ShowGroups がないと複数グループが表示されない      |
-| Group   | `IntroducedVersion="7.0.0.0"`, `IsProfile="false"`     | IsProfile=false でプロファイルグループと区別       |
-| SubArea | `Entity`, `AvailableOffline="true"`                     | オフラインアクセス。モバイル対応に必要             |
+| 要素    | 必須属性                                           | 説明                                          |
+| ------- | -------------------------------------------------- | --------------------------------------------- |
+| SiteMap | `IntroducedVersion="7.0.0.0"`                      | バージョニング用。Unified Interface で必要    |
+| Area    | `ShowGroups="true"`, `IntroducedVersion="7.0.0.0"` | ShowGroups がないと複数グループが表示されない |
+| Group   | `IntroducedVersion="7.0.0.0"`, `IsProfile="false"` | IsProfile=false でプロファイルグループと区別  |
+| SubArea | `Entity`, `AvailableOffline="true"`                | オフラインアクセス。モバイル対応に必要        |
 
 ### Title は属性ではなく Titles 子要素で指定する
 
@@ -322,7 +322,6 @@ else:
     api_post("appmodules", body)
 ```
 
-
 ## .env パラメータ
 
 ```env
@@ -337,7 +336,6 @@ APP_DISPLAY_NAME=インシデント管理           # 未設定時は SOLUTION_N
 APP_UNIQUE_NAME=IncidentManagement          # 未設定時は SOLUTION_NAME を使用
 APP_DESCRIPTION=インシデント管理アプリ      # 未設定時は自動生成
 ```
-
 
 ## デプロイ・設計パターン
 
@@ -357,30 +355,39 @@ APP_DESCRIPTION=インシデント管理アプリ      # 未設定時は自動�
 | Dashboard         | 60            | —                                   |
 | Security Role     | 20            | `Microsoft.Dynamics.CRM.role`       |
 
-
 ## クイックリファレンス: 絶対遵守ルール
 
-| ルール                                           | 理由                                                |
-| ------------------------------------------------ | --------------------------------------------------- |
-| `clienttype=4` (Unified Interface) を必ず指定     | 未指定だとレガシー Web クライアント用アプリになる    |
-| uniquename は英語のみ                             | 日本語は API エラーになる                            |
-| SiteMap は `isappaware: true` で作成              | アプリ固有 SiteMap として認識させる                  |
-| SiteMap を AddAppComponents で追加                | 追加しないと ValidateApp でエラー                    |
-| **`ShowGroups="true"` を Area に指定**             | **未指定だと最初のグループしか表示されない（最重要）** |
-| **`IntroducedVersion="7.0.0.0"` を全要素に指定**  | Unified Interface で必須。欠けると表示不具合          |
-| **Title は `<Titles>` 子要素で指定**               | 属性ではなくネスト要素が正式フォーマット              |
-| **`AvailableOffline="true"` を SubArea に指定**    | モバイル対応・オフラインアクセスに必要                |
-| ビュー・フォームを追加するとテーブルも含まれる    | テーブル直接追加は不要（API で追加もできない）        |
-| Basic User ロールを関連付け                       | ユーザーがアプリを表示できるようにする                |
-| 公開前に ValidateApp で検証                       | エラーがあると公開しても正常動作しない                |
-| AddSolutionComponent でソリューション含有検証     | MSCRM.SolutionName ヘッダーだけに依存しない          |
-| べき等デプロイパターンを使う                      | uniquename で検索 → 更新 or 新規作成                 |
-| **ビューのプライマリ列は常に先頭**                 | `_name` 列を LayoutXml の最初の `<cell>` にする      |
-| **複数行テキスト（Memo）はビューに含めない**       | 一覧表示で見づらいため。フォームのみに表示            |
-| **テーブルアイコンは SVG で設定**                   | `IconVectorName` + Web Resource (type=11)。詳細は `standard` スキルの [アイコン作成リファレンス](../standard/references/icon-creation.md) 参照 |
-| **`IconVectorName` は PUT で設定**                  | `MSCRM.MergeLabels: true` 必須。詳細は `standard` スキルの [アイコン作成リファレンス](../standard/references/icon-creation.md) 参照            |
-| **AddAppComponents は 50 件ずつバッチ分割**         | 大量送信は失敗する場合あり。失敗時は 1 件ずつ再試行   |
-| **アプリ URL は `main.aspx?appid=`**                | `/apps/{id}` 形式ではない                             |
-| **PublishXml はテーブル単位で個別公開**              | `PublishAllXml` より高速                              |
-| **既存 SiteMap は PATCH で XML 更新**                | 新 SiteMap を AddAppComponents で追加すると 0x80050111 |
-| **appmodulecomponent は appmoduleidunique で検索不可**| componenttype=62 で全件取得し objectid で照合          |
+| ルール                                                 | 理由                                                                                                                                           |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clienttype=4` (Unified Interface) を必ず指定          | 未指定だとレガシー Web クライアント用アプリになる                                                                                              |
+| uniquename は英語のみ                                  | 日本語は API エラーになる                                                                                                                      |
+| SiteMap は `isappaware: true` で作成                   | アプリ固有 SiteMap として認識させる                                                                                                            |
+| SiteMap を AddAppComponents で追加                     | 追加しないと ValidateApp でエラー                                                                                                              |
+| **`ShowGroups="true"` を Area に指定**                 | **未指定だと最初のグループしか表示されない（最重要）**                                                                                         |
+| **`IntroducedVersion="7.0.0.0"` を全要素に指定**       | Unified Interface で必須。欠けると表示不具合                                                                                                   |
+| **Title は `<Titles>` 子要素で指定**                   | 属性ではなくネスト要素が正式フォーマット                                                                                                       |
+| **`AvailableOffline="true"` を SubArea に指定**        | モバイル対応・オフラインアクセスに必要                                                                                                         |
+| ビュー・フォームを追加するとテーブルも含まれる         | テーブル直接追加は不要（API で追加もできない）                                                                                                 |
+| Basic User ロールを関連付け                            | ユーザーがアプリを表示できるようにする                                                                                                         |
+| 公開前に ValidateApp で検証                            | エラーがあると公開しても正常動作しない                                                                                                         |
+| AddSolutionComponent でソリューション含有検証          | MSCRM.SolutionName ヘッダーだけに依存しない                                                                                                    |
+| べき等デプロイパターンを使う                           | uniquename で検索 → 更新 or 新規作成                                                                                                           |
+| **ビューのプライマリ列は常に先頭**                     | `_name` 列を LayoutXml の最初の `<cell>` にする                                                                                                |
+| **複数行テキスト（Memo）はビューに含めない**           | 一覧表示で見づらいため。フォームのみに表示                                                                                                     |
+| **テーブルアイコンは SVG で設定**                      | `IconVectorName` + Web Resource (type=11)。詳細は `standard` スキルの [アイコン作成リファレンス](../standard/references/icon-creation.md) 参照 |
+| **`IconVectorName` は PUT で設定**                     | `MSCRM.MergeLabels: true` 必須。詳細は `standard` スキルの [アイコン作成リファレンス](../standard/references/icon-creation.md) 参照            |
+| **AddAppComponents は 50 件ずつバッチ分割**            | 大量送信は失敗する場合あり。失敗時は 1 件ずつ再試行                                                                                            |
+| **アプリ URL は `main.aspx?appid=`**                   | `/apps/{id}` 形式ではない                                                                                                                      |
+| **PublishXml はテーブル単位で個別公開**                | `PublishAllXml` より高速                                                                                                                       |
+| **既存 SiteMap は PATCH で XML 更新**                  | 新 SiteMap を AddAppComponents で追加すると 0x80050111                                                                                         |
+| **appmodulecomponent は appmoduleidunique で検索不可** | componenttype=62 で全件取得し objectid で照合                                                                                                  |
+
+## 関連スキル
+
+| スキル                                         | 連携内容                                        |
+| ---------------------------------------------- | ----------------------------------------------- |
+| [architecture](../architecture/SKILL.md)       | Model-Driven Apps を採用するかの判断            |
+| [standard](../standard/SKILL.md)               | 共通認証・ソリューション・公開の基盤            |
+| [dataverse](../dataverse/SKILL.md)             | テーブル・ビュー・フォームの土台を作る          |
+| [generative-page](../generative-page/SKILL.md) | モデル駆動型アプリ内に Generative Page を載せる |
+| [power-automate](../power-automate/SKILL.md)   | MDA から起動する自動化・通知フローを組む        |

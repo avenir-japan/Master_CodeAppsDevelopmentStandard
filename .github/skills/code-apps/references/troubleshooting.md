@@ -22,10 +22,10 @@ Dataverse Web API / Code Apps SDK では、GUID 比較は **`eq guid-value`（�
 
 ```typescript
 // ❌ レコードが返らない
-filter: `_parentaccountid_value eq '${accountId}'`
+filter: `_parentaccountid_value eq '${accountId}'`;
 
 // ✅ 正しい構文
-filter: `_parentaccountid_value eq ${accountId}`
+filter: `_parentaccountid_value eq ${accountId}`;
 ```
 
 ### 影響範囲
@@ -54,7 +54,7 @@ filter: `_parentaccountid_value eq ${accountId}`
   "connectionReferences": {
     // ❌ 存在しないフロー接続 → 削除する
     // "workflowDetails": { ... }
-  }
+  },
 }
 ```
 
@@ -70,6 +70,7 @@ filter: `_parentaccountid_value eq ${accountId}`
 ### 症状
 
 デプロイ後に以下のエラーが出力される:
+
 ```
 CliLogger: failed to initialize OneDS telemetry writer Error: Network request failed
 ```
@@ -93,31 +94,30 @@ CliLogger: failed to initialize OneDS telemetry writer Error: Network request fa
 `select` にルックアップ列名を含めると、SDK が自動的に OData アノテーションを返す。
 
 ```typescript
-const result = await client.retrieveMultipleRecordsAsync(
-  "opportunities",
-  {
-    select: ["opportunityid", "name", "_ownerid_value"],  // ← ルックアップ列を含める
-    filter: `_parentaccountid_value eq ${accountId}`,
-  },
-);
+const result = await client.retrieveMultipleRecordsAsync("opportunities", {
+  select: ["opportunityid", "name", "_ownerid_value"], // ← ルックアップ列を含める
+  filter: `_parentaccountid_value eq ${accountId}`,
+});
 
 const record = result.data[0];
 
 // 表示名の取得
-const ownerName = record["_ownerid_value@OData.Community.Display.V1.FormattedValue"];
+const ownerName =
+  record["_ownerid_value@OData.Community.Display.V1.FormattedValue"];
 // → "山田 太郎"
 ```
 
 ### 利用可能なアノテーション
 
-| アノテーション | 内容 |
-|---|---|
-| `@OData.Community.Display.V1.FormattedValue` | ルックアップ先の表示名 |
-| `@Microsoft.Dynamics.CRM.lookuplogicalname` | ルックアップ先のテーブル論理名 |
+| アノテーション                               | 内容                           |
+| -------------------------------------------- | ------------------------------ |
+| `@OData.Community.Display.V1.FormattedValue` | ルックアップ先の表示名         |
+| `@Microsoft.Dynamics.CRM.lookuplogicalname`  | ルックアップ先のテーブル論理名 |
 
 ### 型定義の注意
 
 TypeScript の interface にアノテーション付きプロパティを含める場合:
+
 ```typescript
 export interface Opportunity {
   opportunityid: string;
@@ -143,16 +143,16 @@ https://{org}.crm7.dynamics.com/main.aspx?pagetype=entityrecord&etn={entityLogic
 
 ### エンティティ論理名の対応表
 
-| 表示名 | 論理名 |
-|---|---|
-| 取引先企業 | `account` |
-| 営業案件 | `opportunity` |
-| 提案製品 | `opportunityproduct` |
-| サポート案件 | `incident` |
-| 作業指示書 | `msdyn_workorder` |
-| 顧客資産 | `msdyn_customerasset` |
-| IoT アラート | `msdyn_iotalert` |
-| 機能の場所 | `msdyn_functionallocation` |
+| 表示名       | 論理名                     |
+| ------------ | -------------------------- |
+| 取引先企業   | `account`                  |
+| 営業案件     | `opportunity`              |
+| 提案製品     | `opportunityproduct`       |
+| サポート案件 | `incident`                 |
+| 作業指示書   | `msdyn_workorder`          |
+| 顧客資産     | `msdyn_customerasset`      |
+| IoT アラート | `msdyn_iotalert`           |
+| 機能の場所   | `msdyn_functionallocation` |
 
 ### 実装例
 
@@ -189,24 +189,18 @@ Code Apps SDK の `orderBy` パラメータは **文字列の配列** のみ受�
 
 ```typescript
 // ❌ 文字列 → バリデーションエラー
-const result = await client.retrieveMultipleRecordsAsync(
-  "opportunities",
-  {
-    select: ["opportunityid", "name"],
-    filter: `_parentaccountid_value eq ${accountId}`,
-    orderBy: "createdon desc",  // ← string はダメ
-  },
-);
+const result = await client.retrieveMultipleRecordsAsync("opportunities", {
+  select: ["opportunityid", "name"],
+  filter: `_parentaccountid_value eq ${accountId}`,
+  orderBy: "createdon desc", // ← string はダメ
+});
 
 // ✅ 配列 → 正常動作
-const result = await client.retrieveMultipleRecordsAsync(
-  "opportunities",
-  {
-    select: ["opportunityid", "name"],
-    filter: `_parentaccountid_value eq ${accountId}`,
-    orderBy: ["createdon desc"],  // ← string[] が必須
-  },
-);
+const result = await client.retrieveMultipleRecordsAsync("opportunities", {
+  select: ["opportunityid", "name"],
+  filter: `_parentaccountid_value eq ${accountId}`,
+  orderBy: ["createdon desc"], // ← string[] が必須
+});
 ```
 
 ### 補足
@@ -247,7 +241,7 @@ const result = await client.retrieveMultipleRecordsAsync(
     select: ["rcwr_name", "_rcwr_resourceid_value", "_rcwr_territoryid_value"],
     filter: `_rcwr_territoryid_value eq ${territoryId} and rcwr_isactive eq true`,
     orderBy: ["rcwr_priority asc"],
-  }
+  },
 );
 
 // ✅ select を省略して全列取得（確実に動作する）
@@ -256,7 +250,7 @@ const result = await client.retrieveMultipleRecordsAsync(
   {
     filter: `_rcwr_territoryid_value eq ${territoryId} and rcwr_isactive eq true`,
     orderBy: ["rcwr_priority asc"],
-  }
+  },
 );
 ```
 
@@ -333,14 +327,14 @@ Code Apps SKILL.md の「★ 例外: `pac code add-data-source` が最小構成�
 
 ### 生成されるファイル比較
 
-| ファイル | `npx power-apps` | `pac code` |
-|---|---|---|
-| `.power/schemas/dataverse/*.Schema.json` | ✅ | ✅ |
-| `.power/schemas/appschemas/dataSourcesInfo.ts` | ✅ | ✅ |
-| `src/generated/models/CommonModels.ts` | ✅ | ✅ |
-| `src/generated/models/{Table}Model.ts` | ✅ | ❌ |
-| `src/generated/services/{Table}Service.ts` | ✅ | ❌ |
-| `src/generated/index.ts` | ✅ | ❌ |
+| ファイル                                       | `npx power-apps` | `pac code` |
+| ---------------------------------------------- | ---------------- | ---------- |
+| `.power/schemas/dataverse/*.Schema.json`       | ✅               | ✅         |
+| `.power/schemas/appschemas/dataSourcesInfo.ts` | ✅               | ✅         |
+| `src/generated/models/CommonModels.ts`         | ✅               | ✅         |
+| `src/generated/models/{Table}Model.ts`         | ✅               | ❌         |
+| `src/generated/services/{Table}Service.ts`     | ✅               | ❌         |
+| `src/generated/index.ts`                       | ✅               | ❌         |
 
 ---
 
@@ -368,6 +362,7 @@ Error: Request failed with status code 403
 ### 教訓
 
 `npx power-apps` と `pac code` は認証基盤が異なる:
+
 - `npx power-apps`: npm パッケージ独自のトークンキャッシュ（制御困難）
 - `pac code`: PAC CLI 認証プロファイル（`pac auth list` で確認可能）
 
@@ -396,7 +391,7 @@ TS2307: Cannot find module '@/hooks/use-theme'
 
 ```powershell
 # ✅ 正しい: 個別ファイルを指定して削除
-Remove-Item "src/pages/incidents.tsx","src/pages/incident-detail.tsx","src/pages/kanban.tsx","src/pages/assets.tsx" -Force
+Remove-Item "src/pages/assets.tsx","src/pages/dashboard.tsx","src/pages/kanban.tsx" -Force
 Remove-Item "src/types/incident.ts" -Force
 
 # ❌ 危険: ディレクトリごとワイルドカード削除
@@ -427,15 +422,15 @@ Code Apps は iframe 内で `connect-src: 'none'` の CSP が適用される。
 
 **postMessage ベースの SDK メソッドのみが CSP 安全**:
 
-| メソッド | CSP 安全 | 用途 |
-|---|---|---|
-| `retrieveMultipleRecordsAsync` | ✅ | 一覧取得 |
-| `retrieveRecordAsync` | ✅ | 単一レコード取得 |
-| `createRecordAsync` | ✅ | レコード作成 |
-| `updateRecordAsync` | ✅ | レコード更新 |
-| `deleteRecordAsync` | ✅ | レコード削除 |
-| `executeAsync` | ❌ | カスタムアクション（CSP ブロック） |
-| `fetch()` 直接 | ❌ | 全て（CSP ブロック） |
+| メソッド                       | CSP 安全 | 用途                               |
+| ------------------------------ | -------- | ---------------------------------- |
+| `retrieveMultipleRecordsAsync` | ✅       | 一覧取得                           |
+| `retrieveRecordAsync`          | ✅       | 単一レコード取得                   |
+| `createRecordAsync`            | ✅       | レコード作成                       |
+| `updateRecordAsync`            | ✅       | レコード更新                       |
+| `deleteRecordAsync`            | ✅       | レコード削除                       |
+| `executeAsync`                 | ❌       | カスタムアクション（CSP ブロック） |
+| `fetch()` 直接                 | ❌       | 全て（CSP ブロック）               |
 
 `WhoAmI` が必要な場合は `systemuser` テーブルの `azureactivedirectoryobjectid` で
 SDK `getContext().user.objectId`（Entra AAD Object ID）から systemuserid をマッピングする。
@@ -449,7 +444,7 @@ SDK `getContext().user.objectId`（Entra AAD Object ID）から systemuserid を
 Lookup 列の `_xxx_value` でフィルタしても該当レコードが返らない。
 
 ```typescript
-const myRecords = allRecords.filter(r => r._ownerid_value === currentUserId);
+const myRecords = allRecords.filter((r) => r._ownerid_value === currentUserId);
 // → 常に空配列
 ```
 
@@ -463,7 +458,7 @@ JavaScript の `===` 比較は大文字小文字を区別するため一致し�
 ```typescript
 // ✅ 正しい: toLowerCase() で統一
 const myRecords = allRecords.filter(
-  r => r._ownerid_value?.toLowerCase() === currentUserId.toLowerCase()
+  (r) => r._ownerid_value?.toLowerCase() === currentUserId.toLowerCase(),
 );
 ```
 
@@ -498,3 +493,154 @@ pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}
 - `pac code push` は `npm run build` の成果物（`dist/`）を Power Platform にアップロードする
 - `-env` でターゲット環境、`-s` でソリューションを指定
 - 2回目以降は `power.config.json` に appId が記録されるため `-env` `-s` は省略可能
+
+---
+
+## 15. デプロイ後に JS/CSS が 404 エラー
+
+### 症状
+
+デプロイ成功するが、Power Apps でアプリを開くとブラウザコンソールに以下のエラー:
+
+```
+GET https://.../assets/index-xxxxx.js net::ERR_ABORTED 404
+GET https://.../assets/index-xxxxx.css net::ERR_ABORTED 404
+```
+
+画面は白い（Blank）まま。
+
+### 原因
+
+Vite のデフォルト `base` オプションは `/`（絶対パス）。
+Power Apps CDN はアプリを `/e/{env-id}/app/{app-id}/` 配下にホストするため、
+`/assets/...` への参照は CDN ルートに向かい 404 になる。
+
+### 対処
+
+`vite.config.ts` に `base: "./"` を追加して相対パスに変更する:
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  plugins: [react()],
+  base: "./", // ← 必須: Power Apps CDN 対応
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
+```
+
+### 確認方法
+
+ビルド後の `dist/index.html` を確認:
+
+```html
+<!-- ✅ 正しい: 相対パス -->
+<script type="module" crossorigin src="./assets/index-xxxxx.js"></script>
+<link rel="stylesheet" crossorigin href="./assets/index-xxxxx.css" />
+
+<!-- ❌ 誤り: 絶対パス（base 未設定時） -->
+<script type="module" crossorigin src="/assets/index-xxxxx.js"></script>
+```
+
+---
+
+## 16. Power Apps シェルで form submit が動作しない
+
+### 症状
+
+`<form onSubmit={...}>` と `<Button type="submit">` を使用すると、
+ローカル開発では動作するが Power Apps にデプロイすると反応しない。
+
+### 原因
+
+Power Apps の iframe ホストがフォームの `submit` イベントをインターセプトしている。
+これは Power Platform 固有の動作であり、通常の Web アプリとは異なる。
+
+### 対処
+
+**`type="button"` + `onClick` パターンに変更する**:
+
+```tsx
+// ❌ Power Apps で動作しない
+<form onSubmit={handleSubmit}>
+  <Button type="submit">送信</Button>
+</form>
+
+// ✅ 正しいパターン
+<div>
+  <Button type="button" onClick={handleClick}>送信</Button>
+</div>
+```
+
+### 補足
+
+- `<form>` 要素自体は残しても問題ないが、`onSubmit` ハンドラは無視される
+- バリデーションは `onClick` ハンドラ内で明示的に行う
+- `e.preventDefault()` を入れても解決しない（イベント自体が発火しない）
+
+---
+
+## 17. Copilot Studio コネクタで CORS エラー
+
+### 症状
+
+`MicrosoftCopilotStudioService.ExecuteCopilotAsyncV2()` を呼び出すと、
+ブラウザコンソールに CORS エラー:
+
+```
+Access to XMLHttpRequest at 'https://copilotstudio.microsoft.com/environments/...'
+from origin 'https://apps.powerapps.com' has been blocked by CORS policy:
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```
+
+フック内では「エージェントからの応答を取得できませんでした」エラーが返る。
+
+### 原因
+
+1. **接続が正しく確立されていない**: `add-data-source` 後にデプロイしていない、または接続承認が完了していない
+2. **コネクタ経由でなく直接 API 呼び出しになっている**: `dataSourcesInfo` の統合ミスでコネクタ定義が含まれていない
+3. **エージェントが公開されていない**: Copilot Studio でエージェントを「公開」していない
+
+### 対処
+
+#### Step 1: 接続承認を確認
+
+Power Apps Maker Portal で:
+
+1. アプリを編集モードで開く
+2. 「データ」→「接続」で `Microsoft Copilot Studio` 接続が「接続済み」になっているか確認
+3. 未接続の場合は「接続を追加」で OAuth 認証を完了する
+
+#### Step 2: dataSourcesInfo 統合を確認
+
+```typescript
+// src/generated/services/MicrosoftCopilotStudioService.ts のインポートパスを確認
+
+// ❌ 統合されていない（コネクタ定義のみ）
+import { dataSourcesInfo } from "../../../.power/schemas/appschemas/dataSourcesInfo";
+
+// ✅ 統合版を使用
+import { dataSourcesInfo } from "../../lib/dataSourcesInfo";
+```
+
+#### Step 3: エージェント公開状態を確認
+
+Copilot Studio で:
+
+1. エージェントを開く
+2. 右上の「公開」ボタンでエージェントを公開
+3. 公開後、数分待ってから再試行
+
+#### Step 4: 再デプロイ
+
+```bash
+npm run build
+pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}
+```
+
+### 関連
+
+詳細は [Copilot Studio コネクタ連携](copilot-studio-connector.md) を参照。

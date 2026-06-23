@@ -26,8 +26,8 @@ Dataverse テーブルの作成は **VS Code + GitHub Copilot（GeekPowerCode �
 
 1. VS Code に **GitHub Copilot** 拡張機能がインストール済みであること
 2. `GeekPowerCode` エージェントと開発スキル（`.github/skills/`）がリポジトリに含まれていること
-3. GitHub Copilot が有効化されていること（推奨モデル: **Claude Opus 4.6**）
-3. Power Platform 環境に認証済みであること
+3. GitHub Copilot が有効化されていること（既定: **GPT-5.4**、設計判断や難解な障害調査のみ **Opus 4.8**）
+4. Power Platform 環境に認証済みであること
 
 ### テーブル作成手順
 
@@ -64,18 +64,18 @@ GitHub Copilot Agent モードで、作成したいテーブルの要件を会�
 
 以下は実際の開発で手戻りが発生した教訓から確立されたルールです:
 
-| ルール                             | 理由（失敗事例）                                                                                                                                     |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **スキーマ名は英語のみ**           | 日本語の表示名で `pac code add-data-source -a dataverse` が失敗する                                                                                  |
-| **ユーザー参照は SystemUser**      | カスタムユーザーテーブルは不要で複雑化する                                                                                                           |
-| **作成者・報告者は createdby**     | カスタム ReportedBy Lookup を作成→削除の手戻りが発生した                                                                                             |
-| **Choice 値は 100000000 始まり**   | 0, 1, 2... はカスタム Choice では使用不可                                                                                                            |
-| **テーブル作成はリトライ付き**     | 連続作成で `0x80040237` メタデータロックが発生する                                                                                                   |
-| **作成順序: マスタ→主→従属**       | リレーションシップの依存関係を守らないとエラー                                                                                                       |
-| **日本語ローカライズは PUT**       | PATCH/POST では DisplayName が反映されないケースがある                                                                                               |
-| **MSCRM.MergeLabels: true 必須**   | ローカライズ時のリクエストヘッダーに必要                                                                                                             |
+| ルール                             | 理由（失敗事例）                                                                                                                                                             |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **スキーマ名は英語のみ**           | 日本語の表示名で `pac code add-data-source -a dataverse` が失敗する                                                                                                          |
+| **ユーザー参照は SystemUser**      | カスタムユーザーテーブルは不要で複雑化する                                                                                                                                   |
+| **作成者・報告者は createdby**     | カスタム ReportedBy Lookup を作成→削除の手戻りが発生した                                                                                                                     |
+| **Choice 値は 100000000 始まり**   | 0, 1, 2... はカスタム Choice では使用不可                                                                                                                                    |
+| **テーブル作成はリトライ付き**     | 連続作成で `0x80040237` メタデータロックが発生する                                                                                                                           |
+| **作成順序: マスタ→主→従属**       | リレーションシップの依存関係を守らないとエラー                                                                                                                               |
+| **日本語ローカライズは PUT**       | PATCH/POST では DisplayName が反映されないケースがある                                                                                                                       |
+| **MSCRM.MergeLabels: true 必須**   | ローカライズ時のリクエストヘッダーに必要                                                                                                                                     |
 | **nameUtils.js の Unicode パッチ** | `npx power-apps add-data-source` が日本語 DisplayName で `Failed to sanitize string` 失敗する。[§1.2 参照](../../standard/references/power-platform-development-standard.md) |
-| **npx でデータソース追加**         | `pac code add-data-source` は SDK v1.0.x で動作しない。`npx power-apps add-data-source` を使用                                                       |
+| **npx でデータソース追加**         | `pac code add-data-source` は SDK v1.0.x で動作しない。`npx power-apps add-data-source` を使用                                                                               |
 
 > 📖 詳細は [Power Platform コードファースト開発標準](../../standard/references/power-platform-development-standard.md) を参照してください。
 

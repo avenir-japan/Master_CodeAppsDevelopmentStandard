@@ -2,15 +2,15 @@
 
 ## 7. 統合アーキテクチャパターン集
 
-### パターン A: 業務アプリ（CRUD + 通知）
+### パターン A: 業務アプリ（Code Apps / Canvas App + 通知）
 
 ```
-[Dataverse] ←→ [Code Apps]     ← ユーザーがデータ操作
+[Dataverse] ←→ [Code Apps / Canvas App]  ← ユーザーがデータ操作
       ↓ レコード変更
 [Power Automate] → メール/Teams 通知
 ```
 
-**使うスキル**: `code-apps` → `power-automate`
+**使うスキル**: `code-apps` / `canvas-app` → `power-automate`
 
 ### パターン A2: 業務アプリ（Model-Driven + 通知）
 
@@ -23,7 +23,7 @@
 **使うスキル**: `model-driven-app` → `power-automate`
 
 > **パターン A vs A2 の判断**: カスタム UI が不要で標準ビュー/フォームで十分なら A2（最速）。
-> カンバン・ダッシュボード・カスタムビジュアルが必要なら A。
+> ローコード・少人数・モバイル寄りなら A の Canvas App、カンバン・ダッシュボード・カスタムビジュアルが必要なら A の Code Apps。
 
 ### パターン B: AI アシスタント（対話 + ナレッジ）
 
@@ -100,6 +100,7 @@
 | -------------- | -------------------- | ------- |
 | Dataverse      | {テーブル構成の概要} | ✅ 必須 |
 | Code Apps      | {画面の概要}         | ✅ / ❌ |
+| Canvas App     | {画面の概要}         | ✅ / ❌ |
 | Model-Driven   | {アプリの概要}       | ✅ / ❌ |
 | Power Automate | {フローの概要}       | ✅ / ❌ |
 | Copilot Studio | {エージェントの概要} | ✅ / ❌ |
@@ -114,7 +115,8 @@
 
 1. Phase 1: Dataverse — {テーブル数}テーブル
 2. Phase 2: Code Apps — {画面数}画面（※ 不要なら省略）
-   2'. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Code Apps と排他）
+   2'. Phase 2: Canvas App — {画面数}画面（※ 不要なら省略）
+   2''. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Code Apps / Canvas App と排他）
 3. Phase 2.5: Power Automate — {フロー数}フロー（※ 不要なら省略）
 4. Phase 3: Copilot Studio — {エージェント数}エージェント（※ 不要なら省略）
 5. Phase 4: AI Builder — {プロンプト数}プロンプト（※ 不要なら省略）

@@ -1,7 +1,10 @@
 # Power Platform コードファースト開発標準
 
-Power Apps Code Apps・Dataverse・Power Automate・Copilot Studio を **VS Code + GitHub Copilot** で開発するための、実践的な開発標準リポジトリです。
-Code Apps 自体は React / Vue などの SPA フレームワークに対応していますが、このリポジトリの実装標準は **TypeScript + React + Tailwind CSS + shadcn/ui** を前提にしています。
+Power Platform の業務アプリやエージェントを **VS Code + GitHub Copilot** で開発するための、実践的な開発標準リポジトリです。
+UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱いますが、このリポジトリの実装標準は **TypeScript + React + Tailwind CSS + shadcn/ui による Code Apps** を基本とします。
+
+> [!IMPORTANT]
+> UI 方式は AI が独断で確定せず、要件・顧客要望・保守体制・既存資産を踏まえて **architecture スキルで比較し、ユーザー確認のうえ決定** します。
 
 [![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/geekfujiwara/CodeAppsDevelopmentStandard)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-対応-blueviolet?style=for-the-badge&logo=github)](https://github.com/features/copilot)
@@ -17,7 +20,9 @@ Code Apps 自体は React / Vue などの SPA フレームワークに対応し�
 
 - Power Platform 向けコードファースト開発標準（`.github/skills/*/references/`）
 - GitHub Copilot 用のカスタムエージェント / スキル（`.github/`）
+- UI 実装方式の選定ガイド（Code Apps / Canvas Apps / Model-Driven Apps）
 - Code Apps のスターター UI コンポーネント（`src/components/`）
+- Canvas App の添付・staging・msapp 運用パターン
 - Power Automate / Copilot Studio 連携の実装パターン
 - `.env.example` を含むプロジェクト初期化テンプレート
 
@@ -30,7 +35,10 @@ Code Apps 自体は React / Vue などの SPA フレームワークに対応し�
 
 - [クイックスタート](#クイックスタート)
 - [環境事前チェックとブートストラップ](#環境事前チェックとブートストラップ)
+- [想定運用モデル](#想定運用モデル)
+- [GitHub Copilot 利用方針](#github-copilot-利用方針)
 - [カスタムエージェント前提の利用方法](#カスタムエージェント前提の利用方法)
+- [目的別の入口](#目的別の入口)
 - [リポジトリ構成](#リポジトリ構成)
 - [主要ドキュメント](#主要ドキュメント)
 - [GitHub Copilot 活用](#github-copilot-活用)
@@ -44,8 +52,15 @@ Code Apps 自体は React / Vue などの SPA フレームワークに対応し�
 git clone https://github.com/geekfujiwara/CodeAppsDevelopmentStandard . && npm install
 ```
 
+```powershell
+Copy-Item .env.example .env
+```
+
 > [!NOTE]
 > `.` へ clone するため、空ディレクトリで実行してください。既存ファイルがある場所で実行すると上書きリスクがあります。
+
+> [!IMPORTANT]
+> このリポジトリを複数案件向けのマスターとして使う場合、`.env` はリポジトリに保持しません。案件ごとに `.env.example` を複製して `.env` を作成し、接続先・ソリューション名・認証プロファイル名をその案件用の値に置き換えてください。
 
 `npm install` では `postinstall` で **環境事前チェック (preflight)** を実行し、Node.js / npm / Python（`python` or `py -3`）/ pip / `npx power-apps` / `pac` を確認します。
 
@@ -74,11 +89,46 @@ npm run setup
 
 ---
 
+## 想定運用モデル
+
+このリポジトリは、**弊社環境で Power Platform ソリューションを開発・検証するためのマスター**として使います。
+案件ごとはこの標準を複製して進め、顧客要件に応じて `src/`、`scripts/`、`work/`、環境設定を追加します。
+
+納品時は、案件ごとに **マネージド** または **アンマネージド** のいずれかを選定し、ソリューションとして提供します。
+
+- 開発環境は常にアンマネージドで作業する
+- 納品形態は要件定義で確定し、選定理由を記録する
+- 顧客環境ごとに変わる値は環境変数・接続参照に外出しする
+- Teams 公開、認証設定、一部接続設定は納品先で再構成が必要になる
+
+> [!IMPORTANT]
+> 納品形態は固定でマネージドとはしません。顧客がどこまで編集するか、保守主体がどちらか、バージョンアップをどう運用するかを踏まえて、案件ごとに選びます。
+
+> [!NOTE]
+> ライセンス要件や Copilot Credits の消費は変更頻度が高いため、このリポジトリでは固定値の断定よりも **最新の Microsoft Learn / Licensing Guide を都度確認する運用** を優先します。
+
+---
+
+## GitHub Copilot 利用方針
+
+README では全体像だけを示し、**Copilot の詳細ルールの正本は [standard スキル](./.github/skills/standard/SKILL.md)** に置きます。
+
+- 作業の切り分けは `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` の 3 区分で扱う
+- モデル運用は **既定を GPT-5.4**、**高難度タスクだけ Opus 4.8** とする
+- 納品案件では、環境変数だけでなくマネージドプロパティ、接続参照、顧客環境での初期設定作業までまとめて確認する
+
+詳細は以下を参照:
+
+- [standard スキル](./.github/skills/standard/SKILL.md)
+- [Power Platform 開発標準](./.github/skills/standard/references/power-platform-development-standard.md)
+
+---
+
 ## カスタムエージェント前提の利用方法
 
 - この開発標準の実装・運用ルールは、GitHub Copilot カスタムエージェントのスキル（`.github/skills/`）に定義されています。
 - 利用者は手順書を読み込んで操作するのではなく、カスタムエージェントに要件を伝えて進める前提です。
-- チャット入力例 （バッククオート不要）: @GeekPowerCode 在庫管理アプリを Dataverse + Code Apps で作りたい
+- チャット入力例 （バッククオート不要）: @GeekPowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
 - 既存仕様書がある場合の入力例: @GeekPowerCode spec-to-markdown
 - 既定以外の場所を使う場合の入力例: @GeekPowerCode /home/.../input の仕様書を requirements markdown に変換して
 
@@ -88,17 +138,35 @@ npm run setup
 
 ---
 
+## 目的別の入口
+
+最初にどこを見ればよいか迷う場合は、次だけ見れば十分です。
+
+| やりたいこと                         | 最初に読む場所                                                                                                                                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 何から始めるか決めたい               | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
+| 仕様書から要件を整理したい           | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
+| Dataverse のテーブル設計から始めたい | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |
+| UI 実装に入りたい                    | [code-apps](./.github/skills/code-apps/SKILL.md) / [canvas-app](./.github/skills/canvas-app/SKILL.md) / [model-driven-app](./.github/skills/model-driven-app/SKILL.md) / [generative-page](./.github/skills/generative-page/SKILL.md) |
+| 自動化や通知を作りたい               | [power-automate](./.github/skills/power-automate/SKILL.md)                                                                                                                                                                            |
+| エージェントや AI を作りたい         | [copilot-studio](./.github/skills/copilot-studio/SKILL.md) / [ai-builder](./.github/skills/ai-builder/SKILL.md)                                                                                                                       |
+
+詳細な構成規約や全スキルの一覧は [スキルカタログ](./.github/skills/README.md) を参照してください。
+
+---
+
 ## リポジトリ構成
 
 ```text
 .
 ├── .github/
 │   ├── agents/                      # Copilot カスタムエージェント定義
-│   └── skills/                      # 製品単位で統合された 10 スキル
+│   └── skills/                      # 製品単位で統合された 11 スキル
 │       ├── architecture/            # アーキテクチャ設計
 │       ├── standard/                # 共通基盤（認証・アイコン・メールテンプレート）
 │       ├── dataverse/               # テーブル設計・構築・セキュリティロール
 │       ├── code-apps/               # Code Apps 開発（UI 設計・CSP・メール送信含む）
+│       ├── canvas-app/              # Canvas App 開発（添付・staging・msapp 運用）
 │       ├── generative-page/         # Generative Pages 開発
 │       ├── model-driven-app/        # モデル駆動型アプリ構築
 │       ├── copilot-studio/          # エージェント構築・トリガー・ニュース配信
@@ -125,8 +193,13 @@ npm run setup
 ## 主要ドキュメント
 
 - [.github/skills/standard/references/power-platform-development-standard.md](./.github/skills/standard/references/power-platform-development-standard.md)
+- [.github/skills/standard/references/managed-solution-delivery.md](./.github/skills/standard/references/managed-solution-delivery.md)
+- [.github/skills/standard/references/environment-variables.md](./.github/skills/standard/references/environment-variables.md)
+- [.github/skills/standard/references/license-requirements.md](./.github/skills/standard/references/license-requirements.md)
+- [.github/skills/copilot-studio/references/managed-solution-constraints.md](./.github/skills/copilot-studio/references/managed-solution-constraints.md)
 - [.github/skills/dataverse/references/dataverse-guide.md](./.github/skills/dataverse/references/dataverse-guide.md)
 - [.github/skills/code-apps/references/connector-reference.md](./.github/skills/code-apps/references/connector-reference.md)
+- [.github/skills/canvas-app/references/design-patterns.md](./.github/skills/canvas-app/references/design-patterns.md)
 - [.github/skills/code-apps/references/advanced-patterns.md](./.github/skills/code-apps/references/advanced-patterns.md)
 - [SAMPLES.md](./SAMPLES.md)
 
@@ -138,22 +211,7 @@ npm run setup
 - `@GeekPowerCode` に実現したい内容を伝えるだけで、必要なスキルが選択されて開発タスクを進められます
 - このリポジトリの開発標準はスキルとして定義済みのため、マニュアル手順ベースではなくエージェント駆動で利用します
 
-### スキル一覧（10 スキル）
-
-| スキル | 説明 |
-|--------|------|
-| [architecture](.github/skills/architecture/SKILL.md) | 全体アーキテクチャ設計・コンポーネント選定 |
-| [standard](.github/skills/standard/SKILL.md) | 共通基盤（認証・.env・アイコン生成・HTML メールテンプレート） |
-| [dataverse](.github/skills/dataverse/SKILL.md) | テーブル設計・構築・セキュリティロール |
-| [code-apps](.github/skills/code-apps/SKILL.md) | Code Apps 開発（UI 設計・CSP・メール送信含む） |
-| [generative-page](.github/skills/generative-page/SKILL.md) | Generative Pages 開発・デバッグ・デプロイ |
-| [model-driven-app](.github/skills/model-driven-app/SKILL.md) | モデル駆動型アプリ構築・公開 |
-| [copilot-studio](.github/skills/copilot-studio/SKILL.md) | エージェント構築・トリガー・ニュース配信 |
-| [power-automate](.github/skills/power-automate/SKILL.md) | クラウドフロー作成・デプロイ |
-| [ai-builder](.github/skills/ai-builder/SKILL.md) | AI プロンプト作成・エージェントツール追加 |
-| [spec-to-markdown](.github/skills/spec-to-markdown/SKILL.md) | 仕様書を markdown 化し、Power Platform 向け factsheet / document を生成 |
-
-> この一覧で担当領域を選び、構成規約・詳細ガイドは [スキルカタログ](.github/skills/README.md) を参照してください。
+担当領域の選び方は [目的別の入口](#目的別の入口) を参照し、全スキルの一覧と構成規約は [スキルカタログ](./.github/skills/README.md) を正本とします。
 
 ---
 

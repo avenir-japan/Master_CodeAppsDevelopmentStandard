@@ -45,14 +45,14 @@ Code Apps の画面を設計・実装する。
 
 設計提示時に含める内容:
 
-| 項目 | 内容 |
-|------|------|
-| 画面一覧 | ページ名・ルート・各画面の役割 |
+| 項目               | 内容                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| 画面一覧           | ページ名・ルート・各画面の役割                                                        |
 | コンポーネント選定 | 各画面で使うコンポーネント（ListTable / StatsCards / FormModal / InlineEditTable 等） |
-| カラム定義 | テーブルのカラム構成・render 関数 |
-| Lookup 名前解決 | `_xxx_value` + `useMemo` Map パターンでどの Lookup を解決するか |
-| ナビゲーション | サイドバー項目・ページ遷移 |
-| テーマ | ダーク/ライトモード対応 |
+| カラム定義         | テーブルのカラム構成・render 関数                                                     |
+| Lookup 名前解決    | `_xxx_value` + `useMemo` Map パターンでどの Lookup を解決するか                       |
+| ナビゲーション     | サイドバー項目・ページ遷移                                                            |
+| テーマ             | ダーク/ライトモード対応                                                               |
 
 ```
 フロー: code-apps（design-system）で設計 → ユーザー承認 → code-apps で実装
@@ -65,21 +65,20 @@ UI コンポーネントの実装先となる Code Apps も同一ソリューシ
 
 ## 技術スタック
 
-| レイヤー | 技術 |
-|---------|------|
-| スタイリング | Tailwind CSS v4 + CSS カスタムプロパティ |
-| UIプリミティブ | shadcn/ui（Radix UI ベース） |
-| アイコン | lucide-react |
-| チャート | Recharts |
-| ドラッグ＆ドロップ | dnd-kit v6 |
-| ダイアグラム | Mermaid |
-| 通知 | sonner |
-| データテーブル | TanStack React Table v8 |
-
+| レイヤー           | 技術                                     |
+| ------------------ | ---------------------------------------- |
+| スタイリング       | Tailwind CSS v4 + CSS カスタムプロパティ |
+| UIプリミティブ     | shadcn/ui（Radix UI ベース）             |
+| アイコン           | lucide-react                             |
+| チャート           | Recharts                                 |
+| ドラッグ＆ドロップ | dnd-kit v6                               |
+| ダイアグラム       | Mermaid                                  |
+| 通知               | sonner                                   |
+| データテーブル     | TanStack React Table v8                  |
 
 ## コンポーネント・画面パターン
 
-コンポーネントカタログ・ユーティリティ・テーマ変数・画面設計パターンの詳細は [コンポーネントリファレンス](references/component-catalog.md) を参照。
+コンポーネントカタログ・ユーティリティ・テーマ変数・画面設計パターンの詳細は [コンポーネントリファレンス](component-catalog.md) を参照。
 
 ## レスポンシブファースト設計原則
 
@@ -96,11 +95,11 @@ UI コンポーネントの実装先となる Code Apps も同一ソリューシ
 
 **Radix UI `ScrollArea` はテキスト省略（`truncate`）と併用してはならない。**
 
-| 問題 | Radix `ScrollArea` の内部 Viewport が `overflow: scroll` を持ち、コンテンツの水平膨張を許容する |
-|------|------|
-| 症状 | `truncate`（`text-overflow: ellipsis`）が効かない。テキストが横にはみ出す |
-| 原因 | `truncate` の前提は親要素の幅制約（`overflow: hidden`）だが、ScrollArea Viewport が水平スクロールを許可するため幅制約が無効化される |
-| 解決策 | `ScrollArea` を素の `div` + `overflow-y-auto overflow-x-hidden` に置き換える |
+| 問題   | Radix `ScrollArea` の内部 Viewport が `overflow: scroll` を持ち、コンテンツの水平膨張を許容する                                     |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 症状   | `truncate`（`text-overflow: ellipsis`）が効かない。テキストが横にはみ出す                                                           |
+| 原因   | `truncate` の前提は親要素の幅制約（`overflow: hidden`）だが、ScrollArea Viewport が水平スクロールを許可するため幅制約が無効化される |
+| 解決策 | `ScrollArea` を素の `div` + `overflow-y-auto overflow-x-hidden` に置き換える                                                        |
 
 ```tsx
 // ❌ NG: ScrollArea + truncate — テキストが省略されない
@@ -142,6 +141,7 @@ UI コンポーネントの実装先となる Code Apps も同一ソリューシ
 ```
 
 **チェックポイント**:
+
 - `flex` / `grid` の子要素に `min-w-0`（flexbox のデフォルト `min-width: auto` を無効化）
 - `overflow-hidden` がテキスト要素の直近の祖先にある
 - `shrink-0` でアイコン等の固定幅要素が縮まないようにする
@@ -149,22 +149,22 @@ UI コンポーネントの実装先となる Code Apps も同一ソリューシ
 
 ## コンポーネント選定ガイド
 
-| やりたいこと | 推奨コンポーネント |
-|------------|-----------------|
-| データ一覧を表示 | `ListTable`（検索・ソート・ページネーション付き） |
-| データを直接編集 | `InlineEditTable`（インライン編集 + CSV インポート） |
-| カード型で一覧 | `SearchFilterGallery`（フル機能）or `FilterableGallery` |
-| KPI を表示 | `StatsCards`（アイコン + 数値 + トレンド） |
-| カンバンで管理 | `KanbanBoard`（ドラッグ＆ドロップ） |
-| スケジュール表示 | `GanttChart`（タイムスケール切替 + ドラッグリサイズ） |
-| 優先度管理 | `TaskPriorityList`（ドラッグソート + フィルタ） |
-| 階層データ | `TreeStructure`（ツリー + Mermaid エクスポート） |
-| レコード作成/編集 | `FormModal` + `FormSection` + `FormColumns` |
-| CSV 操作 | `CsvImportExport`（バリデーション付きインポート/エクスポート） |
-| 集計チャート | `ChartDashboard`（棒・折れ線・円） |
-| 確認ダイアログ | `ConfirmDialog`（destructive 対応）or `AlertDialog` |
-| ローディング | `LoadingSkeletonGrid`（variant: default/compact/detailed） |
-| コード表示 | `CodeBlock`（コピー機能付き） |
-| 地域別データを地図で可視化 | `JapanMap`（SVG 都道府県クリック + 色分け + 地方フィルタ）— [日本地図パターン](references/japan-map-pattern.md) 参照 |
-| AI エージェントと対話 | `CopilotChatPage`（Copilot Studio 直接統合チャット UI）— [Copilot チャットパターン](references/copilot-chat-pattern.md) 参照 |
-| レコードの読み取り専用制御 | オーナーガード（ログインユーザー vs 担当者の比較で isReadOnly 判定）— [オーナーガードパターン](references/owner-guard-pattern.md) 参照 |
+| やりたいこと               | 推奨コンポーネント                                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| データ一覧を表示           | `ListTable`（検索・ソート・ページネーション付き）                                                                           |
+| データを直接編集           | `InlineEditTable`（インライン編集 + CSV インポート）                                                                        |
+| カード型で一覧             | `SearchFilterGallery`（フル機能）or `FilterableGallery`                                                                     |
+| KPI を表示                 | `StatsCards`（アイコン + 数値 + トレンド）                                                                                  |
+| カンバンで管理             | `KanbanBoard`（ドラッグ＆ドロップ）                                                                                         |
+| スケジュール表示           | `GanttChart`（タイムスケール切替 + ドラッグリサイズ）                                                                       |
+| 優先度管理                 | `TaskPriorityList`（ドラッグソート + フィルタ）                                                                             |
+| 階層データ                 | `TreeStructure`（ツリー + Mermaid エクスポート）                                                                            |
+| レコード作成/編集          | `FormModal` + `FormSection` + `FormColumns`                                                                                 |
+| CSV 操作                   | `CsvImportExport`（バリデーション付きインポート/エクスポート）                                                              |
+| 集計チャート               | `ChartDashboard`（棒・折れ線・円）                                                                                          |
+| 確認ダイアログ             | `ConfirmDialog`（destructive 対応）or `AlertDialog`                                                                         |
+| ローディング               | `LoadingSkeletonGrid`（variant: default/compact/detailed）                                                                  |
+| コード表示                 | `CodeBlock`（コピー機能付き）                                                                                               |
+| 地域別データを地図で可視化 | `JapanMap`（SVG 都道府県クリック + 色分け + 地方フィルタ）— [日本地図パターン](japan-map-pattern.md) 参照                   |
+| AI エージェントと対話      | `CopilotChatPage`（Copilot Studio 直接統合チャット UI）— [Copilot チャットパターン](copilot-chat-pattern.md) 参照           |
+| レコードの読み取り専用制御 | オーナーガード（ログインユーザー vs 担当者の比較で isReadOnly 判定）— [オーナーガードパターン](owner-guard-pattern.md) 参照 |

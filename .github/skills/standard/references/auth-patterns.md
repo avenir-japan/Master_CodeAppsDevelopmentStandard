@@ -1,5 +1,54 @@
 # Power Platform 認証パターンリファレンス
 
+## 条件付きアクセスでデバイスコード認証がブロックされる問題（重要）
+
+### 症状
+
+デバイスコード認証時に以下のエラーが発生:
+
+```
+AADSTS50076: Due to a configuration change made by your administrator,
+or because you moved to a new location, you must use multi-factor authentication to access
+```
+
+または、デバイスコード表示後にブラウザーで認証すると:
+
+```
+申し訳ございませんが、サインイン中に問題が発生しました。
+AADSTS7000218: 要求本文には、パラメーター 'client_assertion' または 'client_secret' を含める必要があります。
+```
+
+### 原因
+
+テナントの **条件付きアクセスポリシー** がデバイスコードフロー（パブリッククライアント）をブロックしている。
+これは企業テナントでよくあるセキュリティ設定。
+
+### 解決策: ブラウザー対話認証への切り替え
+
+`.env` に以下を追加:
+
+```env
+PP_USE_INTERACTIVE_BROWSER=true
+```
+
+これにより `auth_helper.py` は `DeviceCodeCredential` の代わりに `InteractiveBrowserCredential` を使用する。
+
+### 動作
+
+1. 初回: ブラウザーが開き Azure AD ログイン → MFA 完了 → トークン取得
+2. `AuthenticationRecord` をファイル (`.auth_record_browser.json`) に保存
+3. 2回目以降: ファイルからレコードをロード → サイレントリフレッシュ（ブラウザー不要）
+4. キャッシュ期限切れ時: 自動的にブラウザーで再認証
+
+### 注意点
+
+- WSL や SSH リモート環境では `localhost` リダイレクトが機能しない場合がある
+- その場合は Windows ローカルで認証を完了させてからレコードファイルをコピー
+
+---
+
+## 基本的な使い方
+
 ```python
 from auth_helper import get_token, get_session, api_get, api_post, api_patch, api_delete, retry_metadata
 
@@ -52,4 +101,21 @@ Python 3.14 では MSAL 内部トークンキャッシュ (`msal/token_cache.py`
 ```bash
 # Python 3.14 でキャッシュ破損が発生する場合
 $env:PP_NO_PERSISTENT_CACHE="1"; Remove-Item .auth_record.json -ErrorAction SilentlyContinue; python ./setup_dataverse.py
+```
+
+#### ブラウザー対話認証 (`PP_USE_INTERACTIVE_BROWSER=true`) のサイレントリフレッシュ
+
+`PP_USE_INTERACTIVE_BROWSER=true` 設定時、`InteractiveBrowserCredential` はシングルトン + `AuthenticationRecord` 永続化により **初回のみ** ブラウザーが開く。
+
+- 認証レコードファイル: `.auth_record_browser.json`（スクリプトフォルダ直下）
+- 動作:
+  1. 初回: `authenticate()` でブラウザー認証 → `AuthenticationRecord` をファイルに保存
+  2. 2回目以降: `AuthenticationRecord` をロード → 永続キャッシュからサイレントリフレッシュ
+  3. キャッシュ期限切れ: 自動的にレコードを削除して再認証
+
+- **異なるスコープ** (`Dataverse` / `Flow API` / `PowerApps API`) でも同一 credential + 同一キャッシュからサイレント取得
+- ブラウザーが何度も開く場合はレコードファイルを削除して再認証:
+
+```bash
+Remove-Item .auth_record_browser.json -ErrorAction SilentlyContinue; python ./scripts/deploy_save_flow.py
 ```

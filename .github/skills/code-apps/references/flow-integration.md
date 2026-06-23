@@ -23,6 +23,75 @@ npm run build
 npx power-apps push
 ```
 
+### ★ 日本語フロー名で `add-flow` が失敗する問題
+
+#### 症状
+
+```
+Failed to add flow: Failed to sanitize string 領収書アップロード
+```
+
+#### 原因
+
+`npx power-apps add-flow` はフロー名を ASCII に変換しようとするが、日本語では失敗する。
+
+#### 解決策: API でフロー名を英語に変更してから add-flow
+
+```python
+from auth_helper import api_patch
+
+# フロー名を英語に変更
+api_patch(f"workflows({workflow_id})", {"name": "ReceiptUpload"})
+```
+
+その後、`npx power-apps add-flow --flow-id <flow-id>` を実行。
+
+### ★ フロー再デプロイ後に接続が切れる問題
+
+#### 症状
+
+フローを削除 → 再作成すると、Code Apps から呼び出し時に:
+
+```
+Connection reference not found: receiptupload
+```
+
+または `pac code push` で:
+
+```
+Could not find member 'workflowDetails' on object of type 'AppConnectionReference'
+```
+
+#### 原因
+
+フロー再作成で `workflowEntityId` が変わるが、`power.config.json` の古い参照が残っている。
+
+#### 解決策
+
+1. `power.config.json` から旧フロー接続参照を削除
+2. `npx power-apps add-flow --flow-id <新しいフローID>` で再追加
+3. `npm run build && npx power-apps push`
+
+```json
+// power.config.json の接続参照（正しい形式）
+"connectionReferences": {
+  "some-uuid": {
+    "id": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Logic flows",
+    "dataSources": ["receiptupload"],
+    "workflowDetails": {
+      "workflowEntityId": "xxxx-xxxx-xxxx",      // ★ Dataverse の workflow ID
+      "workflowDisplayName": "ReceiptUpload",
+      "workflowName": "yyyy-yyyy-yyyy"            // ★ Flow API の flow ID
+    }
+  }
+}
+```
+
+> [!WARNING]
+> `pac code push` ではなく `npx power-apps push` を使うこと。
+> PAC CLI は `workflowDetails` フィールドに対応していない場合がある。
+
 ### 生成されるファイル
 
 ```
@@ -49,7 +118,7 @@ SDK の `getClient()` はシングルトンで、最初に呼ばれた `dataSour
 **アプリ起動時に `src/generated` 版で先に初期化されると、フローサービスが `Data source not found` エラーになる。**
 
 ```
-Error: Execute operation failure: Data source not found: 
+Error: Execute operation failure: Data source not found:
 Unable to find data source: {flowName} in data sources info.
 ```
 
@@ -82,10 +151,10 @@ import { dataSourcesInfo } from "@/lib/dataSourcesInfo";
 // src/generated/services/{FlowName}Service.ts
 
 // ❌ 自動生成のデフォルト（Dataverse テーブルが含まれない）
-import { dataSourcesInfo } from '../../../.power/schemas/appschemas/dataSourcesInfo';
+import { dataSourcesInfo } from "../../../.power/schemas/appschemas/dataSourcesInfo";
 
 // ✅ 統合版（全テーブル + フロー）
-import { dataSourcesInfo } from '../../lib/dataSourcesInfo';
+import { dataSourcesInfo } from "../../lib/dataSourcesInfo";
 ```
 
 > [!WARNING]
@@ -120,15 +189,18 @@ AI Builder のプロンプト出力は以下のいずれかの形式で返る可
 
 ### 堅牢なパース実装
 
-```typescript
+````typescript
 if (flowResult.success && flowResult.data?.airesult) {
   let raw = flowResult.data.airesult.trim();
-  
+
   // ```json ... ``` で囲まれている場合はストリップ
   if (raw.startsWith("```")) {
-    raw = raw.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "").trim();
+    raw = raw
+      .replace(/^```(?:json)?\s*/, "")
+      .replace(/\s*```$/, "")
+      .trim();
   }
-  
+
   let parsed: Record<string, string> | null = null;
   try {
     parsed = JSON.parse(raw);
@@ -136,7 +208,7 @@ if (flowResult.success && flowResult.data?.airesult) {
     // AI がプレーンテキストを返した場合のフォールバック
     console.warn("airesult is not JSON:", raw.slice(0, 100));
   }
-  
+
   if (parsed && typeof parsed === "object") {
     // 正常: JSON フィールドを使用
     result = {
@@ -151,7 +223,7 @@ if (flowResult.success && flowResult.data?.airesult) {
     };
   }
 }
-```
+````
 
 ## AI Builder プロンプトに JSON 出力を強制する
 
@@ -212,11 +284,11 @@ AI Builder の `msdyn_customconfiguration` は API で PATCH できない（`Une
 
 ## 教訓まとめ
 
-| # | 教訓 | 詳細 |
-|---|------|------|
-| 1 | **dataSourcesInfo シングルトン問題** | SDK の getClient はシングルトン。`src/generated` 版と `.power` 版を統合した `src/lib/dataSourcesInfo.ts` を作り、全コードでそれを使う |
-| 2 | **PowerApps トリガー必須** | Code Apps から呼べるのは PowerApps (V2) トリガーのインスタントフローのみ |
-| 3 | **AI Builder JSON 出力はプロンプト側で強制** | `msdyn_customconfiguration` は API で更新不可。Compose ステップで JSON 指示を含める |
-| 4 | **JSON パースは堅牢に** | AI は \`\`\`json 付き / プレーンテキスト / 正しい JSON のいずれかで返す。全パターン対応 |
-| 5 | **add-flow 再実行後はインポートパス確認** | 自動生成ファイルが上書きされるため、フローサービスの dataSourcesInfo インポートを再修正 |
-| 6 | **フロー呼び出し用 executeAsync は Dataverse API と別物** | ここでの executeAsync はフロー用コネクタの呼び出しで、Connector 経由（postMessage ベース）。Dataverse API の executeAsync / fetch ベース呼び出しとは別実装であり、この文脈では CSP でブロックされない |
+| #   | 教訓                                                      | 詳細                                                                                                                                                                                                  |
+| --- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **dataSourcesInfo シングルトン問題**                      | SDK の getClient はシングルトン。`src/generated` 版と `.power` 版を統合した `src/lib/dataSourcesInfo.ts` を作り、全コードでそれを使う                                                                 |
+| 2   | **PowerApps トリガー必須**                                | Code Apps から呼べるのは PowerApps (V2) トリガーのインスタントフローのみ                                                                                                                              |
+| 3   | **AI Builder JSON 出力はプロンプト側で強制**              | `msdyn_customconfiguration` は API で更新不可。Compose ステップで JSON 指示を含める                                                                                                                   |
+| 4   | **JSON パースは堅牢に**                                   | AI は \`\`\`json 付き / プレーンテキスト / 正しい JSON のいずれかで返す。全パターン対応                                                                                                               |
+| 5   | **add-flow 再実行後はインポートパス確認**                 | 自動生成ファイルが上書きされるため、フローサービスの dataSourcesInfo インポートを再修正                                                                                                               |
+| 6   | **フロー呼び出し用 executeAsync は Dataverse API と別物** | ここでの executeAsync はフロー用コネクタの呼び出しで、Connector 経由（postMessage ベース）。Dataverse API の executeAsync / fetch ベース呼び出しとは別実装であり、この文脈では CSP でブロックされない |

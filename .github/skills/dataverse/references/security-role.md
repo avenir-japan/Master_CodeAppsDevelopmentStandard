@@ -36,16 +36,16 @@ Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio �
 
 設計提示時に含める内容:
 
-| 項目                       | 内容                                                                   |
-| -------------------------- | ---------------------------------------------------------------------- |
-| ベースロール               | Basic User のコピーから開始（確定ルール。変更不可）                     |
-| ロール名                   | 日本語表示名（ロール名に日本語 OK）                                    |
-| ロール説明                 | ロールの目的を簡潔に記述                                               |
-| テーブル権限               | テーブルごとのCRUD権限と深度（Basic/Local/Deep/Global）                 |
-| マスタテーブルの AppendTo  | Lookup 先マスタには必ず AppendTo を付与（読み取り専用でも）            |
-| その他の権限               | 特殊権限（prvExportToExcel, prvBulkDelete 等）が必要か                  |
-| モデル駆動型アプリ関連付け | 作成済みの AppModule に関連付けるか                                     |
-| ユーザー割り当て           | Copilot Studio エージェントに必要か、特定チームか                       |
+| 項目                       | 内容                                                        |
+| -------------------------- | ----------------------------------------------------------- |
+| ベースロール               | Basic User のコピーから開始（確定ルール。変更不可）         |
+| ロール名                   | 日本語表示名（ロール名に日本語 OK）                         |
+| ロール説明                 | ロールの目的を簡潔に記述                                    |
+| テーブル権限               | テーブルごとのCRUD権限と深度（Basic/Local/Deep/Global）     |
+| マスタテーブルの AppendTo  | Lookup 先マスタには必ず AppendTo を付与（読み取り専用でも） |
+| その他の権限               | 特殊権限（prvExportToExcel, prvBulkDelete 等）が必要か      |
+| モデル駆動型アプリ関連付け | 作成済みの AppModule に関連付けるか                         |
+| ユーザー割り当て           | Copilot Studio エージェントに必要か、特定チームか           |
 
 ```
 セキュリティロール: 設計提示 → ユーザー承認 → デプロイスクリプト実行
@@ -98,16 +98,16 @@ TableSchemaName: テーブルのスキーマ名（prefix 含む。例: geek_Inci
 
 > **重要**: 権限名の `{TableSchemaName}` 部分はテーブルの **SchemaName**（大文字始まり）を使う。LogicalName（全小文字）ではない。
 > 例: `geek_Incident`（SchemaName）→ `prvReadgeek_Incident` ✅
->     `geek_incident`（LogicalName）→ `prvReadgeek_incident` ❌（権限が見つからない場合あり）
+> `geek_incident`（LogicalName）→ `prvReadgeek_incident` ❌（権限が見つからない場合あり）
 
 ### PrivilegeDepth（権限の深度）
 
-| 値     | 名前    | 意味                                               |
-| ------ | ------- | -------------------------------------------------- |
-| 0      | Basic   | ユーザー所有のレコードのみ                         |
-| 1      | Local   | ユーザーのビジネスユニット内のレコード             |
-| 2      | Deep    | ユーザーのBU + 子BU のレコード                     |
-| 3      | Global  | 組織全体のレコード                                 |
+| 値  | 名前   | 意味                                   |
+| --- | ------ | -------------------------------------- |
+| 0   | Basic  | ユーザー所有のレコードのみ             |
+| 1   | Local  | ユーザーのビジネスユニット内のレコード |
+| 2   | Deep   | ユーザーのBU + 子BU のレコード         |
+| 3   | Global | 組織全体のレコード                     |
 
 ### 権限設定は AddPrivilegesRole アクションで
 
@@ -217,16 +217,16 @@ for verb in TABLE_VERBS:
 
 ### 標準テーブル権限（よく必要になるもの）
 
-| テーブル       | SchemaName          | 用途                     |
-| -------------- | ------------------- | ------------------------ |
-| systemuser     | SystemUser          | ユーザー参照             |
-| team           | Team                | チーム参照               |
-| annotation     | Annotation          | メモ・添付ファイル       |
-| connection     | Connection          | つながり                 |
-| activitypointer | ActivityPointer    | 活動                     |
-| email          | Email               | メール                   |
-| task           | Task                | タスク                   |
-| note           | Annotation          | 注記                     |
+| テーブル        | SchemaName      | 用途               |
+| --------------- | --------------- | ------------------ |
+| systemuser      | SystemUser      | ユーザー参照       |
+| team            | Team            | チーム参照         |
+| annotation      | Annotation      | メモ・添付ファイル |
+| connection      | Connection      | つながり           |
+| activitypointer | ActivityPointer | 活動               |
+| email           | Email           | メール             |
+| task            | Task            | タスク             |
+| note            | Annotation      | 注記               |
 
 ### その他の特殊権限（テーブルに紐付かない）
 
@@ -270,12 +270,11 @@ requests.post(
 headers["MSCRM.SolutionName"] = SOLUTION_NAME
 ```
 
-
 ## テンプレート・デプロイ
 
-ロールテンプレートパターン・デプロイスクリプトの詳細は [デプロイリファレンス](references/deploy-reference.md) を参照。
+ロールテンプレートパターン・デプロイスクリプトの詳細は [デプロイリファレンス](security-role-deploy-reference.md) を参照。
 
-トラブルシューティングは [トラブルシューティング](references/troubleshooting.md) を参照。
+トラブルシューティングは [トラブルシューティング](security-role-troubleshooting.md) を参照。
 
 ## .env パラメータ
 
@@ -290,27 +289,26 @@ PUBLISHER_PREFIX=geek
 APP_MODULE_ID={app-module-id}    # 未設定時はアプリ関連付けをスキップ
 ```
 
-
 ## コンポーネントタイプ定数
 
-| コンポーネント       | ComponentType |
-| -------------------- | ------------- |
-| Entity (テーブル)    | 1             |
-| Security Role        | 20            |
-| View (savedquery)    | 26            |
-| Form (systemform)    | 60            |
-| SiteMap              | 62            |
-| AppModule            | 80            |
+| コンポーネント    | ComponentType |
+| ----------------- | ------------- |
+| Entity (テーブル) | 1             |
+| Security Role     | 20            |
+| View (savedquery) | 26            |
+| Form (systemform) | 60            |
+| SiteMap           | 62            |
+| AppModule         | 80            |
 
 ## 権限の Verb 一覧（テーブル操作）
 
-| Verb     | 意味             | 説明                                               |
-| -------- | ---------------- | -------------------------------------------------- |
-| Create   | 作成             | 新規レコード作成                                   |
-| Read     | 読み取り         | レコード閲覧                                       |
-| Write    | 書き込み         | レコード更新                                       |
-| Delete   | 削除             | レコード削除                                       |
-| Append   | 追加             | レコードに関連レコードを追加（Lookup の元）        |
-| AppendTo | 追加先           | 他レコードの Lookup 先になる                       |
-| Assign   | 割り当て         | レコードの所有者変更                               |
-| Share    | 共有             | レコードを他ユーザー/チームに共有                  |
+| Verb     | 意味     | 説明                                        |
+| -------- | -------- | ------------------------------------------- |
+| Create   | 作成     | 新規レコード作成                            |
+| Read     | 読み取り | レコード閲覧                                |
+| Write    | 書き込み | レコード更新                                |
+| Delete   | 削除     | レコード削除                                |
+| Append   | 追加     | レコードに関連レコードを追加（Lookup の元） |
+| AppendTo | 追加先   | 他レコードの Lookup 先になる                |
+| Assign   | 割り当て | レコードの所有者変更                        |
+| Share    | 共有     | レコードを他ユーザー/チームに共有           |

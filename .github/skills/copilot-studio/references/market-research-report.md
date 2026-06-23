@@ -55,10 +55,10 @@ Copilot Studio エージェント + スケジュールトリガー + RSS + Web �
 
 ### このスキルが依存する他のスキル
 
-| スキル                   | 用途                                 |
-| ------------------------ | ------------------------------------ |
-| `copilot-studio`         | エージェント構築の基本手順（[SKILL.md](../SKILL.md)） |
-| `copilot-studio` (trigger) | スケジュールトリガーフローの構築手順（[trigger.md](trigger.md)） |
+| スキル                           | 用途                                                                                                        |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `copilot-studio`                 | エージェント構築の基本手順（[SKILL.md](../SKILL.md)）                                                       |
+| `copilot-studio` (trigger)       | スケジュールトリガーフローの構築手順（[trigger.md](trigger.md)）                                            |
 | `standard` (html-email-template) | HTML メールのデザインシステム（[html-email-template.md](../../standard/references/html-email-template.md)） |
 
 > **重要**: エージェントの作成手順・YAML フォーマット・GPT コンポーネント更新等の詳細は
@@ -78,7 +78,7 @@ Copilot Studio エージェント + スケジュールトリガー + RSS + Web �
 | ------------------------ | --------------------------------------------------------- |
 | エージェント名           | AI ニュース配信                                           |
 | 説明                     | AI を活用して最新ニュースを自動収集・配信するエージェント |
-| 基盤モデル               | Claude Sonnet 4.6（UI で手動選択）                        |
+| 基盤モデル               | GPT-5.4（既定。複雑な設計見直し時のみ Opus 4.8）          |
 | Web 検索                 | 有効（gptCapabilities.webBrowsing: true）                 |
 | コンテンツモデレーション | High                                                      |
 
@@ -295,10 +295,9 @@ conversationStarters:
 気になるトピックを教えてください。自動配信もスケジュールで実行中です。
 ```
 
-
 ### HTML メールテンプレート
 
-Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML メールテンプレートリファレンス](references/html-email-template.md) を参照。
+Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML メールテンプレートリファレンス](../../standard/references/html-email-template.md) を参照。
 
 ## 構築手順
 
@@ -315,12 +314,13 @@ Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML �
    - ★ エージェントの公開は行わない（中間公開のみ。最終公開はユーザーが手動で実施）
 
 3. **ユーザーに UI で手動設定を依頼:**
-   - 基盤モデル選択（Claude Sonnet 4.6 推奨）
-   - Web 検索がオンか UI で確認
-   - RSS ツール追加（「ツール」→「コネクタ」→「RSS」→「すべての RSS フィード項目を一覧表示します」）
-   - Work IQ Mail MCP ツール追加（「ツール」→「コネクタ」→「Microsoft 365 Outlook Mail (Preview)」→「Work IQ Mail (Preview)」）
-   - Recurrence トリガー追加（「トリガー」→「Recurrence」→ フローが自動作成される）
-   - 接続の認証
+
+- 基盤モデル選択（既定は GPT-5.4。難しい設計見直し時のみ Opus 4.8）
+- Web 検索がオンか UI で確認
+- RSS ツール追加（「ツール」→「コネクタ」→「RSS」→「すべての RSS フィード項目を一覧表示します」）
+- Work IQ Mail MCP ツール追加（「ツール」→「コネクタ」→「Microsoft 365 Outlook Mail (Preview)」→「Work IQ Mail (Preview)」）
+- Recurrence トリガー追加（「トリガー」→「Recurrence」→ フローが自動作成される）
+- 接続の認証
 
 4. `deploy_news_flow.py` で自動作成されたフローを検索・更新:
    - ExecuteCopilot のプロンプト（業界・役割・関心事）を設定
@@ -441,7 +441,8 @@ def update_flow(flow, bot_schema):
 
    **1-a. 基盤モデル選択:**
 
-- 「設定」→「生成 AI」→「Anthropic Claude Sonnet 4.6」を選択
+- 「設定」→「生成 AI」→「GPT-5.4」を選択
+- 複雑な設計比較や難解な調査だけ、一時的に Opus 4.8 へ切り替える
 
 **1-b. Web 検索の確認:**
 
@@ -506,7 +507,7 @@ python ./deploy_news_flow.py <BOT_ID or URL>
 ### ✅ 動作確認済みの構成
 
 - **エージェント**: `geek_ai`（AIニュース配信）
-- **基盤モデル**: Claude Sonnet 4.6（`modelNameHint: Sonnet46`）
+- **基盤モデル**: GPT-5.4（既定。複雑な検討時のみ Opus 4.8）
 - **Web 検索**: 有効（`webBrowsing: true`）
 - **RSS ツール**: Google News RSS（`ListFeedItems`）
 - **Work IQ Mail MCP**: `mcp_MailTools`（InvokeExternalAgentTaskAction）
@@ -583,7 +584,6 @@ Step3 Web 検索で注目記事の一次ソースを確認する
 フロー3: 営業部向け（市場動向・競合・規制）→ 毎夕 17 時
 ```
 
-
 ## クイックリファレンス
 
 | 項目                            | 値                                                                     |
@@ -603,7 +603,6 @@ Step3 Web 検索で注目記事の一次ソースを確認する
 | ExternalTrigger schema パターン | `{botSchema}.ExternalTriggerComponent.RecurringCopilotTrigger.{GUID}`  |
 | triggerConnectionType           | `Schedule`                                                             |
 
-
 ## デプロイ詳細
 
-再利用スクリプト・GPT コンポーネント設定・教訓の詳細は [デプロイメントガイド](references/deployment-guide.md) を参照。
+再利用スクリプト・GPT コンポーネント設定・教訓の詳細は [デプロイメントガイド](market-research-deployment-guide.md) を参照。

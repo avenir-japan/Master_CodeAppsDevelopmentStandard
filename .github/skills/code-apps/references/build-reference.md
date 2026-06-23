@@ -45,6 +45,60 @@ npm install @tanstack/react-query
 npm install react-router
 ```
 
+### Step 4.1: Tailwind CSS v4 設定（必須）
+
+**Tailwind CSS v4 では `@tailwindcss/vite` プラグインの設定が必須。**
+プラグイン未設定だと CSS ファイルは生成されるが、Tailwind ユーティリティクラスが含まれない。
+
+```typescript
+// vite.config.ts — ✅ 正しい設定
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";  // ← 必須
+import path from "path";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),  // ← 必須: Tailwind CSS v4 のビルド処理
+  ],
+  base: "./",  // ← 必須: Power Apps CDN 対応
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
+```
+
+#### 症状と診断方法
+
+| 症状 | 原因 | 対処 |
+|---|---|---|
+| CSS ファイルサイズが 40KB 程度 | プラグイン未設定 | `tailwindcss()` を plugins に追加 |
+| CSS ファイルサイズが 70KB 以上 | 正常 | — |
+| `bg-blue-500` 等が適用されない | プラグイン未設定 | 上記と同じ |
+
+#### styles/index.pcss の構成
+
+```css
+/* Tailwind CSS v4 の標準インポート */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* CSS カスタムプロパティ（テーマ変数） */
+  --background: #f0f7ff;
+  --foreground: #0c2d5e;
+  /* ... */
+}
+```
+
+> **Note**: Tailwind CSS v4 では `@import "tailwindcss"` ディレクティブを使用する。
+> v3 の `@tailwind base/components/utilities` は非推奨。
+
 ### Step 5: DataverseService パターンで CRUD 実装
 
 ```typescript
@@ -189,3 +243,32 @@ ls src/pages/ | grep -v "incident\|not-found\|_layout"
 # テンプレート専用コンポーネントが残っていないこと
 grep -rn "learn-client\|learn-catalog\|chart-dashboard\|gantt-chart\|kanban-board\|tree-structure" src/ --include="*.ts" --include="*.tsx"
 ```
+
+### Step 7.4: CSS インポート確認（必須）
+
+スタイルが適用されない場合、`src/main.tsx` に CSS インポートがあるか確認する:
+
+```tsx
+// src/main.tsx — ✅ 正しい
+import { createRoot } from "react-dom/client";
+import "./index.css";  // ← 必須: このインポートがないとスタイルが適用されない
+import App from "./App";
+// ...
+```
+
+```css
+/* src/index.css */
+@import "../styles/index.pcss";
+```
+
+#### 診断方法
+
+```bash
+# CSS インポートが main.tsx にあるか確認
+grep -n "index.css" src/main.tsx
+
+# 出力がなければ CSS インポートを追加する
+```
+
+> **よくある原因**: `power-apps init` でスキャフォールドされた `main.tsx` を上書き編集した際に
+> CSS インポート行を削除してしまうケース。

@@ -114,3 +114,15 @@ work/
 ## 参照
 
 - [変換ガイド](references/conversion-guide.md)
+
+## 関連スキル
+
+| スキル                                           | 次に読む場面                               |
+| ------------------------------------------------ | ------------------------------------------ |
+| [architecture](../architecture/SKILL.md)         | factsheet から全体構成と UI 方式を決める   |
+| [dataverse](../dataverse/SKILL.md)               | テーブル・列・リレーション候補を具体化する |
+| [code-apps](../code-apps/SKILL.md)               | Code Apps で UI 実装に進む                 |
+| [model-driven-app](../model-driven-app/SKILL.md) | 標準 CRUD 中心なら MDA に進む              |
+| [power-automate](../power-automate/SKILL.md)     | 自動化要件をクラウドフローに落とす         |
+| [copilot-studio](../copilot-studio/SKILL.md)     | エージェント化・対話導線に進む             |
+| [ai-builder](../ai-builder/SKILL.md)             | 再利用 AI 処理をプロンプト化する           |

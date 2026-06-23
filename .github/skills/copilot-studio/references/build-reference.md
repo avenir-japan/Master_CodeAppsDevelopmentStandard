@@ -120,7 +120,7 @@ for topic in topics["value"]:
 
 ### Step 3: 生成オーケストレーション有効化
 
-**⚠️ 基盤モデル（Claude / GPT 等）を変更しないこと（重要）**
+**⚠️ UI で選択した基盤モデルを変更しないこと（重要）**
 
 ```python
 # 既存 configuration を読み込み → ディープマージで既存設定を保持
@@ -136,7 +136,7 @@ overrides = {
         "useModelKnowledge": True,
         "isFileAnalysisEnabled": True,
         "isSemanticSearchEnabled": True,
-        "optInUseLatestModels": False,  # ★ 明示的に False — True だと基盤モデルが GPT に強制変更される
+        "optInUseLatestModels": False,  # ★ 明示的に False — True だと基盤モデルが別モデルへ強制変更される
     },
     "recognizer": {"$kind": "GenerativeAIRecognizer"},
 }
@@ -148,7 +148,7 @@ api_patch(f"bots({bot_id})", {"configuration": json.dumps(merged)})
 ```
 
 ```
-❌ optInUseLatestModels: True → UI で選択した基盤モデル（Claude 等）が GPT に強制変更される
+❌ optInUseLatestModels: True → UI で選択した基盤モデルが別モデルに強制変更される
 ❌ aISettings を丸ごと上書き → モデル設定が消える
 ❌ gPTSettings だけ保持して他の既存キーを落とす → 設定が欠損
 ✅ ディープマージで既存 configuration を保持し、必要な設定のみ追加・更新

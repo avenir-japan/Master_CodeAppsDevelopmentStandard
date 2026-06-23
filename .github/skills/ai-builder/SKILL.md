@@ -114,14 +114,14 @@ assert r.status_code < 400, f"AIModelPublish 失敗: {r.status_code}"
 
 ### 重要な注意点
 
-| 項目 | 説明 |
-|------|------|
-| アクション名 | `AIModelPublish`（`msdyn_AIModelPublish` ではない! プレフィックスなし） |
-| RunConfigurationId | `model_id` を渡すと Run Config がその ID で自動作成される |
-| 自動生成物 | Published Training (state=2,status=6) + Run Config (state=2,status=7) |
-| 結果 | Model が state=1（Active）に自動変更される |
-| 副作用 | Published Training Config は DELETE 不可（405）→ 無害 |
-| 失敗時 | 既に Active な Run Config がある場合 `AnotherRunConfigAlreadyPublished` |
+| 項目               | 説明                                                                    |
+| ------------------ | ----------------------------------------------------------------------- |
+| アクション名       | `AIModelPublish`（`msdyn_AIModelPublish` ではない! プレフィックスなし） |
+| RunConfigurationId | `model_id` を渡すと Run Config がその ID で自動作成される               |
+| 自動生成物         | Published Training (state=2,status=6) + Run Config (state=2,status=7)   |
+| 結果               | Model が state=1（Active）に自動変更される                              |
+| 副作用             | Published Training Config は DELETE 不可（405）→ 無害                   |
+| 失敗時             | 既に Active な Run Config がある場合 `AnotherRunConfigAlreadyPublished` |
 
 ## Dataverse データ構造
 
@@ -378,3 +378,13 @@ AI_PROMPT_BOT_ID=https://copilotstudio.../bots/xxxxxxxx-xxxx-.../overview
 
 - [構築リファレンス](references/build-reference.md) — デプロイスクリプト・トラブルシューティング
 - [Power Automate 連携リファレンス](references/power-automate-integration.md) — フロー統合パターン
+
+## 関連スキル
+
+| スキル                                       | 連携内容                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| [architecture](../architecture/SKILL.md)     | AI Builder を単独利用するか Copilot Studio / Flow と組み合わせるかを決める |
+| [power-automate](../power-automate/SKILL.md) | フローから AI プロンプトを呼び出す                                         |
+| [copilot-studio](../copilot-studio/SKILL.md) | AI プロンプトをエージェントのツールとして追加する                          |
+| [code-apps](../code-apps/SKILL.md)           | Code Apps からフロー経由で AI 処理を利用する                               |
+| [canvas-app](../canvas-app/SKILL.md)         | Canvas App の添付処理を Flow 経由で AI に渡す                              |

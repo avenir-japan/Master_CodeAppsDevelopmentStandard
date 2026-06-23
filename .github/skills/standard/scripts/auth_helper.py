@@ -53,6 +53,7 @@ from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import (
     AuthenticationRecord,
     DeviceCodeCredential,
+    InteractiveBrowserCredential,
     TokenCachePersistenceOptions,
 )
 from dotenv import load_dotenv
@@ -63,8 +64,9 @@ load_dotenv()
 
 TENANT_ID: str = os.getenv("TENANT_ID", "")
 DATAVERSE_URL: str = os.getenv("DATAVERSE_URL", "").rstrip("/")
+PREFER_BROWSER_AUTH: bool = os.getenv("PP_USE_INTERACTIVE_BROWSER", "").strip().lower() in {"1", "true", "yes"}
 
-# AuthenticationRecord の保存先（プロジェクトルートの .auth_record.json）
+# AuthenticationRecord の保存先（auth_helper.py と同じディレクトリの .auth_record.json）
 _PROJECT_ROOT = Path(__file__).resolve().parent
 AUTH_RECORD_PATH: Path = _PROJECT_ROOT / ".auth_record.json"
 
@@ -74,6 +76,98 @@ _DEFAULT_SCOPE = f"{DATAVERSE_URL}/.default" if DATAVERSE_URL else ""
 # ---------- 内部キャッシュ ----------
 
 _credential: DeviceCodeCredential | None = None
+_browser_credential: InteractiveBrowserCredential | None = None
+
+# ブラウザー認証用 AuthenticationRecord の保存先
+_BROWSER_AUTH_RECORD_PATH: Path = _PROJECT_ROOT / ".auth_record_browser.json"
+
+
+def _interactive_browser_credential_kwargs() -> dict:
+    """InteractiveBrowserCredential 用の共通 kwargs を返す。"""
+    use_persistent_cache = not os.environ.get("PP_NO_PERSISTENT_CACHE")
+
+    kwargs: dict = {
+        "tenant_id": TENANT_ID or None,
+    }
+
+    if use_persistent_cache:
+        kwargs["cache_persistence_options"] = TokenCachePersistenceOptions(
+            name="power_platform_token_cache_v3",
+            allow_unencrypted_storage=True,
+        )
+
+    return {k: v for k, v in kwargs.items() if v is not None}
+
+
+def _ensure_browser_credential() -> InteractiveBrowserCredential:
+    """InteractiveBrowserCredential のシングルトンを返す（AuthenticationRecord 付き）。
+
+    AuthenticationRecord を永続化ファイルからロードすることで、
+    MSAL 永続キャッシュからサイレントにトークンを取得できるようになる。
+    これにより、同一プロセス内で複数スコープのトークンを取得する際に
+    毎回ブラウザーが開く問題を解消する。
+    """
+    global _browser_credential  # noqa: PLW0603
+    if _browser_credential is not None:
+        return _browser_credential
+
+    kwargs = _interactive_browser_credential_kwargs()
+
+    # AuthenticationRecord をロード（存在すればサイレント認証が可能になる）
+    if _BROWSER_AUTH_RECORD_PATH.exists():
+        try:
+            serialized = _BROWSER_AUTH_RECORD_PATH.read_text(encoding="utf-8")
+            auth_record = AuthenticationRecord.deserialize(serialized)
+            kwargs["authentication_record"] = auth_record
+        except (ValueError, OSError, json.JSONDecodeError):
+            pass  # 破損時は無視して対話認証にフォールバック
+
+    _browser_credential = InteractiveBrowserCredential(**kwargs)
+    return _browser_credential
+
+
+def _save_browser_auth_record(record: AuthenticationRecord) -> None:
+    """ブラウザー認証用の AuthenticationRecord をファイルに永続化する。"""
+    _BROWSER_AUTH_RECORD_PATH.write_text(record.serialize(), encoding="utf-8")
+
+
+def _get_interactive_browser_token(scope: str) -> str:
+    """デバイスコード認証がポリシーで拒否される環境向けのフォールバック。
+
+    シングルトン credential + AuthenticationRecord により、
+    初回のみブラウザー認証が走り、以降はサイレントリフレッシュで取得する。
+    """
+    credential = _ensure_browser_credential()
+
+    # まず authenticate() でサイレント or 対話認証を試み、AuthenticationRecord を保存
+    if not _BROWSER_AUTH_RECORD_PATH.exists():
+        print(
+            "[auth_helper] ブラウザー対話認証（初回）を開始します。",
+            file=sys.stderr,
+        )
+        record = credential.authenticate(scopes=[scope])
+        _save_browser_auth_record(record)
+        token = credential.get_token(scope)
+    else:
+        try:
+            token = credential.get_token(scope)
+        except ClientAuthenticationError:
+            # AuthenticationRecord が古い場合は再認証
+            print(
+                "[auth_helper] キャッシュ期限切れ — ブラウザー再認証します。",
+                file=sys.stderr,
+            )
+            global _browser_credential  # noqa: PLW0603
+            _browser_credential = None
+            # 古いレコードを削除して再構築
+            _BROWSER_AUTH_RECORD_PATH.unlink(missing_ok=True)
+            credential = _ensure_browser_credential()
+            record = credential.authenticate(scopes=[scope])
+            _save_browser_auth_record(record)
+            token = credential.get_token(scope)
+
+    _inmemory_tokens[scope] = (token.token, token.expires_on)
+    return token.token
 
 
 def _device_code_callback(verification_uri: str, user_code: str, expires_on: object) -> None:
@@ -191,19 +285,32 @@ def get_token(scope: str | None = None) -> str:
         if time.time() < expires_on - 60:
             return token_str
 
+    if PREFER_BROWSER_AUTH:
+        return _get_interactive_browser_token(scope)
+
     credential = _ensure_credential()
 
     # キャッシュが存在しない場合は明示的に authenticate() を呼んで
     # AuthenticationRecord を永続化してからトークンを取得する
     if not AUTH_RECORD_PATH.exists():
-        record = credential.authenticate(scopes=[scope])
-        _save_auth_record(record)
+        try:
+            record = credential.authenticate(scopes=[scope])
+            _save_auth_record(record)
+        except ClientAuthenticationError as exc:
+            message = str(exc)
+            if "authentication flow" in message.lower() or "access to this resource is blocked" in message.lower():
+                return _get_interactive_browser_token(scope)
+            raise
 
     try:
         token = credential.get_token(scope)
     except (ClientAuthenticationError, TypeError) as exc:
         # MSAL 内部キャッシュ破損時のフォールバック:
         # 新しい credential を永続キャッシュなしで構築し直す
+        if isinstance(exc, ClientAuthenticationError):
+            message = str(exc)
+            if "authentication flow" in message.lower() or "access to this resource is blocked" in message.lower():
+                return _get_interactive_browser_token(scope)
         print(
             f"[auth_helper] MSAL キャッシュ破損を検出 — 再構築中: {type(exc).__name__}",
             file=sys.stderr,

@@ -88,21 +88,21 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 
 ## サブリファレンス（必要に応じて参照）
 
-| リファレンス | 内容 |
-|---|---|
-| [デザインシステム](references/design-system.md) | shadcn/ui + Tailwind CSS v4 のコンポーネント選定・画面設計パターン |
-| [コンポーネントカタログ](references/component-catalog.md) | 全コンポーネントの詳細仕様・使用例 |
-| [CSP 構成](references/csp.md) | iframe 埋め込み・外部 API 接続時の Content Security Policy 設定 |
-| [コネクタリファレンス](references/connector-reference.md) | Code Apps で利用する主要コネクタの追加方法・使用例 |
-| [メール・PDF 送信](references/mail-pdf.md) | HTML→PDF 変換・Power Automate 経由メール添付送信パターン |
-| [日本地図パターン](references/japan-map-pattern.md) | SVG 都道府県地図の実装パターン |
-| [高度な実装パターン](references/advanced-patterns.md) | マルチ環境・オフライン・i18n・パフォーマンス最適化パターン |
-| [ビルドリファレンス](references/build-reference.md) | ビルド・デプロイの詳細手順 |
-| [フロー連携](references/flow-integration.md) | Power Automate フロー呼び出し・AI Builder JSON パース・dataSourcesInfo 統合 |
-| [Copilot Studio コネクタ](references/copilot-studio-connector.md) | Copilot Studio エージェント直接呼び出し・会話継続・レスポンス解析 |
-| [プレデプロイレビュー](references/pre-deploy-review.md) | 「デプロイして」「プッシュして」時の自動チェック手順 |
-| [ディープリンク](references/deep-link.md) | MDA / Power Automate から Code Apps の特定ページにパラメータ付きで遷移するパターン |
-| [トラブルシューティング](references/troubleshooting.md) | 頻出エラーと対処法（日本語サニタイズ・GUID フィルタ・orderBy 等） |
+| リファレンス                                                      | 内容                                                                               |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [デザインシステム](references/design-system.md)                   | shadcn/ui + Tailwind CSS v4 のコンポーネント選定・画面設計パターン                 |
+| [コンポーネントカタログ](references/component-catalog.md)         | 全コンポーネントの詳細仕様・使用例                                                 |
+| [CSP 構成](references/csp.md)                                     | iframe 埋め込み・外部 API 接続時の Content Security Policy 設定                    |
+| [コネクタリファレンス](references/connector-reference.md)         | Code Apps で利用する主要コネクタの追加方法・使用例                                 |
+| [メール・PDF 送信](references/mail-pdf.md)                        | HTML→PDF 変換・Power Automate 経由メール添付送信パターン                           |
+| [日本地図パターン](references/japan-map-pattern.md)               | SVG 都道府県地図の実装パターン                                                     |
+| [高度な実装パターン](references/advanced-patterns.md)             | マルチ環境・オフライン・i18n・パフォーマンス最適化パターン                         |
+| [ビルドリファレンス](references/build-reference.md)               | ビルド・デプロイの詳細手順                                                         |
+| [フロー連携](references/flow-integration.md)                      | Power Automate フロー呼び出し・AI Builder JSON パース・dataSourcesInfo 統合        |
+| [Copilot Studio コネクタ](references/copilot-studio-connector.md) | Copilot Studio エージェント直接呼び出し・会話継続・レスポンス解析                  |
+| [プレデプロイレビュー](references/pre-deploy-review.md)           | 「デプロイして」「プッシュして」時の自動チェック手順                               |
+| [ディープリンク](references/deep-link.md)                         | MDA / Power Automate から Code Apps の特定ページにパラメータ付きで遷移するパターン |
+| [トラブルシューティング](references/troubleshooting.md)           | 頻出エラーと対処法（日本語サニタイズ・GUID フィルタ・orderBy 等）                  |
 
 > [!NOTE]
 > 本スキル内のコード例は **インシデント管理サンプル** を題材としています。
@@ -111,30 +111,40 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 
 ## 前提: 設計フェーズ完了後に実装に入る（必須）
 
-**このスキルでコードを書く前に、[デザインシステム](references/design-system.md) を参照して UI 設計を行い、ユーザーの承認を得ていること。**
+**このスキルでコードを書く前に、[architecture スキル](../architecture/SKILL.md) で Code Apps / Canvas Apps / Model-Driven Apps の候補を比較し、Code Apps で進めることをユーザーに確認済みであること。**
+そのうえで [デザインシステム](references/design-system.md) を参照して UI 設計を行い、ユーザーの承認を得る。
 
 ```
-① デザインシステムリファレンス（references/design-system.md）を読み込む
-② 画面構成・コンポーネント選定・Lookup 名前解決パターンを設計
-③ ユーザーに設計を提示し、「この設計で進めてよいですか？」と承認を得る
-④ 承認後、このスキルに従って実装
+① architecture スキルで UI 方式候補を比較し、Code Apps 採用をユーザーに確認
+② デザインシステムリファレンス（references/design-system.md）を読み込む
+③ 画面構成・コンポーネント選定・Lookup 名前解決パターンを設計
+④ ユーザーに設計を提示し、「この設計で進めてよいですか？」と承認を得る
+⑤ 承認後、このスキルに従って実装
 ```
 
 > **設計で提示する内容**: 画面一覧（ページ名・ルート）、各画面のコンポーネント構成（ListTable / InlineEditTable / StatsCards / FormModal 等）、
 > カラム定義、Lookup 名前解決の方法（`_xxx_value` + `useMemo` Map）、ナビゲーション構造
 
+## 関連スキル
+
+| スキル                                           | 連携内容                                         |
+| ------------------------------------------------ | ------------------------------------------------ |
+| [architecture](../architecture/SKILL.md)         | Code Apps を採用するかの判断と代替 UI 方式の比較 |
+| [standard](../standard/SKILL.md)                 | `.env`・認証・ソリューション運用・共通ルール     |
+| [dataverse](../dataverse/SKILL.md)               | テーブル設計・Lookup・デモデータ・権限           |
+| [power-automate](../power-automate/SKILL.md)     | フロー呼び出し・通知・バックエンド自動化         |
+| [copilot-studio](../copilot-studio/SKILL.md)     | エージェント呼び出しや対話 UI 連携               |
+| [ai-builder](../ai-builder/SKILL.md)             | AI プロンプトをフローや UI から再利用            |
+| [canvas-app](../canvas-app/SKILL.md)             | 添付中心・ローコード前提なら Canvas App を再比較 |
+| [model-driven-app](../model-driven-app/SKILL.md) | 標準 CRUD 中心なら Model-Driven Apps を再比較    |
+
 ## 大前提: 一つのソリューション内に開発
 
-Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio エージェントは **すべて同一のソリューション内** に含める。
+共通の `.env`、認証、ソリューション運用の正本は [standard スキル](../standard/SKILL.md) とする。
 
-```
-SOLUTION_NAME={YourSolutionName}  ← .env で定義。全フェーズで同じ値を使用
-PUBLISHER_PREFIX={prefix}          ← ソリューション発行者の prefix
-```
-
-- Code Apps は `npx power-apps push` でソリューション内にデプロイされる（環境 ID で紐づけ）
-- Dataverse データソース追加時はソリューション内のテーブルを参照
-- 開発・テスト・本番の環境間移行はソリューションのエクスポート/インポートで行う
+- Code Apps は `npx power-apps push` で対象ソリューションにデプロイする
+- Dataverse データソース追加時は同じソリューション内のテーブルを参照する
+- 環境間移行はソリューションのエクスポート / インポートで扱う
 
 ## 絶対遵守ルール
 
@@ -158,17 +168,17 @@ PUBLISHER_PREFIX={prefix}          ← ソリューション発行者の prefix
 
 `npx power-apps init` は以下のファイルを自動生成する。**これらを手動作成・他プロジェクトからコピーしてはならない。**
 
-| ファイル | 役割 | カスタマイズ |
-|---|---|---|
-| `power.config.json` | 環境 ID・アプリ ID（環境固有） | ❌ 禁止 |
-| `plugins/plugin-power-apps.ts` | Vite 開発サーバー用 Power Apps プラグイン（CORS・ミドルウェア・起動 URL 表示） | ❌ 不要 |
-| `vite.config.ts` | Vite 設定（power-apps プラグイン組み込み済み） | ⚠ `manualChunks` 等の追加のみ |
-| `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | TypeScript 設定 | ⚠ パスエイリアス等の追加のみ |
-| `eslint.config.js` | ESLint 設定 | ⚠ ルール追加のみ |
-| `index.html` | エントリ HTML | ❌ 不要 |
-| `package.json` | 依存関係（`@microsoft/power-apps` 等） | ⚠ 依存追加のみ |
-| `src/main.tsx` / `src/App.tsx` / `src/index.css` | React エントリポイント | ✅ 自由にカスタマイズ |
-| `components.json` | shadcn/ui 設定 | ⚠ 通常変更不要 |
+| ファイル                                                     | 役割                                                                           | カスタマイズ                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------ | ----------------------------- |
+| `power.config.json`                                          | 環境 ID・アプリ ID（環境固有）                                                 | ❌ 禁止                       |
+| `plugins/plugin-power-apps.ts`                               | Vite 開発サーバー用 Power Apps プラグイン（CORS・ミドルウェア・起動 URL 表示） | ❌ 不要                       |
+| `vite.config.ts`                                             | Vite 設定（power-apps プラグイン組み込み済み）                                 | ⚠ `manualChunks` 等の追加のみ |
+| `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | TypeScript 設定                                                                | ⚠ パスエイリアス等の追加のみ  |
+| `eslint.config.js`                                           | ESLint 設定                                                                    | ⚠ ルール追加のみ              |
+| `index.html`                                                 | エントリ HTML                                                                  | ❌ 不要                       |
+| `package.json`                                               | 依存関係（`@microsoft/power-apps` 等）                                         | ⚠ 依存追加のみ                |
+| `src/main.tsx` / `src/App.tsx` / `src/index.css`             | React エントリポイント                                                         | ✅ 自由にカスタマイズ         |
+| `components.json`                                            | shadcn/ui 設定                                                                 | ⚠ 通常変更不要                |
 
 > **原則**: SDK がスキャフォールドしたインフラファイル（`plugin-power-apps.ts`、`power.config.json`）は変更しない。開発者がカスタマイズするのは `src/` 配下のアプリコードのみ。
 
@@ -201,7 +211,7 @@ npm install
 
 # ── Step 2: テンプレートクリーンアップ ──
 # ※ サンプルページを削除するが use-theme.ts は絶対に保護する
-Remove-Item "src/pages/incidents.tsx","src/pages/incident-detail.tsx","src/pages/kanban.tsx","src/pages/assets.tsx" -Force -ErrorAction SilentlyContinue
+Remove-Item "src/pages/assets.tsx","src/pages/dashboard.tsx","src/pages/kanban.tsx" -Force -ErrorAction SilentlyContinue
 Remove-Item "src/types/incident.ts" -Force -ErrorAction SilentlyContinue
 # ❌ Remove-Item "src/hooks/*" は禁止（use-theme.ts が消える）
 
@@ -233,10 +243,10 @@ npm run build && pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}
 
 ### デプロイコマンドの選択（pac code push を標準とする）
 
-| コマンド | 認証基盤 | テナント問題 | 推奨度 |
-|---|---|---|---|
-| `pac code push -env {ID} -s {SOL}` | PAC CLI プロファイル | なし | ✅ 標準 |
-| `npx power-apps push` | npm パッケージ独自キャッシュ | 403/404 頻発 | ⚠ 動くならOK |
+| コマンド                           | 認証基盤                     | テナント問題 | 推奨度       |
+| ---------------------------------- | ---------------------------- | ------------ | ------------ |
+| `pac code push -env {ID} -s {SOL}` | PAC CLI プロファイル         | なし         | ✅ 標準      |
+| `npx power-apps push`              | npm パッケージ独自キャッシュ | 403/404 頻発 | ⚠ 動くならOK |
 
 > **注**: Microsoft は `npx power-apps` を推奨ツールとしているが、テナント解決の不具合が
 > 2026-05 時点で未修正のため、本開発標準では `pac code push` を標準採用する。
@@ -287,17 +297,19 @@ name = name.replace(
 
 ```javascript
 // patch-nameutils.cjs — プロジェクトルートに配置
-const fs = require('fs');
-const p = 'node_modules/@microsoft/power-apps-actions/dist/CodeGen/shared/nameUtils.js';
-let c = fs.readFileSync(p, 'utf8');
+const fs = require("fs");
+const p =
+  "node_modules/@microsoft/power-apps-actions/dist/CodeGen/shared/nameUtils.js";
+let c = fs.readFileSync(p, "utf8");
 const oldPat = "[^a-zA-Z0-9_$]/g, '_')";
-const newPat = "[^a-zA-Z0-9_$\\u00C0-\\u024F\\u0370-\\u03FF\\u0400-\\u04FF\\u3000-\\u9FFF\\uAC00-\\uD7AF\\uF900-\\uFAFF]/g, '_')";
+const newPat =
+  "[^a-zA-Z0-9_$\\u00C0-\\u024F\\u0370-\\u03FF\\u0400-\\u04FF\\u3000-\\u9FFF\\uAC00-\\uD7AF\\uF900-\\uFAFF]/g, '_')";
 if (c.includes(oldPat)) {
   c = c.replace(oldPat, newPat);
   fs.writeFileSync(p, c);
-  console.log('Patched successfully');
+  console.log("Patched successfully");
 } else {
-  console.log('Already patched or pattern not found');
+  console.log("Already patched or pattern not found");
 }
 ```
 
@@ -503,7 +515,9 @@ async function getSdkContext(): Promise<IContext | null> {
   try {
     _sdkContext = await getContext();
     return _sdkContext;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -518,15 +532,12 @@ export async function getCurrentUserId(): Promise<string | null> {
       const entraId = ctx.user.objectId;
       console.log("[getCurrentUserId] Entra objectId:", entraId);
 
-      const client = await getClient();  // SDK DataClient
-      const result = await client.retrieveMultipleRecordsAsync(
-        "systemusers",
-        {
-          select: ["systemuserid"],
-          filter: `azureactivedirectoryobjectid eq '${entraId}'`,
-          top: 1,
-        }
-      );
+      const client = await getClient(); // SDK DataClient
+      const result = await client.retrieveMultipleRecordsAsync("systemusers", {
+        select: ["systemuserid"],
+        filter: `azureactivedirectoryobjectid eq '${entraId}'`,
+        top: 1,
+      });
       if (result?.success && result.data?.length > 0) {
         const uid = result.data[0]?.systemuserid;
         if (uid) return uid.toLowerCase();
@@ -547,7 +558,7 @@ export function useCurrentUserId() {
   return useQuery({
     queryKey: ["currentUserId"],
     queryFn: getCurrentUserId,
-    staleTime: Infinity,  // ユーザー ID はセッション中変わらない
+    staleTime: Infinity, // ユーザー ID はセッション中変わらない
     retry: 2,
   });
 }
@@ -578,6 +589,7 @@ export default function BookingsPage() {
 ```
 
 **重要な教訓:**
+
 - **GUID の大文字/小文字は統一する**: Dataverse API は大文字小文字混在で返すことがある。比較時は必ず `.toLowerCase()` を使う
 - **systemuserid が取れない場合は空配列を返す**: null フォールバックで全データ表示しない（セキュリティリスク）
 - **`IContext.user.objectId` は Entra AAD Object ID**: Dataverse の `systemuserid` とは異なる値。`azureactivedirectoryobjectid` 列でマッピングが必要
@@ -598,11 +610,13 @@ Code Apps は cross-origin iframe（`powerplatformusercontent.com`）で動作�
 ```
 
 **呼び出し URL 形式:**
+
 ```
 https://apps.powerapps.com/play/e/{ENV_ID}/app/{APP_ID}?tenantId={TENANT_ID}&Bookingid={GUID}
 ```
 
 **Code Apps 側の実装（ルーター index で自動遷移）:**
+
 ```typescript
 function DeepLinkRedirect() {
   const [target, setTarget] = useState<string | null>(null);
@@ -635,6 +649,7 @@ function DeepLinkRedirect() {
 ```
 
 **重要な教訓:**
+
 - **`queryParams` のキー名は URL に指定した通りの大文字小文字**: `?Bookingid=xxx` と `?bookingid=xxx` は異なるキー。複数ケースにフォールバックする
 - **ローカル開発では `getContext()` が失敗する**: `try/catch` で囲み、失敗時はデフォルトページに遷移
 - **AppId は環境間で変わる**: ハードコードすると環境移行で動かなくなる。環境変数で管理する
@@ -768,15 +783,20 @@ function client() {
 // ── 顧客 ──
 export async function getCustomers(): Promise<Customer[]> {
   const result = await client().retrieveMultipleRecordsAsync<Customer>(
-    "geek_customers",  // ← EntitySetName（dataSourcesInfo のキー）
+    "geek_customers", // ← EntitySetName（dataSourcesInfo のキー）
     {
       select: [
-        "geek_customerid", "geek_name", "geek_industry",
-        "geek_contactperson", "geek_email", "geek_phone",
-        "geek_address", "createdon",
+        "geek_customerid",
+        "geek_name",
+        "geek_industry",
+        "geek_contactperson",
+        "geek_email",
+        "geek_phone",
+        "geek_address",
+        "createdon",
       ],
       orderBy: ["geek_name asc"],
-    }
+    },
   );
   if (!result.success) throw result.error;
   return result.data ?? [];
@@ -785,18 +805,20 @@ export async function getCustomers(): Promise<Customer[]> {
 export async function createCustomer(data: CustomerCreate) {
   const result = await client().createRecordAsync<CustomerCreate, Customer>(
     "geek_customers",
-    data
+    data,
   );
   if (!result.success) throw result.error;
   return result.data;
 }
 
-export async function updateCustomer(id: string, data: Partial<CustomerCreate>) {
-  const result = await client().updateRecordAsync<Partial<CustomerCreate>, Customer>(
-    "geek_customers",
-    id,
-    data
-  );
+export async function updateCustomer(
+  id: string,
+  data: Partial<CustomerCreate>,
+) {
+  const result = await client().updateRecordAsync<
+    Partial<CustomerCreate>,
+    Customer
+  >("geek_customers", id, data);
   if (!result.success) throw result.error;
   return result.data;
 }
@@ -809,14 +831,14 @@ export async function deleteCustomer(id: string) {
 
 **SDK DataClient API（`@microsoft/power-apps/data`）:**
 
-| メソッド | 署名 | CSP 安全 |
-|---|---|---|
-| `retrieveMultipleRecordsAsync` | `<T>(tableName, options?) → IOperationResult<T[]>` | ✅ postMessage |
-| `retrieveRecordAsync` | `<T>(tableName, id, options?) → IOperationResult<T>` | ✅ postMessage |
-| `createRecordAsync` | `<TIn, TOut>(tableName, record) → IOperationResult<TOut>` | ✅ postMessage |
-| `updateRecordAsync` | `<TIn, TOut>(tableName, id, changes) → IOperationResult<TOut>` | ✅ postMessage |
-| `deleteRecordAsync` | `(tableName, id) → IOperationResult<void>` | ✅ postMessage |
-| `executeAsync` | `<TReq, TRes>(operation) → IOperationResult<TRes>` | ❌ CSP ブロック |
+| メソッド                       | 署名                                                           | CSP 安全        |
+| ------------------------------ | -------------------------------------------------------------- | --------------- |
+| `retrieveMultipleRecordsAsync` | `<T>(tableName, options?) → IOperationResult<T[]>`             | ✅ postMessage  |
+| `retrieveRecordAsync`          | `<T>(tableName, id, options?) → IOperationResult<T>`           | ✅ postMessage  |
+| `createRecordAsync`            | `<TIn, TOut>(tableName, record) → IOperationResult<TOut>`      | ✅ postMessage  |
+| `updateRecordAsync`            | `<TIn, TOut>(tableName, id, changes) → IOperationResult<TOut>` | ✅ postMessage  |
+| `deleteRecordAsync`            | `(tableName, id) → IOperationResult<void>`                     | ✅ postMessage  |
+| `executeAsync`                 | `<TReq, TRes>(operation) → IOperationResult<TRes>`             | ❌ CSP ブロック |
 
 **`IOperationOptions` パラメータ:**
 
@@ -885,10 +907,16 @@ export type CreatePayload = Omit<Geek_incidentsBase, SystemFields> &
 export async function getIncidents(): Promise<Geek_incidents[]> {
   const result = await Geek_incidentsService.getAll({
     select: [
-      "geek_incidentid", "geek_name", "geek_description",
-      "geek_status", "geek_priority", "createdon",
-      "_geek_incidentcategoryid_value", "_geek_assignedtoid_value",
-      "_geek_itassetid_value", "_createdby_value",
+      "geek_incidentid",
+      "geek_name",
+      "geek_description",
+      "geek_status",
+      "geek_priority",
+      "createdon",
+      "_geek_incidentcategoryid_value",
+      "_geek_assignedtoid_value",
+      "_geek_itassetid_value",
+      "_createdby_value",
     ],
     orderBy: ["createdon desc"],
   });
@@ -945,22 +973,24 @@ SDK 生成サービスの `getAll()` / `get()` は **フォーマット済み Lo
 
 ```typescript
 // ① hooks で関連テーブルを取得
-const { data: incidents = [] } = useIncidents()
-const { data: users = [] } = useSystemUsers()
-const { data: categories = [] } = useCategories()
+const { data: incidents = [] } = useIncidents();
+const { data: users = [] } = useSystemUsers();
+const { data: categories = [] } = useCategories();
 
 // ② useMemo で GUID → 名前の Map を構築
 const userMap = useMemo(() => {
-  const m = new Map<string, string>()
-  users.forEach((u) => m.set(u.systemuserid, u.fullname || u.internalemailaddress || ""))
-  return m
-}, [users])
+  const m = new Map<string, string>();
+  users.forEach((u) =>
+    m.set(u.systemuserid, u.fullname || u.internalemailaddress || ""),
+  );
+  return m;
+}, [users]);
 
 const categoryMap = useMemo(() => {
-  const m = new Map<string, string>()
-  categories.forEach((c) => m.set(c.geek_incidentcategoryid, c.geek_name))
-  return m
-}, [categories])
+  const m = new Map<string, string>();
+  categories.forEach((c) => m.set(c.geek_incidentcategoryid, c.geek_name));
+  return m;
+}, [categories]);
 
 // ③ テーブルカラムで render 関数を使って GUID → 名前を解決
 const columns = [
@@ -969,27 +999,27 @@ const columns = [
     key: "_geek_incidentcategoryid_value",
     label: "カテゴリ",
     render: (item) => {
-      const v = item._geek_incidentcategoryid_value as string | undefined
-      return v ? categoryMap.get(v) || "" : ""
+      const v = item._geek_incidentcategoryid_value as string | undefined;
+      return v ? categoryMap.get(v) || "" : "";
     },
   },
   {
     key: "_geek_assignedtoid_value",
     label: "担当者",
     render: (item) => {
-      const v = item._geek_assignedtoid_value as string | undefined
-      return v ? userMap.get(v) || "" : ""
+      const v = item._geek_assignedtoid_value as string | undefined;
+      return v ? userMap.get(v) || "" : "";
     },
   },
   {
     key: "_createdby_value",
     label: "報告者",
     render: (item) => {
-      const v = item._createdby_value as string | undefined
-      return v ? userMap.get(v) || "" : ""
+      const v = item._createdby_value as string | undefined;
+      return v ? userMap.get(v) || "" : "";
     },
   },
-]
+];
 ```
 
 **詳細ページの推奨パターン**:
@@ -1043,14 +1073,15 @@ SDK 生成サービスの型定義にはこのプロパティが含まれない�
 export async function getRecordsWithLookupNames(): Promise<MyRecord[]> {
   const client = await getClient();
   const result = await client.retrieveMultipleRecordsAsync(
-    "registeredtablename",  // ← データソース登録済みテーブル
+    "registeredtablename", // ← データソース登録済みテーブル
     {
       select: [
-        "primaryid", "name",
-        "_lookupfield_value",  // ← 未登録テーブルへの Lookup GUID
+        "primaryid",
+        "name",
+        "_lookupfield_value", // ← 未登録テーブルへの Lookup GUID
       ],
       filter: "statecode eq 0",
-    }
+    },
   );
   if (!result.success) throw result.error;
 
@@ -1058,7 +1089,8 @@ export async function getRecordsWithLookupNames(): Promise<MyRecord[]> {
   return (result.data ?? []).map((raw: any) => {
     const record = raw as MyRecord;
     // OData FormattedValue アノテーションから Lookup 先の名前を取得
-    const lookupName = raw["_lookupfield_value@OData.Community.Display.V1.FormattedValue"];
+    const lookupName =
+      raw["_lookupfield_value@OData.Community.Display.V1.FormattedValue"];
     if (lookupName) record._lookupfield_name = lookupName;
     return record;
   });
@@ -1074,7 +1106,9 @@ export interface LookupInfo {
   name: string;
 }
 
-export async function getLookupNamesFromRegisteredTable(): Promise<LookupInfo[]> {
+export async function getLookupNamesFromRegisteredTable(): Promise<
+  LookupInfo[]
+> {
   const result = await RegisteredTableService.getAll({
     select: ["primaryid", "_lookupfield_value"],
     filter: "statecode eq 0",
@@ -1085,7 +1119,9 @@ export async function getLookupNamesFromRegisteredTable(): Promise<LookupInfo[]>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const raw of result.data as any[]) {
     const id = raw._lookupfield_value as string | undefined;
-    const name = raw["_lookupfield_value@OData.Community.Display.V1.FormattedValue"] as string | undefined;
+    const name = raw[
+      "_lookupfield_value@OData.Community.Display.V1.FormattedValue"
+    ] as string | undefined;
     if (id && name && !nameMap.has(id.toLowerCase())) {
       nameMap.set(id.toLowerCase(), name);
     }
@@ -1106,7 +1142,7 @@ export interface MyRecord {
   primaryid: string;
   name: string;
   _lookupfield_value?: string;
-  _lookupfield_name?: string;  // ← FormattedValue から取得した名前用
+  _lookupfield_name?: string; // ← FormattedValue から取得した名前用
 }
 ```
 
@@ -1124,6 +1160,7 @@ export interface MyRecord {
 ```
 
 **重要な注意事項:**
+
 - **FormattedValue はランタイムの Dataverse OData API が自動付与する** — `select` に指定する必要はない。Lookup 列（`_xxx_value`）を `select` に含めれば自動で返される
 - **SDK 生成サービスの型（TypeScript）にはこのプロパティがない** — `any` キャストで raw オブジェクトからアクセスする必要がある
 - **データソース登録済みテーブル経由でのみ取得可能** — 未登録テーブルに直接クエリはできない。登録済みテーブルの Lookup 列を経由して名前を取得する
@@ -1173,7 +1210,6 @@ CodeAppsStarter からプロジェクトを作成した場合、テンプレー�
 > `fullscreen-wrapper.tsx`, `sidebar-layout.tsx`, `sidebar.tsx`, `mode-toggle.tsx`, `ui/` 配下全て。
 > これらは将来の画面実装で活用できる汎用コンポーネント。
 
-
 ## 構築手順
 
 詳細な構築手順（初期化・Dataverse 接続・ビルド・デプロイ）は [構築リファレンス](references/build-reference.md) を参照。
@@ -1216,7 +1252,6 @@ export function useCreateIncident() {
   });
 }
 ```
-
 
 ## プレデプロイレビュー（「デプロイして」「プッシュして」時の必須チェック）
 
@@ -1434,8 +1469,8 @@ if (flowResult.success && flowResult.data?.response) {
 {
   "body": {
     // body/responses は JSON 配列 → 文字列補間で配列ごと入る
-    "response": "@{outputs('エージェントを実行して待機する')?['body/responses']}"
-  }
+    "response": "@{outputs('エージェントを実行して待機する')?['body/responses']}",
+  },
 }
 ```
 
@@ -1456,7 +1491,10 @@ try {
   }
 } catch (err) {
   // 502 BadGateway / タイムアウト時はローカル検索にフォールバック
-  console.warn("[Copilot] Flow call failed, falling back to local search:", err);
+  console.warn(
+    "[Copilot] Flow call failed, falling back to local search:",
+    err,
+  );
   const result = localSearch(query);
   answer = result.answer;
   format = "plain";
@@ -1498,15 +1536,15 @@ time.sleep(5)
 
 Code Apps iframe は `connect-src: 'none'` のため、**postMessage ベースのメソッドのみ使用可能**:
 
-| メソッド | 安全 | 備考 |
-|---|---|---|
-| `retrieveMultipleRecordsAsync` | ✅ | 一覧取得 |
-| `retrieveRecordAsync` | ✅ | 単一取得 |
-| `createRecordAsync` | ✅ | 作成 |
-| `updateRecordAsync` | ✅ | 更新 |
-| `deleteRecordAsync` | ✅ | 削除 |
-| `executeAsync` | ❌ | fetch ベース → CSP ブロック |
-| `fetch()` 直接 | ❌ | CSP ブロック |
+| メソッド                       | 安全 | 備考                        |
+| ------------------------------ | ---- | --------------------------- |
+| `retrieveMultipleRecordsAsync` | ✅   | 一覧取得                    |
+| `retrieveRecordAsync`          | ✅   | 単一取得                    |
+| `createRecordAsync`            | ✅   | 作成                        |
+| `updateRecordAsync`            | ✅   | 更新                        |
+| `deleteRecordAsync`            | ✅   | 削除                        |
+| `executeAsync`                 | ❌   | fetch ベース → CSP ブロック |
+| `fetch()` 直接                 | ❌   | CSP ブロック                |
 
 `WhoAmI` は使えないため、`systemuser` テーブルの `azureactivedirectoryobjectid` で
 `getContext().user.objectId`（AAD Object ID）→ `systemuserid` をマッピングする。
@@ -1517,10 +1555,10 @@ Dataverse API は GUID を大文字小文字混在で返す。全ての GUID 比
 
 ```typescript
 // ✅ 正しい
-records.filter(r => r._ownerid_value?.toLowerCase() === userId.toLowerCase());
+records.filter((r) => r._ownerid_value?.toLowerCase() === userId.toLowerCase());
 
 // ❌ 危険: 大文字小文字の不一致でフィルタが効かない
-records.filter(r => r._ownerid_value === userId);
+records.filter((r) => r._ownerid_value === userId);
 ```
 
 ### テンプレートファイル削除の注意点
@@ -1529,7 +1567,7 @@ records.filter(r => r._ownerid_value === userId);
 
 ```powershell
 # ✅ 個別ファイルを明示
-Remove-Item "src/pages/incidents.tsx","src/pages/kanban.tsx","src/pages/assets.tsx" -Force
+Remove-Item "src/pages/assets.tsx","src/pages/dashboard.tsx","src/pages/kanban.tsx" -Force
 
 # ❌ ワイルドカード禁止
 Remove-Item "src/hooks/*" -Force   # use-theme.ts が消えてビルド壊れる

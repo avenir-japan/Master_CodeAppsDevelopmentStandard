@@ -72,20 +72,23 @@ Dataverse Web API（workflow テーブル）で **ソリューション対応の
 
 ## 大前提: 一つのソリューション内に開発
 
-Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio エージェントは **すべて同一のソリューション内** に含める。
-
-```
-SOLUTION_NAME=ProjectName  ← .env で定義。全フェーズで同じ値を使用
-PUBLISHER_PREFIX=prefix    ← ソリューション発行者の prefix
-```
+共通の `.env`、認証、ソリューション運用の正本は [standard スキル](../standard/SKILL.md) とする。
 
 - フロー作成時は `MSCRM.SolutionUniqueName` ヘッダー必須
-- 接続参照もソリューション内に作成（`MSCRM.SolutionUniqueName` ヘッダー）
-
-> **認証**: Python スクリプトの認証は `standard` スキルの `auth_helper.py` を使用。
-> `from auth_helper import get_token, get_session, api_get, api_post, api_patch, api_delete, retry_metadata, DATAVERSE_URL` で利用する。
-
+- 接続参照も同じソリューション内に作成する
 - ソリューション外のフローは「マイフロー」に入り、ALM 管理できない
+
+## 関連スキル
+
+| スキル                                       | 連携内容                                         |
+| -------------------------------------------- | ------------------------------------------------ |
+| [architecture](../architecture/SKILL.md)     | Flow 単体か Copilot Studio 連携かを先に判断する  |
+| [standard](../standard/SKILL.md)             | 認証・`.env`・ソリューション前提の共通ルール     |
+| [dataverse](../dataverse/SKILL.md)           | トリガー元テーブル・更新対象テーブルの設計       |
+| [code-apps](../code-apps/SKILL.md)           | Code Apps から呼ぶ PowerApps V2 フローを実装する |
+| [canvas-app](../canvas-app/SKILL.md)         | Canvas App の staging 中継フローを作る           |
+| [copilot-studio](../copilot-studio/SKILL.md) | 外部トリガーからエージェントを起動する           |
+| [ai-builder](../ai-builder/SKILL.md)         | フロー内で AI プロンプトを呼び出す               |
 
 ## 絶対遵守ルール
 
@@ -516,12 +519,12 @@ PUBLISHER_PREFIX=prefix
 
 ## よくあるエラーと解決策
 
-| エラー                                  | 原因                                           | 解決策                                                         |
-| --------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `AzureResourceManagerRequestFailed`     | 接続参照なしで直接接続 ID 指定                 | Step 2 の接続参照パターンに変更                                |
-| `InvalidOpenApiFlow` (0x80060467)       | 存在しないパラメータを指定                     | operationSchema を確認（body/subject 等）                      |
-| `WorkflowOperationInputsApiOperationNotFound` | 存在しない operationId                   | 正しい operationId を確認（UploadFile → UpdateEntityFileImageFieldContent） |
-| PowerApps API 504 GatewayTimeout        | 接続検索のタイムアウト                         | 3回リトライ + timeout=120                                      |
-| Webhook トリガーが発火しない            | /start 未呼び出し                              | 有効化後に Flow API /start を呼ぶ                              |
-| フロー実行時に接続エラー                | 接続が Error/Disconnected 状態                 | Power Automate UI で接続を再認証                               |
-| `AppLeaseMissing` / `ConnectionNotFound` | 環境が変わった / 接続 ID が古い               | PowerApps API で毎回 Connected 接続を検索                     |
+| エラー                                        | 原因                            | 解決策                                                                      |
+| --------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------- |
+| `AzureResourceManagerRequestFailed`           | 接続参照なしで直接接続 ID 指定  | Step 2 の接続参照パターンに変更                                             |
+| `InvalidOpenApiFlow` (0x80060467)             | 存在しないパラメータを指定      | operationSchema を確認（body/subject 等）                                   |
+| `WorkflowOperationInputsApiOperationNotFound` | 存在しない operationId          | 正しい operationId を確認（UploadFile → UpdateEntityFileImageFieldContent） |
+| PowerApps API 504 GatewayTimeout              | 接続検索のタイムアウト          | 3回リトライ + timeout=120                                                   |
+| Webhook トリガーが発火しない                  | /start 未呼び出し               | 有効化後に Flow API /start を呼ぶ                                           |
+| フロー実行時に接続エラー                      | 接続が Error/Disconnected 状態  | Power Automate UI で接続を再認証                                            |
+| `AppLeaseMissing` / `ConnectionNotFound`      | 環境が変わった / 接続 ID が古い | PowerApps API で毎回 Connected 接続を検索                                   |

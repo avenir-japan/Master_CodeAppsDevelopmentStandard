@@ -5,8 +5,8 @@ Dataverse テーブル構築テンプレート
 共通ロジック（リトライ・カラム補完・NavProp動的取得・Choice ローカライズ等）は汎用のまま。
 
 前提:
-  - auth_helper.py がプロジェクトルートに存在
-    (.github/skills/standard/scripts/auth_helper.py をコピー)
+    - 共通実装 `.github/skills/standard/scripts/auth_helper.py` を必要に応じて
+        プロジェクトルートへコピーした `auth_helper.py` が存在
   - .env に DATAVERSE_URL, TENANT_ID, SOLUTION_NAME, PUBLISHER_PREFIX を設定済み
   - pip install azure-identity requests python-dotenv
 
@@ -29,7 +29,7 @@ load_dotenv()
 
 # ── auth_helper.py インポート ────────────────────────────────
 # auth_helper.py は standard スキルの共通モジュール。
-# プロジェクトルートにコピーして使用する。
+# 共通実装を必要に応じてプロジェクトルートへコピーして使用する。
 #
 # 主要 API:
 #   api_get(path)                    → dict を返す（パス文字列のみ。dict 第2引数は不可）

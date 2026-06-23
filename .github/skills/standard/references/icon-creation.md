@@ -29,13 +29,13 @@ Power Platform の各コンポーネント（Copilot Studio エージェント�
 
 ### 共通認証: auth_helper.py
 
-`standard` スキルの `auth_helper.py` をプロジェクトルートにコピーして使用する。
+共通実装は `standard` スキルの `.github/skills/standard/scripts/auth_helper.py` にあり、必要に応じてプロジェクト直下へコピーして使用する。
 
-| 関数 | 用途 |
-|------|------|
-| `api_get(path)` | 既存リソース取得 |
-| `api_post(path, body, solution=)` | WebResource・PublishXml 等の作成 |
-| `api_patch(path, body)` | bots / applicationmanifestinformation の更新 |
+| 関数                                    | 用途                                                |
+| --------------------------------------- | --------------------------------------------------- |
+| `api_get(path)`                         | 既存リソース取得                                    |
+| `api_post(path, body, solution=)`       | WebResource・PublishXml 等の作成                    |
+| `api_patch(path, body)`                 | bots / applicationmanifestinformation の更新        |
 | `api_request(path, body, method="PUT")` | EntityMetadata 更新（`MergeLabels: true` 自動付与） |
 
 ### 依存パッケージ
@@ -68,13 +68,13 @@ pip install Pillow azure-identity requests python-dotenv
 
 ## 用途別の形式・サイズ要件
 
-| 用途 | 形式 | サイズ | 登録先 |
-|------|------|--------|--------|
-| Copilot Studio エージェント (メイン) | PNG | 240x240 | `bots.iconbase64` |
-| Copilot Studio Teams colorIcon | PNG | 192x192 | `applicationmanifestinformation.teams.colorIcon` |
-| Copilot Studio Teams outlineIcon | PNG (白い透明背景) | 32x32 | `applicationmanifestinformation.teams.outlineIcon` |
-| Dataverse テーブルアイコン | SVG | 任意 | WebResource (type=11) → `EntityMetadata.IconVectorName` |
-| モデル駆動型アプリアイコン | — | — | `appmodules.webresourceid`（デフォルト: `953b9fac-1e5e-e611-80d6-00155ded156f`） |
+| 用途                                 | 形式               | サイズ  | 登録先                                                                           |
+| ------------------------------------ | ------------------ | ------- | -------------------------------------------------------------------------------- |
+| Copilot Studio エージェント (メイン) | PNG                | 240x240 | `bots.iconbase64`                                                                |
+| Copilot Studio Teams colorIcon       | PNG                | 192x192 | `applicationmanifestinformation.teams.colorIcon`                                 |
+| Copilot Studio Teams outlineIcon     | PNG (白い透明背景) | 32x32   | `applicationmanifestinformation.teams.outlineIcon`                               |
+| Dataverse テーブルアイコン           | SVG                | 任意    | WebResource (type=11) → `EntityMetadata.IconVectorName`                          |
+| モデル駆動型アプリアイコン           | —                  | —       | `appmodules.webresourceid`（デフォルト: `953b9fac-1e5e-e611-80d6-00155ded156f`） |
 
 ## 共通: Pillow PNG 生成コード
 
@@ -307,16 +307,16 @@ SiteMap の SubArea には `VectorIcon` 属性でシステム SVG パスを指�
 
 ### よく使うアイコン例
 
-| アイコン名 | 用途 |
-|------------|------|
-| `document_one_page_sparkle` | Generative Page |
-| `home` | ホーム / ダッシュボード |
-| `people` | ユーザー / チーム |
-| `settings` | 設定 |
-| `clipboard_task_list` | タスク管理 |
-| `alert` | アラート / 通知 |
-| `wrench` | メンテナンス / 設備 |
-| `shield_checkmark` | セキュリティ / 品質 |
+| アイコン名                  | 用途                    |
+| --------------------------- | ----------------------- |
+| `document_one_page_sparkle` | Generative Page         |
+| `home`                      | ホーム / ダッシュボード |
+| `people`                    | ユーザー / チーム       |
+| `settings`                  | 設定                    |
+| `clipboard_task_list`       | タスク管理              |
+| `alert`                     | アラート / 通知         |
+| `wrench`                    | メンテナンス / 設備     |
+| `shield_checkmark`          | セキュリティ / 品質     |
 
 ### SiteMap XML での使用例
 
@@ -332,14 +332,14 @@ SiteMap の SubArea には `VectorIcon` 属性でシステム SVG パスを指�
 
 ## 絶対遵守ルール
 
-| ルール | 理由 |
-|--------|------|
-| **Copilot Studio アイコンは PNG 形式** | SVG は Teams チャネルで表示されない |
-| **Dataverse テーブルアイコンは SVG 形式** | `IconVectorName` は WebResource (type=11) を参照 |
-| **`data:` prefix を付けない** | `bots.iconbase64` は生 Base64 PNG のみ受付 |
-| **bots PATCH には name フィールド必須** | 省略すると 0x80040265 エラー |
-| **outlineIcon は白い透明背景の 32x32 PNG** | Teams マニフェスト要件 |
-| **IconVectorName は PUT で設定** | PATCH では反映されないケースあり。`MergeLabels: true` 必須 |
-| **WebResource 名は `{prefix}_/icons/{name}.svg`** | ソリューション含有のため prefix 必須 |
-| **テーブルアイコン設定後に PublishXml** | 公開しないと UI に反映されない |
-| **アイコン提案は構築前に実施** | ユーザーに選択してもらってから生成 |
+| ルール                                            | 理由                                                       |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| **Copilot Studio アイコンは PNG 形式**            | SVG は Teams チャネルで表示されない                        |
+| **Dataverse テーブルアイコンは SVG 形式**         | `IconVectorName` は WebResource (type=11) を参照           |
+| **`data:` prefix を付けない**                     | `bots.iconbase64` は生 Base64 PNG のみ受付                 |
+| **bots PATCH には name フィールド必須**           | 省略すると 0x80040265 エラー                               |
+| **outlineIcon は白い透明背景の 32x32 PNG**        | Teams マニフェスト要件                                     |
+| **IconVectorName は PUT で設定**                  | PATCH では反映されないケースあり。`MergeLabels: true` 必須 |
+| **WebResource 名は `{prefix}_/icons/{name}.svg`** | ソリューション含有のため prefix 必須                       |
+| **テーブルアイコン設定後に PublishXml**           | 公開しないと UI に反映されない                             |
+| **アイコン提案は構築前に実施**                    | ユーザーに選択してもらってから生成                         |

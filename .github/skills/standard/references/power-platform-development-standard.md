@@ -4,7 +4,7 @@
 > GitHub Copilot Agent モードとスキルベースの開発ワークフローにより、VS Code から Power Platform ソリューションを構築する実践ガイド。
 
 > [!NOTE]
-> 推奨モデル: Claude Opus 4.6
+> 既定モデル: GPT-5.4 / 高難度タスクのみ Opus 4.8
 
 ---
 
@@ -13,13 +13,27 @@
 1. [設計原則](#1-設計原則)
 2. [前提条件と環境セットアップ](#2-前提条件と環境セットアップ)
 3. [Dataverse テーブル設計・作成](#3-dataverse-テーブル設計作成)
-4. [Code Apps 開発](#4-code-apps-開発)
+4. [UI 開発](#4-ui-開発)
 5. [Power Automate フロー開発](#5-power-automate-フロー開発)
 6. [Copilot Studio エージェント開発](#6-copilot-studio-エージェント開発)
 7. [トラブルシューティング・再発防止](#7-トラブルシューティング再発防止)
 8. [開発フロー全体図](#8-開発フロー全体図)
 9. [チェックリスト](#9-チェックリスト)
 10. [GitHub Copilot スキル](#10-github-copilot-スキル)
+
+---
+
+## GitHub Copilot のモデル運用
+
+GitHub Copilot は使用量ベース課金を前提に、**既定を GPT-5.4**、**深い推論が必要な場面だけ Opus 4.8** に寄せる。
+
+| 用途                                     | 既定モデル | Opus 4.8 に切り替える条件                        |
+| ---------------------------------------- | ---------- | ------------------------------------------------ |
+| 通常実装、設定変更、ドキュメント更新     | GPT-5.4    | なし。まずは GPT-5.4 で完了を目指す              |
+| アーキテクチャ判断、原因不明の不具合調査 | GPT-5.4    | 失敗要因が複数あり、比較検討や深い切り分けが必要 |
+| 横断的な改修、納品前レビュー             | GPT-5.4    | 変更影響が広く、見落としコストの方が高い         |
+
+原則は、**実装の手数が多い作業は GPT-5.4**、**推論ミスが高コストな作業だけ Opus 4.8** とする。
 
 ---
 
@@ -217,6 +231,9 @@ PUBLISHER_PREFIX=geek
 
 環境情報の取得は **Power Apps ポータル > 設定（右上の⚙）> セッション詳細** から取得する。
 
+> [!IMPORTANT]
+> このリポジトリを複数案件向けのマスターとして使う場合、`.env` はリポジトリに保持しない。`.env.example` を正本として保持し、案件ごとに `.env` を作成して実値を設定する。
+
 ```
 セッション詳細から取得できる値:
   Tenant ID      → TENANT_ID
@@ -273,7 +290,7 @@ npm run setup
 - `.github/skills/spec-to-markdown/scripts/.venv` — markitdown 等
 - `.github/skills/standard/scripts/.venv` — azure-identity / requests 等（auth_helper 用）
 
-また `.env` ファイルの存在も確認し、未作成であれば `cp .env.example .env` を案内する。
+また `.env` ファイルの存在も確認し、未作成であれば `Copy-Item .env.example .env` を案内する。
 
 #### 共通認証ヘルパー `.github/skills/standard/scripts/auth_helper.py`
 
@@ -285,10 +302,10 @@ Dataverse テーブル作成・フロー・Copilot Studio 等の **Python デプ
 
 サイレントリフレッシュには **AuthenticationRecord** と **MSAL 永続トークンキャッシュ** の両方が必要。
 
-| 層                           | 保存先              | 保存内容                               | 役割                                      |
-| ---------------------------- | ------------------- | -------------------------------------- | ----------------------------------------- |
-| AuthenticationRecord         | `.auth_record.json` | アカウント情報（テナント・ユーザー）   | MSAL キャッシュからトークンを検索するキー |
-| TokenCachePersistenceOptions | OS 資格情報ストア   | リフレッシュトークン・アクセストークン | 実際のトークン永続化                      |
+| 層                           | 保存先                                                    | 保存内容                               | 役割                                      |
+| ---------------------------- | --------------------------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| AuthenticationRecord         | `auth_helper.py` と同じディレクトリの `.auth_record.json` | アカウント情報（テナント・ユーザー）   | MSAL キャッシュからトークンを検索するキー |
+| TokenCachePersistenceOptions | OS 資格情報ストア                                         | リフレッシュトークン・アクセストークン | 実際のトークン永続化                      |
 
 > **教訓**: `AuthenticationRecord` だけではトークンは保存されない。`TokenCachePersistenceOptions` を設定しないと毎回デバイスコード認証が要求される。
 
@@ -469,9 +486,18 @@ api_post("/PublishAllXml", {})
 
 ---
 
-## 4. Code Apps 開発
+## 4. UI 開発
 
-### 4.1 初期セットアップ手順
+Phase 2 は **Code Apps / Canvas Apps / Model-Driven Apps** のいずれかを選んで進める。
+まず `architecture` スキルで UI 方式を比較し、**ユーザー確認のうえで方式を確定**してから各スキルへ進む。
+
+- Code Apps を選ぶ場合: `code-apps` スキルを使う
+- Canvas App を選ぶ場合: `canvas-app` スキルを使う
+- Model-Driven Apps を選ぶ場合: `model-driven-app` スキルを使う
+
+この章では、Phase 2 の共通原則を示したうえで、**標準実装である Code Apps の具体手順** を記載する。
+
+### 4.1 UI 方式選定と Code Apps 初期セットアップ手順
 
 #### 前提条件
 
@@ -517,10 +543,10 @@ npx power-apps push --non-interactive
 
 > **重要**: SDK コマンドが以下のファイルを自動生成する。これらを手動で作成・他プロジェクトからコピーしてはならない。
 >
-> | コマンド | 自動生成されるファイル |
-> |---|---|
-> | `npx power-apps init` | `power.config.json`, `plugins/plugin-power-apps.ts`, `vite.config.ts`, `tsconfig*.json`, `eslint.config.js`, `index.html`, `package.json`, `src/main.tsx`, `src/App.tsx`, `components.json` 等 |
-> | `npx power-apps add-data-source` | `src/generated/`（モデル・サービス）, `.power/schemas/appschemas/dataSourcesInfo.ts` |
+> | コマンド                         | 自動生成されるファイル                                                                                                                                                                         |
+> | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | `npx power-apps init`            | `power.config.json`, `plugins/plugin-power-apps.ts`, `vite.config.ts`, `tsconfig*.json`, `eslint.config.js`, `index.html`, `package.json`, `src/main.tsx`, `src/App.tsx`, `components.json` 等 |
+> | `npx power-apps add-data-source` | `src/generated/`（モデル・サービス）, `.power/schemas/appschemas/dataSourcesInfo.ts`                                                                                                           |
 
 > **SDK v1.0.x への移行**: `pac code add-data-source` は SDK v1.0.x で CLI パスが変更されたため動作しない。`npx power-apps add-data-source` を使用すること。日本語ローカライズ済み環境では nameUtils.js のパッチが必要（§1.2 参照）。
 
@@ -1211,10 +1237,10 @@ PVA は GPT コンポーネントの `data` YAML 末尾に基盤モデル情報�
 ```yaml
 aISettings:
   model:
-    modelNameHint: Sonnet46
+    modelNameHint: <UI で選択したモデル識別子>
 ```
 
-GPT コンポーネントの `data` を上書きすると、この `aISettings` セクションが消えてデフォルトモデル（GPT 4.1）に戻る。
+GPT コンポーネントの `data` を上書きすると、この `aISettings` セクションが消えて UI で選択したモデル設定が失われる。
 
 ```python
 # ★ 更新前に既存データから aISettings セクションを抽出 → 新 YAML の末尾に付加
@@ -1404,7 +1430,7 @@ publish_to_channels(bot_id)
 | 33  | Python スクリプトで `api_get()` の戻り値に `.json()` を呼んでエラー                        | `auth_helper.api_get()` は dict を直返しする（Response ではない）                        | 戻り値の dict をそのまま使う。`.json()` を呼ばない                                        | §2.3 参照   |
 | 34  | GPT コンポーネントの YAML をシングル改行で作成 → conversationStarters が UI に反映されない | PVA パーサーはシングル改行の構造行を認識しない                                           | 構造行はダブル改行 (`\n\n`)、instructions 内はシングル改行。title/text はクォートなし     | §6.4 参照   |
 | 35  | ConversationStart をシングル改行 YAML で更新 → 送信ノードが消える                          | 同上。PVA ダブル改行フォーマットが必須                                                   | ConversationStart もダブル改行で全行を結合                                                | §6.5 参照   |
-| 36  | GPT data 上書きで基盤モデルがデフォルト（GPT 4.1）に戻る                                   | PVA が data YAML 末尾に `aISettings.model.modelNameHint` を格納しており、上書きで消える  | 更新前に `aISettings` セクションを抽出して新 YAML 末尾に付加                              | §6.6 参照   |
+| 36  | GPT data 上書きで UI で選択した基盤モデル設定が失われる                                    | PVA が data YAML 末尾に `aISettings.model.modelNameHint` を格納しており、上書きで消える  | 更新前に `aISettings` セクションを抽出して新 YAML 末尾に付加                              | §6.6 参照   |
 | 37  | SVG アイコンで Teams チャネルのアイコンが表示されない                                      | Teams は SVG を受け付けない。PNG 形式が必須                                              | PNG 3 サイズ生成（240/192/32）、data: prefix なしの生 Base64、outlineIcon は白い透明背景  | §6.7 参照   |
 
 ### 7.2 共通のアンチパターン
@@ -1459,9 +1485,9 @@ flowchart TD
 
     P1["🗄️ Phase 1: Dataverse 構築\n1. ソリューション作成\n2. テーブル作成（マスタ → 主 → 従属）\n3. Lookup リレーションシップ作成（リトライ付き）\n4. 日本語ローカライズ（PUT + MetadataId）\n5. 全テーブルにデモデータ投入\n6. テーブル・リレーションシップ検証"]
 
-    P2D["🎨 Phase 2 設計: Code Apps UI\n1. code-apps スキルの references/design-system.md で設計\n2. 画面構成・コンポーネント選定\n3. Lookup 名前解決パターン設計\n4. ★ ユーザーに UI 設計を提示し承認を得る"]
+    P2D["🎨 Phase 2 設計: UI 方式選定\n1. architecture で Code Apps / Canvas Apps / Model-Driven Apps を比較\n2. 選択した方式のスキルで UI 設計\n3. 顧客要望・保守体制・既存資産を確認\n4. ★ ユーザーに UI 方式と UI 設計を提示し承認を得る"]
 
-    P2["⚛️ Phase 2 実装: Code Apps\n1. npx power-apps init\n2. build & push（先にデプロイ！）\n3. npx power-apps add-data-source\n4. 承認済み設計に従い実装\n5. ビルド & 再デプロイ"]
+    P2["⚛️ Phase 2 実装: 選択した UI 方式\n1. Code Apps: init → build & push → add-data-source\n2. Canvas App: 添付 / staging / import 運用\n3. Model-Driven Apps: フォーム / ビュー / SiteMap / 公開\n4. 承認済み設計に従い実装"]
 
     P25D["📋 Phase 2.5 設計: Power Automate\n1. フロー名・トリガー・アクション設計\n2. 接続・通知先・メール本文設計\n3. ★ ユーザーに設計を提示し承認を得る"]
 
@@ -1535,17 +1561,19 @@ flowchart TD
 
 ### Phase 2/2.5/3 の設計フェーズ（各フェーズ共通原則）
 
-**Dataverse だけでなく、Code Apps・Power Automate・Copilot Studio のいずれも、実装前に設計をユーザーに提示して承認を得る。**
+**Dataverse だけでなく、UI 実装方式（Code Apps / Canvas Apps / Model-Driven Apps）・Power Automate・Copilot Studio のいずれも、実装前に設計をユーザーに提示して承認を得る。**
 
-#### Code Apps UI 設計（Phase 2 開始前）
+#### UI 実装方式の設計（Phase 2 開始前）
 
-`code-apps` スキルを使い、以下を設計してユーザーに提示:
+まず `architecture` スキルで **Code Apps / Canvas Apps / Model-Driven Apps** を比較し、
+どの UI 方式で進めるかをユーザーに確認する。
 
-- 画面一覧（ページ名・ルート・各画面の役割）
-- 各画面のコンポーネント構成（ListTable / StatsCards / FormModal / InlineEditTable 等）
-- カラム定義と render 関数
-- Lookup 名前解決パターン（`_xxx_value` + `useMemo` Map）
-- ナビゲーション構造
+- Code Apps を選ぶ場合: `code-apps` スキルで画面一覧・コンポーネント構成・Lookup 名前解決・ナビゲーションを設計
+- Canvas App を選ぶ場合: `canvas-app` スキルで画面構成・staging・添付・Flow 中継を設計
+- Model-Driven Apps を選ぶ場合: `model-driven-app` スキルで対象テーブル・フォーム・ビュー・SiteMap を設計
+
+> **原則**: AI が独断で UI 方式を確定しない。顧客要望・保守体制・利用人数・モバイル要件・既存資産を確認し、
+> 「この方式で進めてよいですか？」と明示的に確認してから実装に進む。
 
 #### Power Automate フロー設計（Phase 2.5 開始前）
 
@@ -1583,11 +1611,11 @@ flowchart TD
 - [ ] 全 Lookup リレーションシップが設計書に記載済み
 - [ ] デモデータが全テーブル（従属テーブル含む）に計画済み
 
-### Code Apps UI 設計（Phase 2 開始前）
+### UI 実装方式の設計（Phase 2 開始前）
 
-- [ ] `code-apps` スキルで画面構成・コンポーネントを設計済み
-- [ ] Lookup 名前解決パターン（`_xxx_value` + `useMemo` Map）を設計に含めた
-- [ ] **ユーザーに UI 設計を提示し、承認を得た**
+- [ ] `architecture` スキルで UI 方式（Code Apps / Canvas Apps / Model-Driven Apps）を比較済み
+- [ ] 選択した方式に対応するスキル（`code-apps` / `canvas-app` / `model-driven-app`）で設計済み
+- [ ] **ユーザーに UI 方式と UI 設計を提示し、承認を得た**
 
 ### Power Automate フロー設計（Phase 2.5 開始前）
 
@@ -1663,12 +1691,19 @@ flowchart TD
 
 ### スキル一覧
 
-| スキル名                  | 場所                                                                                          | 用途                                                           |
-| ------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `standard` | [standard/SKILL.md](../SKILL.md) | Power Platform 包括開発標準（全体参照）                        |
-| `copilot-studio`    | [copilot-studio/SKILL.md](../../copilot-studio/SKILL.md)       | Copilot Studio エージェント構築（生成オーケストレーション）    |
-| `power-automate`     | [power-automate/SKILL.md](../../power-automate/SKILL.md)         | Power Automate クラウドフロー作成・デプロイ                    |
-| `code-apps`           | [code-apps/SKILL.md](../../code-apps/SKILL.md)                     | Code Apps 開発・UI 設計・CSP 構成・メール送信（統合スキル）    |
+| スキル名           | 場所                                                         | 用途                                                        |
+| ------------------ | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| `architecture`     | [architecture/SKILL.md](../../architecture/SKILL.md)         | 全体アーキテクチャ設計・UI 方式選定                         |
+| `standard`         | [standard/SKILL.md](../SKILL.md)                             | Power Platform 包括開発標準（全体参照）                     |
+| `dataverse`        | [dataverse/SKILL.md](../../dataverse/SKILL.md)               | Dataverse テーブル設計・構築・権限設定                      |
+| `code-apps`        | [code-apps/SKILL.md](../../code-apps/SKILL.md)               | Code Apps 開発・UI 設計・CSP 構成・メール送信               |
+| `canvas-app`       | [canvas-app/SKILL.md](../../canvas-app/SKILL.md)             | Canvas App 開発・添付・staging・msapp import 運用           |
+| `generative-page`  | [generative-page/SKILL.md](../../generative-page/SKILL.md)   | Generative Pages 開発・デバッグ・デプロイ                   |
+| `model-driven-app` | [model-driven-app/SKILL.md](../../model-driven-app/SKILL.md) | モデル駆動型アプリ構築・公開                                |
+| `copilot-studio`   | [copilot-studio/SKILL.md](../../copilot-studio/SKILL.md)     | Copilot Studio エージェント構築（生成オーケストレーション） |
+| `power-automate`   | [power-automate/SKILL.md](../../power-automate/SKILL.md)     | Power Automate クラウドフロー作成・デプロイ                 |
+| `ai-builder`       | [ai-builder/SKILL.md](../../ai-builder/SKILL.md)             | AI Builder プロンプト作成・エージェントツール追加           |
+| `spec-to-markdown` | [spec-to-markdown/SKILL.md](../../spec-to-markdown/SKILL.md) | 仕様書の markdown 化と factsheet / document 整理            |
 
 ### スキルに記録されている主な教訓
 
@@ -1710,6 +1745,6 @@ flowchart TD
 
 ## ライセンス
 
-MIT License — 詳細は [LICENSE](../LICENSE) を参照。
+MIT License — 詳細は [LICENSE](../../../../LICENSE) を参照。
 
 > 📝 本文書は [ギークフジワラ](https://twitter.com/geekfujiwara) の実務経験・検証に基づき作成されています。

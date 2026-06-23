@@ -1,7 +1,7 @@
 # Power Platform Skills カタログ
 
 Power Platform コードファースト開発で使用するスキル群。
-Anthropic「The Complete Guide to Building Skills for Claude」の Planning and Design チャプターに基づき構成。
+GitHub Copilot の段階的読込と Progressive Disclosure を前提に構成。
 
 ## スキル構成規約
 
@@ -43,12 +43,12 @@ skill-name/
 
 ```yaml
 ---
-name: skill-name              # kebab-case 識別子（必須）
-description: "短い説明文"      # スキルの目的を簡潔に（必須）。トリガーキーワードは含めない
-category: カテゴリ名           # 分類タグ（必須）: architecture / data / ui / automation / ai
-argument-hint: "引数の説明"    # ユーザー入力を受け付ける場合のみ（任意）
-user-invocable: true           # ユーザーが直接呼び出せる場合のみ（任意）
-triggers:                      # スキル発動条件キーワード（必須）
+name: skill-name # kebab-case 識別子（必須）
+description: "短い説明文" # スキルの目的を簡潔に（必須）。トリガーキーワードは含めない
+category: カテゴリ名 # 分類タグ（必須）: architecture / data / ui / automation / ai
+argument-hint: "引数の説明" # ユーザー入力を受け付ける場合のみ（任意）
+user-invocable: true # ユーザーが直接呼び出せる場合のみ（任意）
+triggers: # スキル発動条件キーワード（必須）
   - "キーワード1"
   - "キーワード2"
 ---
@@ -56,52 +56,66 @@ triggers:                      # スキル発動条件キーワード（必須�
 
 ### 命名規則
 
-| 対象 | 規則 | 例 |
-|------|------|-----|
-| スキルディレクトリ名 | kebab-case | `copilot-studio` |
-| YAML `name` フィールド | kebab-case（ディレクトリ名と一致） | `copilot-studio` |
-| Python スクリプト | snake_case | `deploy_agent.py` |
-| リファレンスドキュメント | kebab-case | `build-reference.md` |
-| カテゴリ名 | 英小文字 | `architecture`, `data`, `ui`, `automation`, `ai` |
+| 対象                     | 規則                               | 例                                               |
+| ------------------------ | ---------------------------------- | ------------------------------------------------ |
+| スキルディレクトリ名     | kebab-case                         | `copilot-studio`                                 |
+| YAML `name` フィールド   | kebab-case（ディレクトリ名と一致） | `copilot-studio`                                 |
+| Python スクリプト        | snake_case                         | `deploy_agent.py`                                |
+| リファレンスドキュメント | kebab-case                         | `build-reference.md`                             |
+| カテゴリ名               | 英小文字                           | `architecture`, `data`, `ui`, `automation`, `ai` |
 
 ---
 
-## スキル一覧（10 スキル）
+## スキル一覧（11 スキル）
 
 ### architecture — アーキテクチャ・基盤
 
-| スキル | 説明 |
-|--------|------|
-| [architecture](architecture/SKILL.md) | Power Platform 全体の構成方針を設計し、最適なコンポーネント構成を決定する。 |
-| [standard](standard/SKILL.md) | 共通認証・環境変数・ソリューション運用など、全スキル共通の開発基盤を提供する。 |
+| スキル                                | 説明                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| [architecture](architecture/SKILL.md) | Power Platform 全体の構成方針を設計し、最適なコンポーネント構成を決定する。    |
+| [standard](standard/SKILL.md)         | 共通認証・環境変数・ソリューション運用など、全スキル共通の開発基盤を提供する。 |
 
 ### data — データ層
 
-| スキル | 説明 |
-|--------|------|
+| スキル                          | 説明                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------- |
 | [dataverse](dataverse/SKILL.md) | Dataverse のテーブル設計・構築・デモデータ投入・権限設定を一括で実施する。 |
 
 ### ui — UI / フロントエンド
 
-| スキル | 説明 |
-|--------|------|
-| [code-apps](code-apps/SKILL.md) | Code Apps を TypeScript/React ベースで開発し、UI 設計からデプロイまで対応する。 |
-| [generative-page](generative-page/SKILL.md) | Generative Pages（genux）を開発・デバッグし、モデル駆動型アプリへデプロイする。 |
-| [model-driven-app](model-driven-app/SKILL.md) | モデル駆動型アプリを作成・構成し、公開まで実行する。 |
+| スキル                                        | 説明                                                                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| [code-apps](code-apps/SKILL.md)               | Code Apps を TypeScript/React ベースで開発し、UI 設計からデプロイまで対応する。                                                      |
+| [canvas-app](canvas-app/SKILL.md)             | Canvas App で添付・PDF を扱い、SharePoint staging + Flow 中継で AI Builder / 外部処理へ渡す。msapp 編集・import・UI 調整に対応する。 |
+| [generative-page](generative-page/SKILL.md)   | Generative Pages（genux）を開発・デバッグし、モデル駆動型アプリへデプロイする。                                                      |
+| [model-driven-app](model-driven-app/SKILL.md) | モデル駆動型アプリを作成・構成し、公開まで実行する。                                                                                 |
 
 ### automation — 自動化
 
-| スキル | 説明 |
-|--------|------|
+| スキル                                    | 説明                                                                        |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
 | [copilot-studio](copilot-studio/SKILL.md) | Copilot Studio エージェントを生成オーケストレーション前提で構築・運用する。 |
-| [power-automate](power-automate/SKILL.md) | Power Automate クラウドフローをソリューション対応で作成・デプロイする。 |
+| [power-automate](power-automate/SKILL.md) | Power Automate クラウドフローをソリューション対応で作成・デプロイする。     |
 
 ### ai — AI / プロンプト
 
-| スキル | 説明 |
-|--------|------|
-| [ai-builder](ai-builder/SKILL.md) | AI Builder の AI プロンプトを作成し、エージェントのツールとして組み込む。 |
+| スキル                                        | 説明                                                                                                           |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [ai-builder](ai-builder/SKILL.md)             | AI Builder の AI プロンプトを作成し、エージェントのツールとして組み込む。                                      |
 | [spec-to-markdown](spec-to-markdown/SKILL.md) | PDF・PowerPoint・Excel 等の仕様書を markdown 化し、Power Platform 開発向けの factsheet / document を整理する。 |
+
+---
+
+## 目的別の入口
+
+| やりたいこと                               | 最初に読むスキル                                                                                                                                                  |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 何から始めるか決めたい                     | [architecture](architecture/SKILL.md)                                                                                                                             |
+| 既存仕様書を整理して要件化したい           | [spec-to-markdown](spec-to-markdown/SKILL.md)                                                                                                                     |
+| Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md)                                                                                                                                   |
+| UI 実装にすぐ入りたい                      | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
+| 自動化・通知・外部トリガーを作りたい       | [power-automate](power-automate/SKILL.md)                                                                                                                         |
+| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                                                                     |
 
 ---
 
@@ -109,10 +123,11 @@ triggers:                      # スキル発動条件キーワード（必須�
 
 ```
 0. spec-to-markdown   → 既存仕様書を factsheet / document に正規化（必要時）
-1. architecture       → 全体設計・コンポーネント選定
+1. architecture       → 全体設計・コンポーネント選定（UI 方式は Code Apps / Canvas Apps / Model-Driven Apps を提示して必ずユーザー確認）
 2. standard           → 共通基盤の確認（.env・認証）
 3. dataverse          → テーブル設計・構築・セキュリティロール設定
 4. code-apps          → Code Apps UI 設計・開発・デプロイ
+   OR canvas-app      → Canvas App（添付・staging・Flow 中継）構築
    OR generative-page → Generative Pages 開発
    OR model-driven-app → モデル駆動型アプリ構築
 5. power-automate     → フロー作成

@@ -463,7 +463,7 @@ def _deep_merge(base: dict, override: dict) -> dict:
 
 def enable_generative_orchestration(bot_id: str) -> dict:
     """生成オーケストレーションを有効化。既存 configuration をディープマージして返す。
-    ★ 基盤モデル（Claude / GPT 等）の選択は変更しない。"""
+    ★ UI で選択した基盤モデルの選択は変更しない。"""
     print("\n=== Step 3: 生成オーケストレーション有効化 ===")
 
     # 既存 configuration を読み込み（モデル設定・gPTSettings 等を保持するため）
@@ -552,7 +552,7 @@ def set_gpt_instructions(bot_id: str, saved_config: dict):
 
         # ★ 既存データから aISettings セクションを抽出（モデル選択を保持）
         # PVA は GPT コンポーネントの data YAML 末尾に aISettings.model.modelNameHint を保存
-        # これを上書きすると基盤モデルがデフォルト（GPT 4.1）に戻ってしまう
+        # これを上書きすると UI で選択した基盤モデル設定が失われる
         existing_data = ui_comp.get("data", "")
         ai_settings_section = ""
         ai_idx = existing_data.find("\naISettings:")
