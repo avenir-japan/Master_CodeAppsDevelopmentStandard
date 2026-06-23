@@ -227,6 +227,35 @@ PUBLISHER_PREFIX=geek
 | pip                           | Python 依存導入     | `python -m ensurepip --upgrade`              |
 | PAC CLI                       | Power Platform CLI  | `npm install -g @microsoft/power-apps-cli`   |
 
+### 2.1.1 リポジトリ同梱物と別途インストール物の切り分け
+
+Power Platform 開発では、次の 3 層を混同しないこと。
+
+| 区分                                  | 例                                                                                | リポジトリに含まれるか | 補足                                                             |
+| ------------------------------------- | --------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------- |
+| 開発者端末に入れるもの                | VS Code、GitHub Copilot 拡張機能、Power Platform Tools、Node.js、Python、PAC CLI  | ❌                     | 端末ごとに別途導入する                                           |
+| リポジトリ同梱の Copilot カスタマイズ | `.github/agents/GeekPowerCode.agent.md`、`.github/skills/`                        | ✅                     | この標準リポジトリを開いたときに参照される                       |
+| 外部 Agent Plugin / MCP               | Canvas Apps Plugin、Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP など | ❌                     | 必要時のみ追加する補助機能。各 plugin の README と前提条件に従う |
+
+> [!IMPORTANT]
+> `.github/agents/` と `.github/skills/` は、このリポジトリに同梱される **案件標準・作業ルール** である。
+> 一方、Canvas Apps Plugin や Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP は **外部 plugin / 補助機能** であり、別途インストールとセットアップが必要。
+
+> [!IMPORTANT]
+> repo 同梱の skill と外部 plugin は、対象製品が同じでも役割が違う。
+> 前者は設計方針・命名・承認フロー・実装標準を定義し、後者は MCP や YAML 操作などの追加ツールを提供する。
+
+> [!NOTE]
+> `plugins/plugin-power-apps.ts` は Power Apps 用の Vite プラグインであり、Copilot の Agent Plugin ではない。
+
+外部 plugin を利用する場合の代表例:
+
+- Power Platform Tools 拡張機能: VS Code 側へ別途インストールする。PAC CLI 連携の入口にはなるが、`pac` コマンドの利用可否は本リポジトリの preflight でも独立に確認する
+- Canvas Apps Plugin: preview 機能。別途 `.NET 10 SDK` が必要。`canvas-authoring` MCP を登録し、YAML 検証・control/API/data source 参照・coauthoring sync を提供する
+- Copilot Studio plugin: author / manage / test / advisor 系の補助機能。VS Code では `@agentPlugins` から追加し、push/pull/clone では Copilot Studio Extension が必要
+- Dataverse 向けの外部 plugin / MCP: 使う場合は外部追加物として扱う。このリポジトリの `dataverse` skill と役割が重なって見えても、別レイヤーの補助機能である
+- これらは便利だが、このリポジトリの `.github/skills/` を置き換えるものではない
+
 ### 2.2 .env ファイル設定
 
 環境情報の取得は **Power Apps ポータル > 設定（右上の⚙）> セッション詳細** から取得する。

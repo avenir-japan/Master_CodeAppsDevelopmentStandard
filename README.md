@@ -34,6 +34,7 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 ## 目次
 
 - [クイックスタート](#クイックスタート)
+- [はじめての方向け](#はじめての方向け)
 - [環境事前チェックとブートストラップ](#環境事前チェックとブートストラップ)
 - [想定運用モデル](#想定運用モデル)
 - [GitHub Copilot 利用方針](#github-copilot-利用方針)
@@ -67,6 +68,34 @@ Copy-Item .env.example .env
 Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の作成と `requirements.txt` の導入まで自動で試行します。未導入ツールがある場合は、次に実行すべきコマンドを表示します。
 
 セットアップ後は、GitHub Copilot のカスタムエージェントに「実現したいこと」をそのまま伝えて開発を進めます。
+
+---
+
+## はじめての方向け
+
+このリポジトリでは、Power Platform 開発に関わるものを次の 3 層に分けて扱います。
+
+| 区分 | 何が入るか | このリポジトリに含まれるか | 補足 |
+| --- | --- | --- | --- |
+| VS Code 拡張機能・ランタイム | VS Code、Node.js、GitHub Copilot、GitHub Copilot Chat、Power Platform Tools など | ❌ 含まれない | 開発者の端末へ別途インストールする |
+| Copilot カスタムエージェント / スキル | `@GeekPowerCode`、`.github/skills/` 配下の開発標準 | ✅ 含まれる | このリポジトリを VS Code で開くと参照される |
+| 外部 Agent Plugin / MCP | Canvas Apps Plugin、Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP など | ❌ 含まれない | 必要な場合だけ別途追加し、各 plugin の README と前提条件に従う |
+
+最初に押さえるべきポイント:
+
+- VS Code 拡張機能の推奨一覧は [.vscode/extensions.json](./.vscode/extensions.json) を正本とする
+- このリポジトリに含まれる Copilot 用の知識と作業ルールは [.github/agents/GeekPowerCode.agent.md](./.github/agents/GeekPowerCode.agent.md) と [.github/skills/README.md](./.github/skills/README.md) にある
+- Power Platform Tools 拡張機能は VS Code 側へ別途インストールする。PAC CLI 連携の入口にはなるが、このリポジトリでは `pac` の利用可否を bootstrap で独立に確認する
+- `plugins/plugin-power-apps.ts` は Power Apps 用の Vite プラグインであり、Copilot の Agent Plugin ではない
+- Canvas Apps Plugin や Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP は補助的な外部追加物であり、このリポジトリへ同梱して配布するものではない
+- repo 同梱の skill と外部 plugin はテーマが重なることがあるが、前者は案件標準、後者は追加ツール群であり、同一物ではない
+
+外部 plugin を使う場合の注意:
+
+- Canvas Apps Plugin は preview 機能で、別途 `.NET 10 SDK` が必要。`canvas-authoring` MCP を登録し、YAML 検証・control/API/data source 参照・coauthoring sync を提供する
+- Copilot Studio plugin は author / manage / test / advisor 系の外部 plugin で、VS Code では `@agentPlugins` から追加する。push/pull/clone では Copilot Studio Extension が別途必要になる
+- Dataverse でも外部 plugin や MCP を使う場合があるが、この repo の `.github/skills/dataverse/` とは別レイヤーの補助機能として扱う
+- これらはあると便利だが、リポジトリ内の `.github/agents/` と `.github/skills/` を置き換えるものではない
 
 ---
 

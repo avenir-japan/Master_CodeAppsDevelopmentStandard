@@ -6,21 +6,21 @@
 
 ### そのまま再利用できるもの（開発標準・テンプレート）
 
-| パス                                             | 内容                                               |
-| ------------------------------------------------ | -------------------------------------------------- |
-| `.github/agents/`                                | GitHub Copilot カスタムエージェント定義            |
-| `.github/skills/`                                | 各フェーズの開発スキル（検証済み教訓・パターン集） |
-| `.github/skills/**/references/`                  | 開発標準ドキュメント                               |
-| `src/components/`                                | shadcn/ui + カスタム UI コンポーネント             |
-| `src/providers/`                                 | React Context Providers                            |
-| `src/lib/utils.ts`                               | ユーティリティ                                     |
-| `.github/skills/standard/scripts/auth_helper.py` | MSAL 認証ヘルパー                                  |
-| `plugins/`                                       | Vite プラグイン                                    |
-| `styles/`                                        | Tailwind CSS テーマ                                |
-| `patch-nameutils.cjs`                            | 日本語 DisplayName パッチ                          |
-| `.env.example`                                   | 環境変数テンプレート                               |
-| `package.json`                                   | 依存関係（shadcn/ui, TanStack Query 等）           |
-| `vite.config.ts`, `tsconfig*.json`               | ビルド設定                                         |
+| パス                                             | 内容                                                           |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `.github/agents/`                                | GitHub Copilot カスタムエージェント定義                        |
+| `.github/skills/`                                | 各フェーズの開発スキル（検証済み教訓・パターン集）             |
+| `.github/skills/**/references/`                  | 開発標準ドキュメント                                           |
+| `src/components/`                                | shadcn/ui + カスタム UI コンポーネント                         |
+| `src/providers/`                                 | React Context Providers                                        |
+| `src/lib/utils.ts`                               | ユーティリティ                                                 |
+| `.github/skills/standard/scripts/auth_helper.py` | MSAL 認証ヘルパー                                              |
+| `plugins/`                                       | Power Apps 用 Vite プラグイン（Copilot Agent Plugin ではない） |
+| `styles/`                                        | Tailwind CSS テーマ                                            |
+| `patch-nameutils.cjs`                            | 日本語 DisplayName パッチ                                      |
+| `.env.example`                                   | 環境変数テンプレート                                           |
+| `package.json`                                   | 依存関係（shadcn/ui, TanStack Query 等）                       |
+| `vite.config.ts`, `tsconfig*.json`               | ビルド設定                                                     |
 
 ### サンプル実装（プロジェクトに合わせて置き換え）
 
@@ -73,19 +73,28 @@ Copy-Item .env.example .env
 # → エージェントが setup_dataverse.py 等を自動生成
 ```
 
-### 方法 2: 開発標準だけ導入（既存プロジェクトに追加）
+### 方法 2: standard スキルだけ導入（既存プロジェクトに追加）
 
 ```powershell
 $base = "https://raw.githubusercontent.com/geekfujiwara/CodeAppsDevelopmentStandard/main"
-@(".github/agents", ".github/skills/standard", ".github/skills/standard/references") | ForEach-Object {
+@(".github/skills/standard", ".github/skills/standard/references") | ForEach-Object {
   New-Item -ItemType Directory -Path $_ -Force
 }
 @(
-  @{Src="$base/.github/agents/GeekPowerCode.agent.md"; Dst=".github/agents/GeekPowerCode.agent.md"},
   @{Src="$base/.github/skills/standard/SKILL.md"; Dst=".github/skills/standard/SKILL.md"},
   @{Src="$base/.github/skills/standard/references/power-platform-development-standard.md"; Dst=".github/skills/standard/references/power-platform-development-standard.md"}
 ) | ForEach-Object { Invoke-WebRequest -Uri $_.Src -OutFile $_.Dst }
 ```
+
+> [!NOTE]
+> この方法で取り込まれるのは、`standard` スキルと全体ガイドだけです。
+> VS Code 拡張機能、Power Platform Tools、Canvas Apps Plugin、Copilot Studio plugin などの外部追加物は含まれません。
+> それらは開発者端末へ別途インストールし、必要に応じて前提条件を満たしてください。
+
+> [!IMPORTANT]
+> `GeekPowerCode.agent.md` は `dataverse`、`code-apps`、`copilot-studio` など複数の製品別スキルを参照します。
+> そのため、既存プロジェクトへ最小セットだけを入れるこの方法には含めません。
+> `@GeekPowerCode` をそのまま使いたい場合は、`.github/agents/GeekPowerCode.agent.md` に加えて、参照先となる `.github/skills/` 一式、または必要な製品別スキルを合わせて取り込んでください。
 
 ## サンプルの置き換え手順
 
@@ -101,6 +110,11 @@ $base = "https://raw.githubusercontent.com/geekfujiwara/CodeAppsDevelopmentStand
 
 3. **手動で行うこと**
    - `.env` の設定
+   - VS Code 拡張機能や外部 Agent Plugin が必要な場合は、開発者端末へ別途インストール
    - Copilot Studio UI でのエージェント作成
    - Power Automate 接続の事前作成
    - ナレッジ・MCP Server の UI での追加
+
+> [!NOTE]
+> ナレッジ・MCP Server の追加は、repo に含まれる `.github/skills/` の設定だけでは完了しません。
+> 外部 plugin や MCP を使う場合は、それぞれの README にある前提条件とインストール手順を先に満たしてください。
