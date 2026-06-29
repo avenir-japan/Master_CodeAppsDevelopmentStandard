@@ -12,7 +12,6 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 
 [![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/geekfujiwara/Master_CodeAppsDevelopmentStandard)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-対応-blueviolet?style=for-the-badge&logo=github)](https://github.com/features/copilot)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
 ## 使い方動画
 
@@ -47,7 +46,6 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 - [リポジトリ構成](#リポジトリ構成)
 - [主要ドキュメント](#主要ドキュメント)
 - [GitHub Copilot 活用](#github-copilot-活用)
-- [ライセンス](#ライセンス)
 
 ---
 
@@ -252,16 +250,3 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 - このリポジトリの開発標準はスキルとして定義済みのため、マニュアル手順ベースではなくエージェント駆動で利用します
 
 担当領域の選び方は [目的別の入口](#目的別の入口) を参照し、全スキルの一覧と構成規約は [スキルカタログ](./.github/skills/README.md) を正本とします。
-
----
-
-## ライセンス
-
-MIT License。詳細は [LICENSE](./LICENSE) を参照してください。
-
----
-
-## フィードバック
-
-- Issues: https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard/issues
-- X: https://twitter.com/geekfujiwara
