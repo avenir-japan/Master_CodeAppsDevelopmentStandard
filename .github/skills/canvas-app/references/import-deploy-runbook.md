@@ -11,6 +11,8 @@ coauthoring を使って live app に反映する手順を第一選択とし、�
 標準運用では、まず Power Apps Designer の coauthoring セッションを使って live app に直接反映する。
 `.msapp` ベースの作業は、配布物が必要な場合や coauthoring を使えない場合の代替手段とする。
 
+手早く確認したい場合は、先に [coauthoring live 反映チェックリスト](coauthoring-checklist.md) を参照する。
+
 ## 2. coauthoring live 反映（第一選択）
 
 `.msapp` を upload する代わりに、Power Apps Designer の coauthoring セッションに対して同期した `.pa.yaml` の変更を反映する。

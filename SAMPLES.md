@@ -2,6 +2,10 @@
 
 本リポジトリには **開発標準・スキル（汎用テンプレート）** と **インシデント管理サンプル（リファレンス実装）** の 2 種類のコードが含まれています。
 
+> [!TIP]
+> このリポジトリから案件を始める場合は、まず **`@PowerCode` + GPT-5.4** で要件を伝える運用を推奨します。
+> サンプルの置き換え判断や、どのスキルから入るかの整理をエージェント側に寄せられます。
+
 ## 構成の区分
 
 ### そのまま再利用できるもの（開発標準・テンプレート）
@@ -68,8 +72,9 @@ cd my-project
 Copy-Item .env.example .env
 # DATAVERSE_URL, TENANT_ID, SOLUTION_NAME, PUBLISHER_PREFIX を編集
 
-# 2. GitHub Copilot に指示（GeekPowerCode エージェント）
-# @GeekPowerCode {あなたのアプリ}を作成してください
+# 2. GitHub Copilot に指示（PowerCode エージェント）
+# @PowerCode {あなたのアプリ}を作成してください
+# 推奨モデル: GPT-5.4
 # → エージェントが setup_dataverse.py 等を自動生成
 ```
 
@@ -92,13 +97,13 @@ $base = "https://raw.githubusercontent.com/geekfujiwara/CodeAppsDevelopmentStand
 > それらは開発者端末へ別途インストールし、必要に応じて前提条件を満たしてください。
 
 > [!IMPORTANT]
-> `GeekPowerCode.agent.md` は `dataverse`、`code-apps`、`copilot-studio` など複数の製品別スキルを参照します。
+> `PowerCode.agent.md` は `dataverse`、`code-apps`、`copilot-studio` など複数の製品別スキルを参照します。
 > そのため、既存プロジェクトへ最小セットだけを入れるこの方法には含めません。
-> `@GeekPowerCode` をそのまま使いたい場合は、`.github/agents/GeekPowerCode.agent.md` に加えて、参照先となる `.github/skills/` 一式、または必要な製品別スキルを合わせて取り込んでください。
+> `@PowerCode` をそのまま使いたい場合は、`.github/agents/PowerCode.agent.md` に加えて、参照先となる `.github/skills/` 一式、または必要な製品別スキルを合わせて取り込んでください。
 
 ## サンプルの置き換え手順
 
-1. **GeekPowerCode エージェントに要件を伝える**
+1. **PowerCode エージェントに要件を伝える**
    - エージェントが Phase 0（設計）から自動でガイド
    - テーブル設計・UI 設計・エージェント設計をそれぞれ提案 → 承認後に実装
 

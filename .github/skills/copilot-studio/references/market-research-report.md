@@ -74,13 +74,13 @@ Copilot Studio エージェント + スケジュールトリガー + RSS + Web �
 
 ### 1. エージェント基本情報
 
-| 項目                     | 設計内容（例）                                            |
-| ------------------------ | --------------------------------------------------------- |
-| エージェント名           | AI ニュース配信                                           |
-| 説明                     | AI を活用して最新ニュースを自動収集・配信するエージェント |
-| 基盤モデル               | GPT-5.4（既定。複雑な設計見直し時のみ Opus 4.8）          |
-| Web 検索                 | 有効（gptCapabilities.webBrowsing: true）                 |
-| コンテンツモデレーション | High                                                      |
+| 項目                     | 設計内容（例）                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| エージェント名           | AI ニュース配信                                                                                               |
+| 説明                     | AI を活用して最新ニュースを自動収集・配信するエージェント                                                     |
+| 基盤モデル               | GPT-5.4（既定。複雑な設計見直し時は GPT 系の上位 reasoning model を第一候補とし、比較検討では Opus 系も候補） |
+| Web 検索                 | 有効（gptCapabilities.webBrowsing: true）                                                                     |
+| コンテンツモデレーション | High                                                                                                          |
 
 ### 2. Instructions（指示）
 
@@ -315,7 +315,7 @@ Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML �
 
 3. **ユーザーに UI で手動設定を依頼:**
 
-- 基盤モデル選択（既定は GPT-5.4。難しい設計見直し時のみ Opus 4.8）
+- 基盤モデル選択（既定は GPT-5.4。難しい設計見直し時はまず GPT 系の上位 reasoning model を候補にし、比較検討では Opus 系も候補）
 - Web 検索がオンか UI で確認
 - RSS ツール追加（「ツール」→「コネクタ」→「RSS」→「すべての RSS フィード項目を一覧表示します」）
 - Work IQ Mail MCP ツール追加（「ツール」→「コネクタ」→「Microsoft 365 Outlook Mail (Preview)」→「Work IQ Mail (Preview)」）
@@ -442,7 +442,7 @@ def update_flow(flow, bot_schema):
    **1-a. 基盤モデル選択:**
 
 - 「設定」→「生成 AI」→「GPT-5.4」を選択
-- 複雑な設計比較や難解な調査だけ、一時的に Opus 4.8 へ切り替える
+- 複雑な設計比較や難解な調査では、まず GPT 系の上位 reasoning model を候補にし、比較検討では Opus 系も候補にする
 
 **1-b. Web 検索の確認:**
 
@@ -507,7 +507,7 @@ python ./deploy_news_flow.py <BOT_ID or URL>
 ### ✅ 動作確認済みの構成
 
 - **エージェント**: `geek_ai`（AIニュース配信）
-- **基盤モデル**: GPT-5.4（既定。複雑な検討時のみ Opus 4.8）
+- **基盤モデル**: GPT-5.4（既定。複雑な検討時は GPT 系の上位 reasoning model を第一候補とし、比較検討では Opus 系も候補）
 - **Web 検索**: 有効（`webBrowsing: true`）
 - **RSS ツール**: Google News RSS（`ListFeedItems`）
 - **Work IQ Mail MCP**: `mcp_MailTools`（InvokeExternalAgentTaskAction）

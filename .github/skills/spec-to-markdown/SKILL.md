@@ -32,10 +32,10 @@ Power Platform 開発で使いやすい **factsheet 群** と **全体 document.
 
 ### 推奨の始め方
 
-- `@GeekPowerCode input フォルダの仕様書を requirements markdown に変換して`
-- `@GeekPowerCode /home/.../input の PDF と Excel を factsheet 化して`
-- `@GeekPowerCode spec-to-markdown`
-- `@GeekPowerCode spec-to-markdown input`
+- `@PowerCode input フォルダの仕様書を requirements markdown に変換して`
+- `@PowerCode /home/.../input の PDF と Excel を factsheet 化して`
+- `@PowerCode spec-to-markdown`
+- `@PowerCode spec-to-markdown input`
 
 ## 目的
 

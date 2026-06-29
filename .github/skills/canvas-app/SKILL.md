@@ -45,7 +45,7 @@ msapp の取得・編集・import、coauthoring による live 反映、Attachme
 | -------------------------------------------------------------- | --------------------------------------------------------------------- |
 | [設計パターン](references/design-patterns.md)                  | PDF 添付・SharePoint staging・Flow 中継・AI Builder 入力設計          |
 | [トラブルシューティング](references/troubleshooting.md)        | PAC CLI 制約・msapp ZIP 編集回避策・Attachments UI 崩れ・compile 運用 |
-| [import / deploy runbook](references/import-deploy-runbook.md) | msapp の取得・編集・再封入・import と live 反映の手順テンプレート     |
+| [import / deploy runbook](references/import-deploy-runbook.md) | msapp の取得・編集・再封入・import と live 反映、短い確認チェックリスト |
 
 ## 反映方式は 2 系統ある
 

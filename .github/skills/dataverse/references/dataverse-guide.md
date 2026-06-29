@@ -20,13 +20,13 @@ Dataverse は Power Platform のネイティブデータストアです。Code A
 
 ## テーブル作成（GitHub Copilot 推奨）
 
-Dataverse テーブルの作成は **VS Code + GitHub Copilot（GeekPowerCode エージェント + standard スキル）** を使って会話形式で行うことを**推奨**します。Power Apps ポータル UI での手動作成よりもこちらを優先してください。
+Dataverse テーブルの作成は **VS Code + GitHub Copilot（PowerCode エージェント + standard スキル）** を使って会話形式で行うことを**推奨**します。Power Apps ポータル UI での手動作成よりもこちらを優先してください。
 
 ### 前提条件
 
 1. VS Code に **GitHub Copilot** 拡張機能がインストール済みであること
-2. `GeekPowerCode` エージェントと開発スキル（`.github/skills/`）がリポジトリに含まれていること
-3. GitHub Copilot が有効化されていること（既定: **GPT-5.4**、設計判断や難解な障害調査のみ **Opus 4.8**）
+2. `PowerCode` エージェントと開発スキル（`.github/skills/`）がリポジトリに含まれていること
+3. GitHub Copilot が有効化されていること（既定: **GPT-5.4**。設計判断や難解な障害調査では、まず GPT 系の上位 reasoning model を候補にし、比較検討では Opus 系も候補にする）
 4. Power Platform 環境に認証済みであること
 
 ### テーブル作成手順
@@ -117,7 +117,7 @@ PAC CLI を使用して Dataverse テーブルをソリューション単位で�
 # ソリューションの作成
 pac solution init --publisher-name "YourPublisher" --publisher-prefix "yp"
 
-# テーブルの作成・管理は GitHub Copilot（GeekPowerCode エージェント + スキル）を優先
+# テーブルの作成・管理は GitHub Copilot（PowerCode エージェント + スキル）を優先
 # 代替手段として Power Apps ポータルまたは PAC CLI でも実施可能
 ```
 

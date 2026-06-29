@@ -3,10 +3,14 @@
 Power Platform の業務アプリやエージェントを **VS Code + GitHub Copilot** で開発するための、実践的な開発標準リポジトリです。
 UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱いますが、このリポジトリの実装標準は **TypeScript + React + Tailwind CSS + shadcn/ui による Code Apps** を基本とします。
 
+> [!TIP]
+> このリポジトリを GitHub Copilot と使う場合は、まず **`@PowerCode` + GPT-5.4** を入口として使う運用を推奨します。
+> Power Platform 案件に必要なスキル選択、設計確認、実装フローをこの前提で揃えています。
+
 > [!IMPORTANT]
 > UI 方式は AI が独断で確定せず、要件・顧客要望・保守体制・既存資産を踏まえて **architecture スキルで比較し、ユーザー確認のうえ決定** します。
 
-[![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/geekfujiwara/CodeAppsDevelopmentStandard)
+[![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/geekfujiwara/Master_CodeAppsDevelopmentStandard)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-対応-blueviolet?style=for-the-badge&logo=github)](https://github.com/features/copilot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
@@ -50,7 +54,7 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 ## クイックスタート
 
 ```bash
-git clone https://github.com/geekfujiwara/CodeAppsDevelopmentStandard . && npm install
+git clone https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard . && npm install
 ```
 
 ```powershell
@@ -75,16 +79,16 @@ Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の�
 
 このリポジトリでは、Power Platform 開発に関わるものを次の 3 層に分けて扱います。
 
-| 区分 | 何が入るか | このリポジトリに含まれるか | 補足 |
-| --- | --- | --- | --- |
-| VS Code 拡張機能・ランタイム | VS Code、Node.js、GitHub Copilot、GitHub Copilot Chat、Power Platform Tools など | ❌ 含まれない | 開発者の端末へ別途インストールする |
-| Copilot カスタムエージェント / スキル | `@GeekPowerCode`、`.github/skills/` 配下の開発標準 | ✅ 含まれる | このリポジトリを VS Code で開くと参照される |
-| 外部 Agent Plugin / MCP | Canvas Apps Plugin、Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP など | ❌ 含まれない | 必要な場合だけ別途追加し、各 plugin の README と前提条件に従う |
+| 区分                                  | 何が入るか                                                                        | このリポジトリに含まれるか | 補足                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------- |
+| VS Code 拡張機能・ランタイム          | VS Code、Node.js、GitHub Copilot、GitHub Copilot Chat、Power Platform Tools など  | ❌ 含まれない              | 開発者の端末へ別途インストールする                             |
+| Copilot カスタムエージェント / スキル | `@PowerCode`、`.github/skills/` 配下の開発標準                                    | ✅ 含まれる                | このリポジトリを VS Code で開くと参照される                    |
+| 外部 Agent Plugin / MCP               | Canvas Apps Plugin、Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP など | ❌ 含まれない              | 必要な場合だけ別途追加し、各 plugin の README と前提条件に従う |
 
 最初に押さえるべきポイント:
 
 - VS Code 拡張機能の推奨一覧は [.vscode/extensions.json](./.vscode/extensions.json) を正本とする
-- このリポジトリに含まれる Copilot 用の知識と作業ルールは [.github/agents/GeekPowerCode.agent.md](./.github/agents/GeekPowerCode.agent.md) と [.github/skills/README.md](./.github/skills/README.md) にある
+- このリポジトリに含まれる Copilot 用の知識と作業ルールは [.github/agents/PowerCode.agent.md](./.github/agents/PowerCode.agent.md) と [.github/skills/README.md](./.github/skills/README.md) にある
 - Power Platform Tools 拡張機能は VS Code 側へ別途インストールする。PAC CLI 連携の入口にはなるが、このリポジトリでは `pac` の利用可否を bootstrap で独立に確認する
 - `plugins/plugin-power-apps.ts` は Power Apps 用の Vite プラグインであり、Copilot の Agent Plugin ではない
 - Canvas Apps Plugin や Copilot Studio plugin、Dataverse 向けの外部 plugin / MCP は補助的な外部追加物であり、このリポジトリへ同梱して配布するものではない
@@ -123,6 +127,10 @@ npm run setup
 このリポジトリは、**弊社環境で Power Platform ソリューションを開発・検証するためのマスター**として使います。
 案件ごとはこの標準を複製して進め、顧客要件に応じて `src/`、`scripts/`、`work/`、環境設定を追加します。
 
+案件で得た汎用的に再利用できる知見は、案件リポジトリからこのマスターへスキル・ナレッジとして戻し、案件を重ねるごとにマスターを育てます。戻す対象・戻さない対象・戻し先の判断は [マスターリポジトリへの知見還元](./.github/skills/standard/references/master-repo-feedback-loop.md) を参照してください。
+
+案件終了時の VS Code 上での具体手順と、GitHub Copilot へそのまま渡せる依頼テンプレートも同じ文書にまとめています。還元候補の洗い出し自体は Copilot が担い、利用者は案件フォルダ指定と最終判断に集中する前提です。運用に迷った場合は、まずこのリファレンスを起点にしてください。
+
 納品時は、案件ごとに **マネージド** または **アンマネージド** のいずれかを選定し、ソリューションとして提供します。
 
 - 開発環境は常にアンマネージドで作業する
@@ -143,7 +151,7 @@ npm run setup
 README では全体像だけを示し、**Copilot の詳細ルールの正本は [standard スキル](./.github/skills/standard/SKILL.md)** に置きます。
 
 - 作業の切り分けは `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` の 3 区分で扱う
-- モデル運用は **既定を GPT-5.4**、**高難度タスクだけ Opus 4.8** とする
+- モデル運用は **既定を GPT-5.4** とし、軽作業は軽量モデル、コード中心の実装はコード特化モデルも候補にしつつ、高難度タスクではまず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
 - 納品案件では、環境変数だけでなくマネージドプロパティ、接続参照、顧客環境での初期設定作業までまとめて確認する
 
 詳細は以下を参照:
@@ -157,9 +165,11 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 - この開発標準の実装・運用ルールは、GitHub Copilot カスタムエージェントのスキル（`.github/skills/`）に定義されています。
 - 利用者は手順書を読み込んで操作するのではなく、カスタムエージェントに要件を伝えて進める前提です。
-- チャット入力例 （バッククオート不要）: @GeekPowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
-- 既存仕様書がある場合の入力例: @GeekPowerCode spec-to-markdown
-- 既定以外の場所を使う場合の入力例: @GeekPowerCode /home/.../input の仕様書を requirements markdown に変換して
+- このリポジトリで Power Platform 案件を進める場合は、通常の汎用 Agent よりも **`@PowerCode` を第一選択** とします。
+- モデルは **既定で GPT-5.4 を推奨** し、高難度タスクで上位 reasoning model へ切り替える基準は [standard スキル](./.github/skills/standard/SKILL.md) の「Copilot 向け優先判断基準」を正本とします。
+- チャット入力例 （バッククオート不要）: @PowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
+- 既存仕様書がある場合の入力例: @PowerCode spec-to-markdown
+- 既定以外の場所を使う場合の入力例: @PowerCode /home/.../input の仕様書を requirements markdown に変換して
 
 > [!NOTE]
 > Microsoft Learn の現行 Code Apps 概要に合わせ、このリポジトリでは **Code Apps は SPA をホストする機能** として扱います。
@@ -229,6 +239,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 - [.github/skills/dataverse/references/dataverse-guide.md](./.github/skills/dataverse/references/dataverse-guide.md)
 - [.github/skills/code-apps/references/connector-reference.md](./.github/skills/code-apps/references/connector-reference.md)
 - [.github/skills/canvas-app/references/design-patterns.md](./.github/skills/canvas-app/references/design-patterns.md)
+- [.github/skills/canvas-app/references/coauthoring-checklist.md](./.github/skills/canvas-app/references/coauthoring-checklist.md)
 - [.github/skills/code-apps/references/advanced-patterns.md](./.github/skills/code-apps/references/advanced-patterns.md)
 - [SAMPLES.md](./SAMPLES.md)
 
@@ -237,7 +248,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 ## GitHub Copilot 活用
 
 - VS Code で開くと `.github/agents/` と `.github/skills/` が認識されます
-- `@GeekPowerCode` に実現したい内容を伝えるだけで、必要なスキルが選択されて開発タスクを進められます
+- `@PowerCode` に実現したい内容を伝えるだけで、必要なスキルが選択されて開発タスクを進められます
 - このリポジトリの開発標準はスキルとして定義済みのため、マニュアル手順ベースではなくエージェント駆動で利用します
 
 担当領域の選び方は [目的別の入口](#目的別の入口) を参照し、全スキルの一覧と構成規約は [スキルカタログ](./.github/skills/README.md) を正本とします。
@@ -252,5 +263,5 @@ MIT License。詳細は [LICENSE](./LICENSE) を参照してください。
 
 ## フィードバック
 
-- Issues: https://github.com/geekfujiwara/CodeAppsDevelopmentStandard/issues
+- Issues: https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard/issues
 - X: https://twitter.com/geekfujiwara

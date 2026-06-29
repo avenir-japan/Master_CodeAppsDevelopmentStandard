@@ -67,7 +67,25 @@ msapp は ZIP 形式なので、次の回避策が使える。
 - coauthoring 未接続の compile は **false negative** やコネクタ未解決エラーを出すことがある。
 - 接続系エラーが多発する場合は、**Designer を開いた状態で最終確認** する。
 
-### 3.2 ブラウザ制約
+### 3.2 compile は通るが画面が変わらない
+
+- compile が成功しても画面が変わらない場合は、まず **別の app を開いていないか** を疑う。
+- `canvas-app.config.json` や手元メモの appId ではなく、**Designer の URL に含まれる app-id を正** として確認する。
+- coauthoring live 反映では、Designer タブを前面表示し続ける必要はないが、**タブを閉じると反映経路が切れる**。
+
+切り分け順:
+
+1. Designer の URL の `app-id` が対象 app と一致しているか
+2. いま見ている画面が本当にその app の Designer か
+3. タブを閉じていないか、サインアウトしていないか、セッションが切れていないか
+
+### 3.3 coauthoring セッション切れ
+
+- `sync_canvas` や `compile_canvas` が通っても結果が不自然な場合は、coauthoring セッションが切れていることがある。
+- その場合は、Designer を開き直して coauthoring を有効にした状態で再接続する。
+- 最終的な保存の正本は Designer 側の **Save / Publish** であり、compile 成功だけで保存完了とみなさない。
+
+### 3.4 ブラウザ制約
 
 - 組織ポリシーで VS Code 内蔵ブラウザが使えない場合がある。
 - その場合は最初から **外部ブラウザ前提の runbook** に切り替える。
