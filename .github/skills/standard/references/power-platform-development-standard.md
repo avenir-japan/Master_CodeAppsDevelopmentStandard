@@ -1,6 +1,6 @@
-# Power Platform コードファースト開発標準
+# Power Platform 開発標準
 
-> **Geek Fujiwara 作成** — Power Apps Code Apps・Dataverse・Copilot Studio を VS Code + GitHub Copilot でコードファーストに構築するための開発標準。  
+> **Geek Fujiwara 作成** — Power Platform コンポーネントを VS Code + GitHub Copilot で設計・構築するための開発標準。  
 > GitHub Copilot Agent モードとスキルベースの開発ワークフローにより、VS Code から Power Platform ソリューションを構築する実践ガイド。
 
 > [!NOTE]
@@ -35,6 +35,17 @@ GitHub Copilot は使用量ベース課金を前提に、**既定を GPT-5.4** �
 | 横断的な改修、納品前レビュー             | GPT-5.4    | まず GPT 系の上位 reasoning model。レビュー観点を増やす場合は Opus 系も候補 |
 
 原則は、**通常の主力は GPT-5.4**、**コード量が多い実装ではコード特化モデルも候補**、**高難度では GPT 系の上位 reasoning model を第一候補**、**比較検討や別観点レビューでは Opus 系も候補** とする。
+
+---
+
+## この標準の既定スコープ
+
+このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+
+- 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
+- **Canvas App（標準コネクタ）** は既定スコープに含むが、工数を踏まえて必要時のみ採用候補とする
+- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **追加ライセンス評価項目** として扱う
+- 個別技術の詳細手順は各スキルに残し、この文書では **既定提案の優先順位と判断基準** を定義する
 
 ---
 
@@ -521,13 +532,16 @@ api_post("/PublishAllXml", {})
 Phase 2 は **Code Apps / Canvas Apps / Model-Driven Apps** のいずれかを選んで進める。
 まず `architecture` スキルで UI 方式を比較し、**ユーザー確認のうえで方式を確定**してから各スキルへ進む。
 
+> **既定提案**: まず Teams / Microsoft 365 Copilot を UI / チャネルの第一候補として検討する。
+> 画面 UI が必要な場合のみ Canvas Apps / Model-Driven Apps / Code Apps を比較し、Canvas App はベースライセンス範囲内の選択肢として必要時のみ採用する。
+
 - Code Apps を選ぶ場合: `code-apps` スキルを使う
 - Canvas App を選ぶ場合: `canvas-app` スキルを使う
 - Model-Driven Apps を選ぶ場合: `model-driven-app` スキルを使う
 
-この章では、Phase 2 の共通原則を示したうえで、**標準実装である Code Apps の具体手順** を記載する。
+この章では、Phase 2 の共通原則を示したうえで、**Code Apps を選ぶ場合の具体手順** を記載する。
 
-### 4.1 UI 方式選定と Code Apps 初期セットアップ手順
+### 4.1 UI 方式選定と、Code Apps を選ぶ場合の初期セットアップ手順
 
 #### 前提条件
 
@@ -1515,9 +1529,9 @@ flowchart TD
 
     P1["🗄️ Phase 1: Dataverse 構築\n1. ソリューション作成\n2. テーブル作成（マスタ → 主 → 従属）\n3. Lookup リレーションシップ作成（リトライ付き）\n4. 日本語ローカライズ（PUT + MetadataId）\n5. 全テーブルにデモデータ投入\n6. テーブル・リレーションシップ検証"]
 
-    P2D["🎨 Phase 2 設計: UI 方式選定\n1. architecture で Code Apps / Canvas Apps / Model-Driven Apps を比較\n2. 選択した方式のスキルで UI 設計\n3. 顧客要望・保守体制・既存資産を確認\n4. ★ ユーザーに UI 方式と UI 設計を提示し承認を得る"]
+    P2D["🎨 Phase 2 設計: UI 方式選定\n1. 既定提案は Teams / M365 Copilot\n2. 画面 UI が必要なら Canvas Apps / Model-Driven Apps / Code Apps を比較\n3. 顧客要望・保守体制・既存資産・追加ライセンス要素を確認\n4. ★ ユーザーに UI 方式と UI 設計を提示し承認を得る"]
 
-    P2["⚛️ Phase 2 実装: 選択した UI 方式\n1. Code Apps: init → build & push → add-data-source\n2. Canvas App: 添付 / staging / import 運用\n3. Model-Driven Apps: フォーム / ビュー / SiteMap / 公開\n4. 承認済み設計に従い実装"]
+    P2["⚛️ Phase 2 実装: 選択した UI 方式\n1. Copilot Studio: Teams / M365 Copilot チャネル設定\n2. Canvas App: 必要時のみ添付 / staging / import 運用\n3. Model-Driven Apps / Code Apps: 要件に応じて実装\n4. 承認済み設計に従い実装"]
 
     P25D["📋 Phase 2.5 設計: Power Automate\n1. フロー名・トリガー・アクション設計\n2. 接続・通知先・メール本文設計\n3. ★ ユーザーに設計を提示し承認を得る"]
 
@@ -1591,18 +1605,18 @@ flowchart TD
 
 ### Phase 2/2.5/3 の設計フェーズ（各フェーズ共通原則）
 
-**Dataverse だけでなく、UI 実装方式（Code Apps / Canvas Apps / Model-Driven Apps）・Power Automate・Copilot Studio のいずれも、実装前に設計をユーザーに提示して承認を得る。**
+**Dataverse だけでなく、UI 実装方式（Teams / Microsoft 365 Copilot を含む）・Power Automate・Copilot Studio のいずれも、実装前に設計をユーザーに提示して承認を得る。**
 
 #### UI 実装方式の設計（Phase 2 開始前）
 
-まず `architecture` スキルで **Code Apps / Canvas Apps / Model-Driven Apps** を比較し、
-どの UI 方式で進めるかをユーザーに確認する。
+まず `architecture` スキルで **Teams / Microsoft 365 Copilot を既定提案** として確認し、
+画面 UI が必要な場合のみ **Code Apps / Canvas Apps / Model-Driven Apps** を比較して、どの方式で進めるかをユーザーに確認する。
 
 - Code Apps を選ぶ場合: `code-apps` スキルで画面一覧・コンポーネント構成・Lookup 名前解決・ナビゲーションを設計
 - Canvas App を選ぶ場合: `canvas-app` スキルで画面構成・staging・添付・Flow 中継を設計
 - Model-Driven Apps を選ぶ場合: `model-driven-app` スキルで対象テーブル・フォーム・ビュー・SiteMap を設計
 
-> **原則**: AI が独断で UI 方式を確定しない。顧客要望・保守体制・利用人数・モバイル要件・既存資産を確認し、
+> **原則**: AI が独断で UI 方式を確定しない。顧客要望・保守体制・利用人数・モバイル要件・既存資産・追加ライセンス要素を確認し、
 > 「この方式で進めてよいですか？」と明示的に確認してから実装に進む。
 
 #### Power Automate フロー設計（Phase 2.5 開始前）

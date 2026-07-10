@@ -3,6 +3,15 @@
 Power Platform コードファースト開発で使用するスキル群。
 GitHub Copilot の段階的読込と Progressive Disclosure を前提に構成。
 
+## このカタログの既定スコープ
+
+このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+
+- 既定の UI / チャネル優先順位は **Teams / Microsoft 365 Copilot** を先頭に置く
+- **Canvas App（標準コネクタ）** は既定スコープに含むが、工数を踏まえて **必要時のみ** 提案する
+- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、**案件ごとの追加ライセンス評価項目** として扱う
+- 個別スキルの技術手順は残し、採用可否や優先順位は上位の `standard` / `architecture` / ライセンス確認ルールを正本とする
+
 ## スキル構成規約
 
 ### フォルダ構成（Progressive Disclosure モデル）
@@ -123,14 +132,14 @@ triggers: # スキル発動条件キーワード（必須）
 
 ```
 0. spec-to-markdown   → 既存仕様書を factsheet / document に正規化（必要時）
-1. architecture       → 全体設計・コンポーネント選定（UI 方式は Code Apps / Canvas Apps / Model-Driven Apps を提示して必ずユーザー確認）
+1. architecture       → 全体設計・コンポーネント選定（UI / チャネルは Teams / M365 Copilot を既定提案。画面 UI が必要なら Canvas Apps / Model-Driven Apps / Code Apps を比較して必ずユーザー確認）
 2. standard           → 共通基盤の確認（.env・認証）
-3. dataverse          → テーブル設計・構築・セキュリティロール設定
-4. code-apps          → Code Apps UI 設計・開発・デプロイ
-   OR canvas-app      → Canvas App（添付・staging・Flow 中継）構築
-   OR generative-page → Generative Pages 開発
-   OR model-driven-app → モデル駆動型アプリ構築
+3. copilot-studio     → Teams / M365 Copilot をチャネルとする対話体験を標準提案
+4. canvas-app         → 画面 UI が必要な場合のみ Canvas App（添付・staging・Flow 中継）を検討
+  OR model-driven-app → モデル駆動型アプリ構築
+  OR code-apps        → Code Apps UI 設計・開発・デプロイ
+  OR generative-page  → Generative Pages 開発
 5. power-automate     → フロー作成
-6. copilot-studio     → エージェント構築・トリガー追加
-7. ai-builder         → AI プロンプト追加
+6. dataverse          → テーブル設計・構築・セキュリティロール設定（必要時）
+7. ai-builder         → AI プロンプト追加（必要時。最新ライセンス条件を確認）
 ```

@@ -38,6 +38,15 @@ triggers:
 
 全スキル共通の基盤。共通認証・ソリューション管理・アイコン生成・HTML メールテンプレートを提供する。
 
+## この標準の既定スコープ
+
+このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+
+- 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
+- **Canvas App（標準コネクタ）** は既定スコープに含むが、工数を踏まえて必要時のみ採用候補とする
+- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **案件ごとの追加ライセンス評価項目** として扱う
+- 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
+
 ## Copilot 向け優先判断基準
 
 - GitHub Copilot の既定モデルは GPT-5.4 とし、軽作業は軽量モデル、コード量が多い実装はコード特化モデルも候補にしつつ、アーキテクチャ設計、原因不明の障害調査、横断リファクタリング、納品前の高リスクレビューでは、まず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
@@ -150,10 +159,14 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 
 ## 関連スキル
 
+> **採用優先順位の扱い**: 下表は利用可能な実装スキルの一覧であり、既定提案の優先順位そのものではない。
+> 優先順位は「Teams / Microsoft 365 Copilot を先頭、Canvas App は必要時のみ、その他は案件判断」を正本とする。
+
 | フェーズ                  | スキル             | 内容                                             |
 | ------------------------- | ------------------ | ------------------------------------------------ |
 | Phase 1: Dataverse 構築   | `dataverse`        | テーブル設計・作成・ローカライズ・デモデータ     |
 | Phase 1.5: Security Role  | `dataverse`        | カスタムセキュリティロール作成・権限設定         |
+| Phase 2: Copilot Studio   | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験    |
 | Phase 2: Code Apps        | `code-apps`        | 初期化・デプロイ・Dataverse 接続                 |
 | Phase 2: Code Apps UI     | `code-apps`        | CodeAppsStarter デザインシステム・コンポーネント |
 | Phase 2: Canvas App       | `canvas-app`       | 添付・SharePoint staging・msapp import 運用      |
@@ -211,4 +224,4 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 | **ExecuteCopilot プロンプトは構造化**                                                  | `triggerBody()` の丸投げは不十分。メッセージID・差出人・件名・本文を個別に渡し、ツール名を明示する                                                                 |
 | **セキュリティロールは Basic User コピーから開始**                                     | ゼロから作成すると約480の標準権限が欠落しアプリが動かない。RetrieveRolePrivilegesRole で取得して土台にする                                                         |
 | **マスタテーブルの読み取り専用ロールにも AppendTo**                                    | Lookup 先テーブルに AppendTo がないとレコード作成時にエラー。Read + AppendTo: Global が最低限必要                                                                  |
-| **ライセンス回答は固定値を断定しない**                                                 | Copilot Credits、Code Apps 要件、SKU 条件は変わりやすい。提案前・納品前に最新の Microsoft Learn または公式ガイドを確認する                                         |
+| **ライセンス回答は固定値を断定しない**                                                 | 本パッケージの既定提案はベースライセンス範囲内だが、Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは都度最新の Microsoft Learn または公式ガイドを確認する |

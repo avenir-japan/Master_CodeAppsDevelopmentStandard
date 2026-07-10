@@ -1,11 +1,14 @@
 # アーキテクチャ設計 リファレンス
 
+> **既定提案**: 検証導入パッケージでは、まず Teams / Microsoft 365 Copilot を入口にした対話型パターンを第一候補にする。
+> 画面 UI が必要な場合のみ Canvas App を優先的に検討し、Code Apps やその他の拡張パターンは案件要件と追加ライセンス評価に応じて採用する。
+
 ## 7. 統合アーキテクチャパターン集
 
-### パターン A: 業務アプリ（Code Apps / Canvas App + 通知）
+### パターン A: 必要時の業務アプリ（Canvas App / Code Apps + 通知）
 
 ```
-[Dataverse] ←→ [Code Apps / Canvas App]  ← ユーザーがデータ操作
+[Dataverse] ←→ [Canvas App / Code Apps]  ← ユーザーがデータ操作
       ↓ レコード変更
 [Power Automate] → メール/Teams 通知
 ```
@@ -23,9 +26,9 @@
 **使うスキル**: `model-driven-app` → `power-automate`
 
 > **パターン A vs A2 の判断**: カスタム UI が不要で標準ビュー/フォームで十分なら A2（最速）。
-> ローコード・少人数・モバイル寄りなら A の Canvas App、カンバン・ダッシュボード・カスタムビジュアルが必要なら A の Code Apps。
+> 画面 UI が必要で、まずベースライセンス範囲内を優先するなら A の Canvas App、カンバン・ダッシュボード・カスタムビジュアルが必要なら A の Code Apps を比較する。
 
-### パターン B: AI アシスタント（対話 + ナレッジ）
+### パターン B: 標準対話 UI（Teams / M365 Copilot + ナレッジ）
 
 ```
 [Teams / Web] → [Copilot Studio]
@@ -59,7 +62,7 @@
 
 **使うスキル**: `copilot-studio`（[market-research-report.md](../../copilot-studio/references/market-research-report.md) を参照）
 
-### パターン E: フルスタック業務システム
+### パターン E: 拡張フルスタック業務システム
 
 ```
 [Dataverse]
@@ -74,6 +77,8 @@
 ```
 
 **使うスキル**: 全フェーズスキルを順番に適用
+
+> **位置づけ**: パターン E は拡張パターンとして扱う。検証導入パッケージの既定提案ではなく、要件と追加ライセンス評価に応じて採用する。
 
 ---
 
@@ -98,6 +103,7 @@
 
 | コンポーネント | 用途                 | 必要性  |
 | -------------- | -------------------- | ------- |
+| Teams / M365 Copilot | {入口 / チャネルの概要} | ✅ / ❌ |
 | Dataverse      | {テーブル構成の概要} | ✅ 必須 |
 | Code Apps      | {画面の概要}         | ✅ / ❌ |
 | Canvas App     | {画面の概要}         | ✅ / ❌ |
@@ -114,12 +120,13 @@
 ### 5. 構築フェーズ
 
 1. Phase 1: Dataverse — {テーブル数}テーブル
-2. Phase 2: Code Apps — {画面数}画面（※ 不要なら省略）
-   2'. Phase 2: Canvas App — {画面数}画面（※ 不要なら省略）
-   2''. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Code Apps / Canvas App と排他）
-3. Phase 2.5: Power Automate — {フロー数}フロー（※ 不要なら省略）
-4. Phase 3: Copilot Studio — {エージェント数}エージェント（※ 不要なら省略）
-5. Phase 4: AI Builder — {プロンプト数}プロンプト（※ 不要なら省略）
+2. Phase 2: Copilot Studio / Teams / M365 Copilot — {対話 UI の概要}（※ 不要なら省略）
+3. Phase 2: Canvas App — {画面数}画面（※ 不要なら省略）
+4. Phase 2: Code Apps — {画面数}画面（※ 不要なら省略）
+5. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Canvas App / Code Apps と排他）
+6. Phase 2.5: Power Automate — {フロー数}フロー（※ 不要なら省略）
+7. Phase 3: Copilot Studio — {エージェント数}エージェント（※ 不要なら省略）
+8. Phase 4: AI Builder — {プロンプト数}プロンプト（※ 不要なら省略）
 
 この設計で進めてよいですか？
 ```
