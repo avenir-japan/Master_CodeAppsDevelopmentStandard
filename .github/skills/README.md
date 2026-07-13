@@ -75,7 +75,7 @@ triggers: # スキル発動条件キーワード（必須）
 
 ---
 
-## スキル一覧（11 スキル）
+## スキル一覧（12 スキル）
 
 ### architecture — アーキテクチャ・基盤
 
@@ -101,10 +101,11 @@ triggers: # スキル発動条件キーワード（必須）
 
 ### automation — 自動化
 
-| スキル                                    | 説明                                                                        |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| [copilot-studio](copilot-studio/SKILL.md) | Copilot Studio エージェントを生成オーケストレーション前提で構築・運用する。 |
-| [power-automate](power-automate/SKILL.md) | Power Automate クラウドフローをソリューション対応で作成・デプロイする。     |
+| スキル                                          | 説明                                                                                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [copilot-studio](copilot-studio/SKILL.md)       | Copilot Studio エージェントを生成オーケストレーション前提で構築・運用する。                               |
+| [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。単独利用時の判断基準。 |
+| [power-automate](power-automate/SKILL.md)       | Power Automate クラウドフローをソリューション対応で作成・デプロイする。                                   |
 
 ### ai — AI / プロンプト
 
@@ -124,7 +125,7 @@ triggers: # スキル発動条件キーワード（必須）
 | Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md)                                                                                                                                   |
 | UI 実装にすぐ入りたい                      | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
 | 自動化・通知・外部トリガーを作りたい       | [power-automate](power-automate/SKILL.md)                                                                                                                         |
-| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                                                                     |
+| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                  |
 
 ---
 
@@ -134,7 +135,8 @@ triggers: # スキル発動条件キーワード（必須）
 0. spec-to-markdown   → 既存仕様書を factsheet / document に正規化（必要時）
 1. architecture       → 全体設計・コンポーネント選定（UI / チャネルは Teams / M365 Copilot を既定提案。画面 UI が必要なら Canvas Apps / Model-Driven Apps / Code Apps を比較して必ずユーザー確認）
 2. standard           → 共通基盤の確認（.env・認証）
-3. copilot-studio     → Teams / M365 Copilot をチャネルとする対話体験を標準提案
+3. copilot-studio     → 連携利用や既存トリガー資産を使う Copilot Studio 構成
+  OR copilot-studio-v2 → Teams / M365 Copilot 単独利用向けの新アーキ構成
 4. canvas-app         → 画面 UI が必要な場合のみ Canvas App（添付・staging・Flow 中継）を検討
   OR model-driven-app → モデル駆動型アプリ構築
   OR code-apps        → Code Apps UI 設計・開発・デプロイ
