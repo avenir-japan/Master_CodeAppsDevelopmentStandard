@@ -163,8 +163,18 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 ## 案件開発の進め方（Copilot 運用）
 
 - GitHub Copilot の参照方針：[.github/copilot-instructions.md](./.github/copilot-instructions.md)
-- 要件ディスカバリーと生成物一式の作成（M365 Copilot／Cowork 用）：
+- 要件ディスカバリーと生成物一式の作成（M365 Copilot／Copilot Cowork 用）：
   [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
+
+### M365 Copilot／Copilot Cowork で要件整理を開始する
+
+1. 本リポジトリを参照対象として指定する。
+2. 「要件ディスカバリーと生成物一式の作成」の実際のファイルパス
+   [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
+   を指定し、その手順に従って要件整理を進めるよう依頼する。
+3. 目的・現状・制約・構成を 1 問ずつ確認する。
+4. 構成が確定した後、必要な開発入力ファイルの候補を提示させる。
+5. 作成対象について合意した後に、開発入力ファイル一式を作成する。
 
 ---
 
