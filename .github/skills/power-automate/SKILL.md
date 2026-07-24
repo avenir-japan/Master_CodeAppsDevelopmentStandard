@@ -109,6 +109,23 @@ Dataverse API: https://{org}.crm7.dynamics.com/.default      ← workflow テー
    https://make.powerautomate.com/connections
 ```
 
+### 接続参照は「論理名がある」だけでは不十分
+
+```text
+connectionReferences に logical name が存在しても、環境側 connectionreference の
+connectionid が未解決だと有効化で失敗する。
+
+有効化前チェック:
+  1. 対象の connectionreferencelogicalname が存在する
+  2. connectionid が null / 空でない
+  3. 期待する connectorid に紐づいている
+
+❌ よくある失敗:
+  - フロー JSON 上は connectionReferences が正しい
+  - しかし Dataverse の connectionreferences テーブル側で connectionid 未設定
+  - 結果として Activate 時にコネクタ認証解決に失敗する
+```
+
 ### f-string と式の二重ブレース問題
 
 ```python
@@ -137,6 +154,28 @@ for f in existing.get("value", []):
     api_delete(f"workflows({wf_id})")
     time.sleep(3)
 # → 新規作成へ進む
+```
+
+### InitializeVariable は Scope 内にネストしない
+
+```text
+❌ Scope の内側に InitializeVariable を置く
+  → 定義検証または有効化で失敗する
+
+✅ 変数初期化はトップレベル actions に置く
+  → Scope では既存変数への SetVariable / AppendToArrayVariable 等のみ使う
+```
+
+### 自己参照 SetVariable は使わない
+
+```text
+❌ SetVariable で同じ変数を式内参照する
+  例: union(variables('varItems'), createArray(...)) を同じ varItems に代入
+  → Self reference is not supported で失敗する
+
+✅ 代替パターン:
+  - 収集中は AppendToArrayVariable で追加する
+  - 収集完了後に Compose で union(variables('varItems'), variables('varItems')) を実行して重複排除する
 ```
 
 ### Dataverse Webhook トリガーのフローは /start 必須（★ 検証済み教訓）
@@ -362,6 +401,11 @@ ensure_connection_reference(CONNREF_OUTLOOK, "Office 365 Outlook", "shared_offic
   authenticatedUserObjectId が解決され、AzureResourceManagerRequestFailed は発生しない。
 
   接続参照なしの旧パターンでは、接続の認証情報が不足して有効化が失敗していた。
+
+有効化前の最終確認:
+  - 定義内 connectionReferences の key と host.connectionName が一致している
+  - Dataverse connectionreferences の connectionid が全件解決している
+  - 不要になった接続参照を削除した場合、ローカル Solution と環境側の両方で整合している
 ```
 
 ### Step 3: フロー定義の構築
@@ -518,6 +562,21 @@ PUBLISHER_PREFIX=prefix
 ```
 
 ## よくあるエラーと解決策
+
+### コネクタ削除時の整合漏れ
+
+```text
+症状:
+  - 定義から外したはずの connector / connection reference が有効化やパック時に残骸として影響する
+
+安全手順:
+  1. フロー JSON の connectionReferences と該当アクションを削除する
+  2. ソリューション配下の Customizations.xml などローカル定義からも対応する connection reference を外す
+  3. 環境側 connectionreference は、workflow / solution 参照残りを確認してから削除する
+
+❌ 片側だけ消す
+   → ローカル成果物と環境実体がずれ、次回デプロイや有効化で再発する
+```
 
 | エラー                                        | 原因                            | 解決策                                                                      |
 | --------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------- |
