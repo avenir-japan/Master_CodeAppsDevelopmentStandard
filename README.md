@@ -41,6 +41,7 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 - [環境事前チェックとブートストラップ](#環境事前チェックとブートストラップ)
 - [想定運用モデル](#想定運用モデル)
 - [GitHub Copilot 利用方針](#github-copilot-利用方針)
+- [案件開発の進め方（Copilot 運用）](#案件開発の進め方copilot-運用)
 - [カスタムエージェント前提の利用方法](#カスタムエージェント前提の利用方法)
 - [目的別の入口](#目的別の入口)
 - [リポジトリ構成](#リポジトリ構成)
@@ -156,6 +157,14 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 - [standard スキル](./.github/skills/standard/SKILL.md)
 - [Power Platform 開発標準](./.github/skills/standard/references/power-platform-development-standard.md)
+
+---
+
+## 案件開発の進め方（Copilot 運用）
+
+- GitHub Copilot の参照方針：[.github/copilot-instructions.md](./.github/copilot-instructions.md)
+- 要件ディスカバリーと生成物一式の作成（M365 Copilot／Cowork 用）：
+  [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
 
 ---
 
