@@ -58,13 +58,14 @@ Dataverse Web API（workflow テーブル）で **ソリューション対応の
 
 設計提示時に含める内容:
 
-| 項目           | 内容                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| フロー名       | フローの名前と目的                                                 |
-| トリガー       | 何をきっかけに実行するか（レコード変更時 / スケジュール / 手動等） |
-| アクション一覧 | 条件分岐・メール送信・Teams 通知・データ更新等                     |
-| 必要な接続     | 使用するコネクタ（Dataverse, Office 365 Outlook, Teams 等）        |
-| 通知先・本文   | メールの宛先・件名・本文の概要                                     |
+| 項目           | 内容                                                                          |
+| -------------- | ----------------------------------------------------------------------------- |
+| フロー名       | フローの名前と目的                                                            |
+| トリガー       | 何をきっかけに実行するか（レコード変更時 / スケジュール / 手動等）            |
+| アクション一覧 | 条件分岐・メール送信・Teams 通知・データ更新等                                |
+| 命名規則       | トリガー・アクション名を `連番_処理内容（既定の日本語UIアクション名）` で統一 |
+| 必要な接続     | 使用するコネクタ（Dataverse, Office 365 Outlook, Teams 等）                   |
+| 通知先・本文   | メールの宛先・件名・本文の概要                                                |
 
 ```
 フロー: 設計提示 → ユーザー承認 → デプロイスクリプト実行
@@ -108,6 +109,57 @@ Dataverse API: https://{org}.crm7.dynamics.com/.default      ← workflow テー
 ✅ Power Automate UI で事前に接続を作成 → API ではその接続 ID を参照するのみ
    https://make.powerautomate.com/connections
 ```
+
+### フロー実装は既定アクション優先、Graph は未サポート処理だけに限定する
+
+```text
+設計原則:
+  - まず Power Automate の既定アクションで実現できるかを確認する
+  - Graph HTTP は「既定アクションが存在しない」「既定アクションのスキーマが不安定」「既定アクションでは必要な操作が表現できない」場合だけ使う
+  - Teams / Groups のように複数コネクタで到達できる処理は、対象リソースに最も近い既定コネクタを優先する
+
+✅ 推奨:
+  - 一覧取得、通常 CRUD、通知投稿は既定アクションを第一候補にする
+  - Graph HTTP を使う場合は、その理由を設計時に明示する
+
+❌ 非推奨:
+  - 既定アクションがあるのに、最初から Graph HTTP 前提で実装する
+  - /groups 系を Teams Graph HTTP へ寄せるなど、コネクタの責務境界をまたいで無理に統一する
+```
+
+### トリガー・アクション名は作成直後に固定する
+
+```text
+必須形式:
+  連番_処理内容（既定の日本語UIアクション名）
+
+例:
+  01_定期実行を開始（繰り返し）
+  02_対象一覧を取得（表内に存在する行を一覧表示）
+  03_対象を処理（それぞれに適用する）
+  03-01_メンバーを取得（チーム メンバーを一覧表示する）
+
+必須ルール:
+  - アクション追加直後、式や動的コンテンツを設定する前に改名する
+  - 改名後は変更しない
+  - 同名アクションが複数ある場合は処理対象を明示する
+  - 式内参照は表示名の手入力ではなく、取得済み定義の内部名を正本にする
+
+Copilot の実装ルール:
+  - Power Automate フローを新規作成・更新する場合、この命名へ必ず正規化する
+  - 既存フローの命名が崩れている場合は、参照式との整合を確認したうえで命名方針を先に揃える
+```
+
+詳細は [トリガー・アクション命名規則](references/naming-conventions.md) を参照。
+
+### 最小雛形は Power Automate UI で成立させてから clone し、その定義を正本に拡張する
+
+```text
+コードベース実装では、UI で保存可能な最小フローを先に成立させ、
+pac / clone / export で取得した定義を正本として拡張する。
+```
+
+詳細は [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
 
 ### 接続参照は「論理名がある」だけでは不十分
 
@@ -154,6 +206,27 @@ for f in existing.get("value", []):
     api_delete(f"workflows({wf_id})")
     time.sleep(3)
 # → 新規作成へ進む
+```
+
+### Modern Flow の import が詰まる場合は API 再作成へ切り替える
+
+```text
+`pac solution import` で Modern Flow が `ActiveUnpublished` 相当の状態に引っかかり、
+対象フローだけが更新できないことがある。
+
+この場合の原則:
+  - ソリューション import の再試行に固執しない
+  - 対象が単一または少数のクラウドフローなら、Dataverse `workflows` テーブル経由で
+    既存フローを削除し、ローカル定義から再作成・有効化する
+  - 反映前に可能なら既存ソリューションまたは対象フローの退避を取る
+
+使いどころ:
+  - publish all 後も import が同じ workflow 行状態で失敗する
+  - 接続参照や定義自体は妥当で、ブロッカーが環境側の Modern Flow 状態に見える
+
+位置づけ:
+  - これはソリューション import の一般代替ではない
+  - Modern Flow 単体の復旧・再反映手段として使う
 ```
 
 ### InitializeVariable は Scope 内にネストしない
@@ -552,6 +625,10 @@ except Exception as e:
 
 詳細なトリガー・アクションパターン（SharePoint、Dataverse、Teams、AI Builder、OneDrive PDF 変換等）は [トリガー・アクションパターンリファレンス](references/trigger-action-patterns.md) を参照。
 
+コードファーストでの実装順序と切り分けは [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
+
+トリガー・アクション名の付け方と内部名の扱いは [トリガー・アクション命名規則](references/naming-conventions.md) を参照。
+
 ## .env 必須項目
 
 ```env
@@ -562,6 +639,32 @@ PUBLISHER_PREFIX=prefix
 ```
 
 ## よくあるエラーと解決策
+
+### import / save / publish は別ゲートとして切り分ける
+
+```text
+Power Automate の不具合切り分けでは、import / pack、save、publish を別の検証ゲートとして扱う。
+```
+
+詳細は [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
+
+### docs と UI がずれたら、最終的な parameter shape はコードビューと clone 定義を正本にする
+
+```text
+Learn / swagger と UI の code view がずれたら、最終的な parameter shape は
+UI 保存済み定義と clone 定義を正本にする。
+```
+
+詳細は [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
+
+### pac solution sync の結果が怪しいときは fresh clone で切り分ける
+
+```text
+`pac solution sync` の結果が不自然なときは、ローカル読み取り競合を疑い、
+fresh clone で環境差分かローカル差分かを切り分ける。
+```
+
+詳細は [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
 
 ### コネクタ削除時の整合漏れ
 
