@@ -25,7 +25,7 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 - GitHub Copilot 用のカスタムエージェント / スキル（`.github/`）
 - UI 実装方式の選定ガイド（Code Apps / Canvas Apps / Model-Driven Apps）
 - Code Apps のスターター UI コンポーネント（`src/components/`）
-- Canvas App の添付・staging・msapp 運用パターン
+- Canvas App の AI 編集、Git 管理、限定的な受け渡しの 3 モード整理
 - Power Automate / Copilot Studio 連携の実装パターン
 - `.env.example` を含むプロジェクト初期化テンプレート
 
@@ -99,6 +99,16 @@ Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の�
 - Copilot Studio plugin は author / manage / test / advisor 系の外部 plugin で、VS Code では `@agentPlugins` から追加する。push/pull/clone では Copilot Studio Extension が別途必要になる
 - Dataverse でも外部 plugin や MCP を使う場合があるが、この repo の `.github/skills/dataverse/` とは別レイヤーの補助機能として扱う
 - これらはあると便利だが、リポジトリ内の `.github/agents/` と `.github/skills/` を置き換えるものではない
+
+Canvas App の運用は、次の 3 モードで整理して使い分けます。
+
+| モード               | 主目的                    | この repo での位置づけ |
+| -------------------- | ------------------------- | ---------------------- |
+| MCP + coauthoring    | AI 主導の作成・編集       | 第一選択               |
+| Git Integration      | source control と軽微編集 | チーム標準             |
+| single app / package | 限定的な受け渡し          | 例外運用               |
+
+詳細は [.github/skills/canvas-app/SKILL.md](./.github/skills/canvas-app/SKILL.md) と、その配下の references を正本とします。
 
 ---
 
@@ -217,12 +227,12 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 .
 ├── .github/
 │   ├── agents/                      # Copilot カスタムエージェント定義
-│   └── skills/                      # 製品単位で統合された 11 スキル
+│   └── skills/                      # 製品単位で統合された 12 スキル
 │       ├── architecture/            # アーキテクチャ設計
 │       ├── standard/                # 共通基盤（認証・アイコン・メールテンプレート）
 │       ├── dataverse/               # テーブル設計・構築・セキュリティロール
 │       ├── code-apps/               # Code Apps 開発（UI 設計・CSP・メール送信含む）
-│       ├── canvas-app/              # Canvas App 開発（添付・staging・msapp 運用）
+│       ├── canvas-app/              # Canvas App 開発（AI 編集・Git 管理・限定移送・添付パターン）
 │       ├── generative-page/         # Generative Pages 開発
 │       ├── model-driven-app/        # モデル駆動型アプリ構築
 │       ├── copilot-studio/          # エージェント構築・トリガー・ニュース配信
@@ -255,8 +265,13 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 - [.github/skills/copilot-studio/references/managed-solution-constraints.md](./.github/skills/copilot-studio/references/managed-solution-constraints.md)
 - [.github/skills/dataverse/references/dataverse-guide.md](./.github/skills/dataverse/references/dataverse-guide.md)
 - [.github/skills/code-apps/references/connector-reference.md](./.github/skills/code-apps/references/connector-reference.md)
+- [.github/skills/canvas-app/references/ai-codegen-workflow.md](./.github/skills/canvas-app/references/ai-codegen-workflow.md)
+- [.github/skills/canvas-app/references/source-code-and-git-integration.md](./.github/skills/canvas-app/references/source-code-and-git-integration.md)
+- [.github/skills/canvas-app/references/alm-and-import-options.md](./.github/skills/canvas-app/references/alm-and-import-options.md)
 - [.github/skills/canvas-app/references/design-patterns.md](./.github/skills/canvas-app/references/design-patterns.md)
 - [.github/skills/canvas-app/references/coauthoring-checklist.md](./.github/skills/canvas-app/references/coauthoring-checklist.md)
+- [.github/skills/canvas-app/references/coauthoring-limitations.md](./.github/skills/canvas-app/references/coauthoring-limitations.md)
+- [.github/skills/canvas-app/references/data-source-and-connector-boundary.md](./.github/skills/canvas-app/references/data-source-and-connector-boundary.md)
 - [.github/skills/code-apps/references/advanced-patterns.md](./.github/skills/code-apps/references/advanced-patterns.md)
 - [SAMPLES.md](./SAMPLES.md)
 

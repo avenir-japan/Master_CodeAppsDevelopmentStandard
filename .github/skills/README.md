@@ -92,12 +92,12 @@ triggers: # スキル発動条件キーワード（必須）
 
 ### ui — UI / フロントエンド
 
-| スキル                                        | 説明                                                                                                                                 |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| [code-apps](code-apps/SKILL.md)               | Code Apps を TypeScript/React ベースで開発し、UI 設計からデプロイまで対応する。                                                      |
-| [canvas-app](canvas-app/SKILL.md)             | Canvas App で添付・PDF を扱い、SharePoint staging + Flow 中継で AI Builder / 外部処理へ渡す。msapp 編集・import・UI 調整に対応する。 |
-| [generative-page](generative-page/SKILL.md)   | Generative Pages（genux）を開発・デバッグし、モデル駆動型アプリへデプロイする。                                                      |
-| [model-driven-app](model-driven-app/SKILL.md) | モデル駆動型アプリを作成・構成し、公開まで実行する。                                                                                 |
+| スキル                                        | 説明                                                                                                                                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [code-apps](code-apps/SKILL.md)               | Code Apps を TypeScript/React ベースで開発し、UI 設計からデプロイまで対応する。                                                                           |
+| [canvas-app](canvas-app/SKILL.md)             | Canvas App の AI 主導編集、Git によるソース管理、single app / package による限定移送を整理し、添付・PDF 要件では SharePoint staging + Flow 中継まで扱う。 |
+| [generative-page](generative-page/SKILL.md)   | Generative Pages（genux）を開発・デバッグし、モデル駆動型アプリへデプロイする。                                                                           |
+| [model-driven-app](model-driven-app/SKILL.md) | モデル駆動型アプリを作成・構成し、公開まで実行する。                                                                                                      |
 
 ### automation — 自動化
 
@@ -125,7 +125,7 @@ triggers: # スキル発動条件キーワード（必須）
 | Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md)                                                                                                                                   |
 | UI 実装にすぐ入りたい                      | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
 | 自動化・通知・外部トリガーを作りたい       | [power-automate](power-automate/SKILL.md)                                                                                                                         |
-| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                  |
+| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                   |
 
 ---
 
@@ -137,7 +137,7 @@ triggers: # スキル発動条件キーワード（必須）
 2. standard           → 共通基盤の確認（.env・認証）
 3. copilot-studio     → 連携利用や既存トリガー資産を使う Copilot Studio 構成
   OR copilot-studio-v2 → Teams / M365 Copilot 単独利用向けの新アーキ構成
-4. canvas-app         → 画面 UI が必要な場合のみ Canvas App（添付・staging・Flow 中継）を検討
+4. canvas-app         → 画面 UI が必要な場合のみ Canvas App（MCP + coauthoring / Git Integration / single app・package の使い分けと、添付・staging・Flow 中継）を検討
   OR model-driven-app → モデル駆動型アプリ構築
   OR code-apps        → Code Apps UI 設計・開発・デプロイ
   OR generative-page  → Generative Pages 開発

@@ -5,10 +5,11 @@ Canvas App を Copilot から直接反映したいときに、最初に確認す
 
 ## 1. まず覚えること
 
-1. 既存 Canvas App への変更反映は、標準運用では **coauthoring live 反映を優先** する
+1. 既存 Canvas App への変更反映は、標準運用では **MCP + coauthoring を優先** する
 2. `pac canvas` には、既存 app へ `.msapp` を upload / update するコマンドはない
 3. Designer タブは **前面表示不要** だが、**開いたまま維持が必要**
 4. 反映後の正本保存は Designer 側の **Save**、必要なら **Publish**
+5. 事前に `/configure-canvas-mcp` 相当の接続設定を済ませておく
 
 ## 2. 事前チェック
 
@@ -61,5 +62,7 @@ Canvas App を Copilot から直接反映したいときに、最初に確認す
 
 ## 6. 関連ドキュメント
 
+- 全体フロー: [ai-codegen-workflow](ai-codegen-workflow.md)
+- 制約一覧: [coauthoring limitations](coauthoring-limitations.md)
 - 詳細 runbook: [import / deploy runbook](import-deploy-runbook.md)
 - よくある問題: [troubleshooting](troubleshooting.md)

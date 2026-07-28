@@ -1741,7 +1741,7 @@ flowchart TD
 | `standard`         | [standard/SKILL.md](../SKILL.md)                             | Power Platform 包括開発標準（全体参照）                     |
 | `dataverse`        | [dataverse/SKILL.md](../../dataverse/SKILL.md)               | Dataverse テーブル設計・構築・権限設定                      |
 | `code-apps`        | [code-apps/SKILL.md](../../code-apps/SKILL.md)               | Code Apps 開発・UI 設計・CSP 構成・メール送信               |
-| `canvas-app`       | [canvas-app/SKILL.md](../../canvas-app/SKILL.md)             | Canvas App 開発・添付・staging・msapp import 運用           |
+| `canvas-app`       | [canvas-app/SKILL.md](../../canvas-app/SKILL.md)             | Canvas App の AI 主導編集・Git 管理・限定移送・添付パターン |
 | `generative-page`  | [generative-page/SKILL.md](../../generative-page/SKILL.md)   | Generative Pages 開発・デバッグ・デプロイ                   |
 | `model-driven-app` | [model-driven-app/SKILL.md](../../model-driven-app/SKILL.md) | モデル駆動型アプリ構築・公開                                |
 | `copilot-studio`   | [copilot-studio/SKILL.md](../../copilot-studio/SKILL.md)     | Copilot Studio エージェント構築（生成オーケストレーション） |

@@ -184,17 +184,17 @@ $env:PP_USE_INTERACTIVE_BROWSER = "1"
 > **採用優先順位の扱い**: 下表は利用可能な実装スキルの一覧であり、既定提案の優先順位そのものではない。
 > 優先順位は「Teams / Microsoft 365 Copilot を先頭、Canvas App は必要時のみ、その他は案件判断」を正本とする。
 
-| フェーズ                  | スキル             | 内容                                             |
-| ------------------------- | ------------------ | ------------------------------------------------ |
-| Phase 1: Dataverse 構築   | `dataverse`        | テーブル設計・作成・ローカライズ・デモデータ     |
-| Phase 1.5: Security Role  | `dataverse`        | カスタムセキュリティロール作成・権限設定         |
-| Phase 2: Copilot Studio   | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験    |
-| Phase 2: Code Apps        | `code-apps`        | 初期化・デプロイ・Dataverse 接続                 |
-| Phase 2: Code Apps UI     | `code-apps`        | CodeAppsStarter デザインシステム・コンポーネント |
-| Phase 2: Canvas App       | `canvas-app`       | 添付・SharePoint staging・msapp import 運用      |
-| Phase 2: Model-Driven App | `model-driven-app` | モデル駆動型アプリ作成・SiteMap・公開            |
-| Phase 2.5: Power Automate | `power-automate`   | クラウドフロー作成・接続参照                     |
-| Phase 3: Copilot Studio   | `copilot-studio`   | エージェント構築・生成オーケストレーション       |
+| フェーズ                  | スキル             | 内容                                                                        |
+| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| Phase 1: Dataverse 構築   | `dataverse`        | テーブル設計・作成・ローカライズ・デモデータ                                |
+| Phase 1.5: Security Role  | `dataverse`        | カスタムセキュリティロール作成・権限設定                                    |
+| Phase 2: Copilot Studio   | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験                               |
+| Phase 2: Code Apps        | `code-apps`        | 初期化・デプロイ・Dataverse 接続                                            |
+| Phase 2: Code Apps UI     | `code-apps`        | CodeAppsStarter デザインシステム・コンポーネント                            |
+| Phase 2: Canvas App       | `canvas-app`       | MCP + coauthoring、Git Integration、限定移送、添付・SharePoint staging 運用 |
+| Phase 2: Model-Driven App | `model-driven-app` | モデル駆動型アプリ作成・SiteMap・公開                                       |
+| Phase 2.5: Power Automate | `power-automate`   | クラウドフロー作成・接続参照                                                |
+| Phase 3: Copilot Studio   | `copilot-studio`   | エージェント構築・生成オーケストレーション                                  |
 
 ## クイックリファレンス: 絶対遵守ルール
 
