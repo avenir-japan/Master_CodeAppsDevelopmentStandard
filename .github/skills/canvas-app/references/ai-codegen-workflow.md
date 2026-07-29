@@ -53,6 +53,38 @@ source control や ALM の正本は別で考える。
 4. `configure-canvas-mcp` 相当の手順で environment ID / app ID / cluster を設定する
 5. Designer タブを閉じずに維持する
 
+### 3.1 VS Code Copilot のローカル設定
+
+VS Code Copilot では、Canvas Authoring MCP を `.vscode/mcp.json` に登録する運用が分かりやすい。
+設定値は Designer の URL から取得した `environment ID`、`app ID`、`cluster category` を使う。
+
+最小構成の例は次のとおり。
+
+```json
+{
+  "servers": {
+    "canvas-authoring": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": [
+        "Microsoft.PowerApps.CanvasAuthoring.McpServer",
+        "--yes",
+        "--prerelease",
+        "--source",
+        "https://api.nuget.org/v3/index.json"
+      ],
+      "env": {
+        "CANVAS_ENVIRONMENT_ID": "{ENVIRONMENT_ID}",
+        "CANVAS_APP_ID": "{APP_ID}",
+        "CANVAS_CLUSTER_CATEGORY": "{CLUSTER_CATEGORY}"
+      }
+    }
+  }
+}
+```
+
+`environment ID` は `make.powerapps.com/e/{environmentId}/canvas/...` の `e/` 配下の値、`app ID` は `app-id` の末尾 GUID を使う。
+
 > [!IMPORTANT]
 > Designer タブは前面表示し続ける必要はないが、閉じると coauthoring セッションが切れる。
 
@@ -90,16 +122,30 @@ AI が直接できないこと:
 - connection 作成
 - connector の認証操作
 
+## 7. 最初の疎通確認
+
+接続設定後は、まず `connect` に続けて `list_controls` を実行し、対象 app に対して MCP が実際に触れていることを確認する。
+
+もし `list_controls` が `Not connected` で失敗するなら、先に `connect` を実行し直す。これは設定不備よりも前提未実行で起きやすい。
+
 この境界は [data source and connector boundary](data-source-and-connector-boundary.md) を参照。
 
-## 7. 検証の考え方
+## 8.1 Canvas Authoring MCP の薄い wrapper を作るとき
+
+- `connect + compile_canvas`、`connect + sync_canvas` は、環境 ID・app ID・login hint・directoryPath を引数化した Node テンプレートにしておくと再利用しやすい。
+- hardcode は極力避け、既定値は `.env` か CLI 引数で受ける。
+- 特定案件向けの値を埋め込んだスクリプトは、master 側ではなく案件リポジトリに置く。
+
+## 8. 検証の考え方
 
 - `compile_canvas` は重要だが、それだけで完了とみなさない
+- `compile_canvas` が通っても preview 崩れは残りうるので、Designer 上の目視確認と局所修正を別工程として扱う
+- 広いレイアウト rewrite より、小さい可逆修正を優先する
 - coauthoring 未接続時は false negative や connection 未解決が混ざることがある
 - 最終確認は Designer 上で行う
 - 保存の正本は Save / Publish 側にある
 
-## 8. うまくいかないとき
+## 9. うまくいかないとき
 
 ### 8.1 画面が変わらない
 

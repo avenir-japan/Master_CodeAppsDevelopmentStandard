@@ -9,7 +9,7 @@ Canvas App を Copilot から直接反映したいときに、最初に確認す
 2. `pac canvas` には、既存 app へ `.msapp` を upload / update するコマンドはない
 3. Designer タブは **前面表示不要** だが、**開いたまま維持が必要**
 4. 反映後の正本保存は Designer 側の **Save**、必要なら **Publish**
-5. 事前に `/configure-canvas-mcp` 相当の接続設定を済ませておく
+5. 事前に `canvas-authoring` MCP の接続設定を済ませておく
 
 ## 2. 事前チェック
 
@@ -32,6 +32,21 @@ Canvas App を Copilot から直接反映したいときに、最初に確認す
 6. Designer 画面で見た目と動作を確認する
 7. Save、必要なら Publish を実行する
 
+### 3.1 疎通確認の最小手順
+
+接続設定の確認は、`connect` のあとに `list_controls` を 1 回実行するのが最短で分かりやすい。
+この 2 手順で通れば、MCP 経由で対象 app の live セッションに触れていることが分かる。
+
+- `list_controls` が `Not connected` なら、先に `connect` をやり直す
+- `connect` を繰り返すときは、前回成功した `login_hint` を再利用すると再認証を避けやすい
+- ツール一覧が見えない場合は、MCP 設定 → サーバー再読込 → `connect` → `list_controls` の順で切り分ける
+
+### 3.2 つまずきやすいポイント
+
+- `list_controls` は単独ではなく、先に `connect` を通してから実行する
+- `connect` 後も応答が不安定な場合は、Designer の URL に入っている app ID を正本として見直す
+- 接続直後は内部でクラスタ解決や authoring endpoint への切り替えが入るため、数秒待つ前提で扱う
+
 ## 4. うまくいかないときの見分け方
 
 ### 4.1 compile は通るが画面が変わらない
@@ -46,6 +61,7 @@ Canvas App を Copilot から直接反映したいときに、最初に確認す
 
 1. coauthoring 未接続だと false negative が混ざることがある
 2. 接続系エラーは Designer を開いた状態で再確認する
+3. `422` は source 問題と決め打ちせず、Designer reopen と再接続を試す
 
 ### 4.3 どうしても coauthoring を維持できない
 

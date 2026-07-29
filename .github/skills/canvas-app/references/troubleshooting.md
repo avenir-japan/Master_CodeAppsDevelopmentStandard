@@ -11,6 +11,11 @@ Canvas App の AI 編集、coauthoring、single app / package、UI 調整で頻�
 - Power Apps Studio の対象 app で coauthoring が有効か
 - Designer タブが開いたままか
 
+接続確認の最短経路は、`connect` で対象 app に入ってから `list_controls` を 1 回実行すること。
+`list_controls` が `Not connected` を返す場合は、設定ミスよりも前に `connect` 未実行を疑う。
+
+再接続時は、前回成功したアカウントの `login_hint` を使うと認証のやり直しを減らしやすい。
+
 セットアップ自体の流れは [ai-codegen-workflow](ai-codegen-workflow.md) を参照。
 
 ### 1.2 compile は通るが画面が変わらない
@@ -30,8 +35,26 @@ Canvas App の AI 編集、coauthoring、single app / package、UI 調整で頻�
 - `sync_canvas` や `compile_canvas` が通っても結果が不自然な場合は、coauthoring セッションが切れていることがある。
 - その場合は、Designer を開き直して coauthoring を有効にした状態で再接続する。
 - 最終的な保存の正本は Designer 側の **Save / Publish** であり、compile 成功だけで保存完了とみなさない。
+- `422` が出た場合も、source 問題と決め打ちせず、まず Designer reopen と再接続を試す。
 
-### 1.4 ブラウザ制約
+- 接続後すぐに `list_controls` を実行すると、内部のクラスタ解決や authoring endpoint 切り替え待ちが入ることがある。
+- そのため、接続直後の数秒は結果未反映に見えても、まずは `connect` 完了を待ってから再試行する。
+
+再接続時は、前回成功したアカウントの `login_hint` を使うと認証のやり直しを減らしやすい。
+
+### 1.4 画面だけが不自然に崩れる
+
+- 灰色の縦バー、テキスト切れ、謎の高さ崩れが出たら、まず `ModernText` の `AutoHeight` を確認する。
+- 意図して固定高にしているのでなければ、`AutoHeight=true` を先に疑う。
+- 特に見出し、説明文、カード内ラベルは、固定高のままだと preview 崩れの原因になりやすい。
+
+### 1.5 blank-safe の基本
+
+- `selected` 系や画面選択変数が `Blank()` になりうる場合は、`OnVisible` で初期化する。
+- Gallery の空分岐は `Blank()` より `FirstN(collection, 0)` を優先する。
+- 集計関数は、空集合で落ちないように `CountRows(...) = 0` を先に判定する。
+
+### 1.6 ブラウザ制約
 
 - 組織ポリシーで VS Code 内蔵ブラウザが使えない場合がある。
 - その場合は最初から **外部ブラウザ前提の runbook** に切り替える。
