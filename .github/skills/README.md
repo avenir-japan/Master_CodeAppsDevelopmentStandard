@@ -86,9 +86,9 @@ triggers: # スキル発動条件キーワード（必須）
 
 ### data — データ層
 
-| スキル                          | 説明                                                                       |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| [dataverse](dataverse/SKILL.md) | Dataverse のテーブル設計・構築・デモデータ投入・権限設定を一括で実施する。 |
+| スキル                          | 説明                                                                                                           |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [dataverse](dataverse/SKILL.md) | Dataverse のテーブル設計・構築・デモデータ投入・権限設定を一括で実施する。会話ログ分析の入口もここから辿れる。 |
 
 ### ui — UI / フロントエンド
 
@@ -122,7 +122,7 @@ triggers: # スキル発動条件キーワード（必須）
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 何から始めるか決めたい                     | [architecture](architecture/SKILL.md)                                                                                                                             |
 | 既存仕様書を整理して要件化したい           | [spec-to-markdown](spec-to-markdown/SKILL.md)                                                                                                                     |
-| Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md)                                                                                                                                   |
+| Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                        |
 | UI 実装にすぐ入りたい                      | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
 | 自動化・通知・外部トリガーを作りたい       | [power-automate](power-automate/SKILL.md)                                                                                                                         |
 | エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                   |

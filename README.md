@@ -97,6 +97,7 @@ Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の�
 
 - Canvas Apps Plugin は preview 機能で、別途 `.NET 10 SDK` が必要。`canvas-authoring` MCP を登録し、YAML 検証・control/API/data source 参照・coauthoring sync を提供する
 - Copilot Studio plugin は author / manage / test / advisor 系の外部 plugin で、VS Code では `@agentPlugins` から追加する。push/pull/clone では Copilot Studio Extension が別途必要になる
+- Dataverse MCP Server は Power Platform 環境側で提供・有効化する機能であり、`dataverse` Agent Plugin は GitHub Copilot / Copilot CLI 側で使う外部補助機能です。どちらもこのリポジトリに同梱しません
 - Dataverse でも外部 plugin や MCP を使う場合があるが、この repo の `.github/skills/dataverse/` とは別レイヤーの補助機能として扱う
 - これらはあると便利だが、リポジトリ内の `.github/agents/` と `.github/skills/` を置き換えるものではない
 
@@ -208,16 +209,20 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 最初にどこを見ればよいか迷う場合は、次だけ見れば十分です。
 
-| やりたいこと                         | 最初に読む場所                                                                                                                                                                                                                        |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 何から始めるか決めたい               | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
-| 仕様書から要件を整理したい           | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
-| Dataverse のテーブル設計から始めたい | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |
-| UI 実装に入りたい                    | [code-apps](./.github/skills/code-apps/SKILL.md) / [canvas-app](./.github/skills/canvas-app/SKILL.md) / [model-driven-app](./.github/skills/model-driven-app/SKILL.md) / [generative-page](./.github/skills/generative-page/SKILL.md) |
-| 自動化や通知を作りたい               | [power-automate](./.github/skills/power-automate/SKILL.md)                                                                                                                                                                            |
-| エージェントや AI を作りたい         | [copilot-studio](./.github/skills/copilot-studio/SKILL.md) / [ai-builder](./.github/skills/ai-builder/SKILL.md)                                                                                                                       |
+| やりたいこと                          | 最初に読む場所                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 何から始めるか決めたい                | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
+| 仕様書から要件を整理したい            | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
+| Dataverse のテーブル設計から始めたい  | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |
+| Copilot Studio の会話ログを分析したい | [Conversation Transcript 分析](./.github/skills/dataverse/references/conversation-transcript-analysis.md)                                                                                                                             |
+| UI 実装に入りたい                     | [code-apps](./.github/skills/code-apps/SKILL.md) / [canvas-app](./.github/skills/canvas-app/SKILL.md) / [model-driven-app](./.github/skills/model-driven-app/SKILL.md) / [generative-page](./.github/skills/generative-page/SKILL.md) |
+| 自動化や通知を作りたい                | [power-automate](./.github/skills/power-automate/SKILL.md)                                                                                                                                                                            |
+| エージェントや AI を作りたい          | [copilot-studio](./.github/skills/copilot-studio/SKILL.md) / [ai-builder](./.github/skills/ai-builder/SKILL.md)                                                                                                                       |
 
 詳細な構成規約や全スキルの一覧は [スキルカタログ](./.github/skills/README.md) を参照してください。
+
+> [!IMPORTANT]
+> Dataverse MCP Server の実環境 URL、接続設定、シークレットはリポジトリへ保存しません。必要な設定は VS Code の MCP 追加操作や、プレースホルダー付きの参照手順で扱ってください。
 
 ---
 

@@ -35,12 +35,17 @@ Dataverse のソリューション・テーブル・リレーション・ロー�
 
 | リファレンス                                                                            | 内容                                                     |
 | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| [Conversation Transcript 分析](references/conversation-transcript-analysis.md)          | Copilot Studio 会話ログの検証・原因調査・探索手順        |
 | [Dataverse 統合ガイド](references/dataverse-guide.md)                                   | CRUD・Lookup・Choice・システム列・トラブルシューティング |
 | [セキュリティロール](references/security-role.md)                                       | カスタムセキュリティロールの作成・権限設定パターン       |
 | [セキュリティロールデプロイリファレンス](references/security-role-deploy-reference.md)  | セキュリティロールのデプロイ手順詳細                     |
 | [セキュリティロールトラブルシューティング](references/security-role-troubleshooting.md) | セキュリティロール関連のトラブルシューティング           |
 
 > **このスキルの位置づけ**: アーキテクチャ設計（`architecture`）で Dataverse 利用が確定した後、テーブル設計→構築を担当する。Code Apps / Generative Pages / Power Automate / Copilot Studio のいずれを使う場合でも、データ層はこのスキルで構築する。
+
+> **会話ログ分析の扱い**: Copilot Studio の ConversationTranscript を使ったエージェント動作分析も対象になり得るが、これはカスタムテーブル開発とは別テーマとして扱う。詳細手順の正本は [Conversation Transcript 分析](references/conversation-transcript-analysis.md) とし、既定は読み取り専用の探索・原因調査に置く。
+
+> **外部 Plugin / MCP との関係**: リポジトリ内の `dataverse` スキルと、外部の `dataverse` Agent Plugin / Dataverse MCP Server は別物である。Plugin は補助的な外部ツールであり、このスキルの標準や手順を置き換えない。
 
 ## 前提
 
