@@ -101,6 +101,38 @@ Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の�
 - Dataverse でも外部 plugin や MCP を使う場合があるが、この repo の `.github/skills/dataverse/` とは別レイヤーの補助機能として扱う
 - これらはあると便利だが、リポジトリ内の `.github/agents/` と `.github/skills/` を置き換えるものではない
 
+### GitHub Copilot で Canvas Apps plugin を使い始める最短入口
+
+このリポジトリは **GitHub Copilot での利用を第一候補** にしているため、
+Canvas App の AI 編集もまず GitHub Copilot 前提で整理する。
+
+- この repo だけでは Canvas Apps plugin / MCP は使える状態にならない
+- まず外部 plugin と MCP サーバー設定を開発端末側へ追加する
+- 追加後の運用ルールと実装方針は、この repo の `.github/skills/canvas-app/` を正本とする
+
+Copilot CLI / Claude Code で導入する場合の代表コマンド:
+
+```text
+/plugin marketplace add microsoft/power-platform-skills
+/plugin install canvas-apps@power-platform-skills
+```
+
+VS Code の GitHub Copilot で使う場合の見方:
+
+- 拡張機能ビューの **エージェント プラグイン** に `canvas-apps` が見える
+- **MCP サーバー** に `canvas-authoring` が見える
+- ただし、表示されているだけでは対象 app に接続済みとは限らない
+
+次の 3 点がそろって初めて、Canvas App の live editing を始められる。
+
+1. Canvas Apps plugin がインストール済み
+2. `canvas-authoring` MCP が対象 app の environment ID / app ID / cluster に向けて設定済み
+3. Power Apps Studio 側で対象 app を開き、coauthoring が有効になっている
+
+最短セットアップ手順と疎通確認は
+[.github/skills/canvas-app/references/ai-codegen-workflow.md](./.github/skills/canvas-app/references/ai-codegen-workflow.md)
+を参照する。
+
 Canvas App の運用は、次の 3 モードで整理して使い分けます。
 
 | モード               | 主目的                    | この repo での位置づけ |
