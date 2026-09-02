@@ -46,6 +46,7 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | [外部トリガー](references/trigger.md)                                          | メール受信・Teams メッセージ・スケジュール等のトリガー追加           |
 | [トリガーパターン](references/trigger-patterns.md)                             | トリガーの設定パターン集                                             |
 | [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
+| [トラブルシューティング](references/troubleshooting.md)                        | トリガー以外を含む障害切り分け・復旧手順                             |
 | [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
 | [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
 | [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
@@ -267,7 +268,7 @@ Instructions テンプレート・既存エージェント改善パターンは 
 ## .env 必須項目
 
 ```env
-DATAVERSE_URL=https://xxx.crm7.dynamics.com
+DATAVERSE_URL=https://{org}.crm7.dynamics.com
 SOLUTION_NAME=SolutionName
 PUBLISHER_PREFIX=prefix
 BOT_ID=https://copilotstudio.../bots/xxxxxxxx-xxxx-.../overview

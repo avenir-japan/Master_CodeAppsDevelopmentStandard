@@ -6,7 +6,8 @@ from auth_helper import get_session
 
 s = get_session()
 url = os.getenv("DATAVERSE_URL").rstrip("/")
-r = s.get(f"{url}/api/data/v9.2/botcomponents(cf20b37f-bd2a-4b77-8889-4cfc01a570a0)?$select=data")
+component_id = os.environ.get("BOTCOMPONENT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+r = s.get(f"{url}/api/data/v9.2/botcomponents({component_id})?$select=data")
 data = r.json().get("data", "")
 lines = data.split("\n")
 print(f"Total lines: {len(lines)}")

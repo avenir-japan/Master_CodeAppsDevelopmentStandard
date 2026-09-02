@@ -23,7 +23,7 @@ npx power-apps push --non-interactive
 # テーブルごとに実行
 npx power-apps add-data-source --api-id dataverse \
   --resource-name geek_incident \
-  --org-url https://xxx.crm7.dynamics.com --non-interactive
+  --org-url https://{org}.crm7.dynamics.com --non-interactive
 
 # 日本語エラーが出たら nameUtils.js をパッチしてリトライ
 ```

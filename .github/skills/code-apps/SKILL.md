@@ -1319,7 +1319,7 @@ PowerShell で `npm run build 2>&1` の後にテキストを付けると Vite �
 ## .env 必須項目
 
 ```env
-DATAVERSE_URL=https://xxx.crm7.dynamics.com
+DATAVERSE_URL=https://{org}.crm7.dynamics.com
 ENVIRONMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # pac code push -env で使用
 SOLUTION_NAME=SolutionName
 PUBLISHER_PREFIX=prefix

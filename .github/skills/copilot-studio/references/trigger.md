@@ -19,7 +19,7 @@ triggers:
 Copilot Studio エージェントに **Power Automate フロー経由の外部トリガー** を追加する。
 メール受信・Teams メッセージ・スケジュール等をきっかけにエージェントを自動起動する。
 
-## 最重要方針: トリガーはすべて Copilot Studio UI で手動作成
+## 基本方針: トリガーはすべて Copilot Studio UI で手動作成
 
 ```
 ❌ API でトリガーフロー（Power Automate）を事前作成 → うまくいかない。接続認証・フローID不一致等の問題が頻発
@@ -126,7 +126,7 @@ ExternalTriggerComponent には 2 種類のフロー ID が存在する:
 
 フロー・接続参照・ExternalTriggerComponent は **すべてエージェントと同じソリューション内** に含める。
 
-## 絶対遵守ルール
+## 必須要件
 
 ### ExternalTriggerComponent の構造
 
@@ -902,11 +902,12 @@ def deploy_trigger_flow(flow_name, clientdata, solution_name):
 > **この手順は不要になりました。** ユーザーが Copilot Studio UI でトリガーを追加した後、
 > UI の「公開」ボタンで公開します。
 
+
 ## トリガーパターン・設計ガイド
 
 詳細なトリガーパターン（メール受信、Teams、スケジュール、Dataverse、SharePoint、OneDrive）は [トリガーパターンリファレンス](trigger-patterns.md) を参照。
 
-Teams 連携の設計ガイド・フロー後処理パターン・トラブルシューティングは [トラブルシューティング・設計ガイド](trigger-troubleshooting.md) を参照。
+Teams 連携の設計ガイド・フロー後処理パターン・トラブルシューティングは [トラブルシューティング・設計ガイド](troubleshooting.md) を参照。
 
 ## .env 項目
 

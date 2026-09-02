@@ -90,10 +90,10 @@ uuid: ^9.0.1
 
 ```typescript
 // ❌ NG: クエリパラメータ → MDA ルーティングエラー
-// https://org.crm7.dynamics.com/main.aspx?appid=...&pagetype=genux&id=...&date=2026-04-24
+// https://{org}.crm7.dynamics.com/main.aspx?appid=...&pagetype=genux&id=...&date=2026-04-24
 
 // ✅ OK: ハッシュフラグメント → MDA ルーティングに干渉しない
-// https://org.crm7.dynamics.com/main.aspx?appid=...&pagetype=genux&id=...#date=2026-04-24
+// https://{org}.crm7.dynamics.com/main.aspx?appid=...&pagetype=genux&id=...#date=2026-04-24
 
 function getInitialDate(): string {
   try {
@@ -135,13 +135,13 @@ function getInitialDate(): string {
 
 ```xml
 <!-- ❌ NG: GenPageId 属性 → 「新しいサブエリア」と表示されることがある -->
-<SubArea Id="sub_page" GenPageId="54dc32ce-bfcf-4899-8c25-0ac0436e2340" AvailableOffline="true">
+<SubArea Id="sub_page" GenPageId="{GENPAGE_ID}" AvailableOffline="true">
   <Titles><Title LCID="1041" Title="日報承認" /></Titles>
 </SubArea>
 
 <!-- ✅ OK: Url 属性 → <Titles> が正しく MDA メニューに反映される -->
 <SubArea Id="sub_dailyreport_approval" GetStartedPanePath=""
-  Url="/main.aspx?pagetype=genux&amp;id=54dc32ce-bfcf-4899-8c25-0ac0436e2340"
+  Url="/main.aspx?pagetype=genux&amp;id={GENPAGE_ID}"
   IntroducedVersion="7.0.0.0">
   <Titles>
     <Title LCID="1041" Title="日報承認" />
@@ -201,7 +201,7 @@ var period = woDateMap.get(woId) || ""; // "2026-04" (実作業月)
 
 ## 開発フロー
 
-### Step 0.5: モデル駆動型アプリ作成（Dataverse テーブル作成後・Generative Page 作成前）
+### 補足 0.5: モデル駆動型アプリ作成（Dataverse テーブル作成後・Generative Page 作成前）
 
 > **Generative Page はモデル駆動型アプリのページとして動作する。**
 > Dataverse テーブル作成（Phase 1）完了後、Generative Page のコード開発に入る前に、
@@ -235,7 +235,7 @@ pac auth list     # 認証プロファイル確認（* がアクティブ）
 認証がなければ:
 
 ```powershell
-pac auth create --environment https://your-env.crm7.dynamics.com
+pac auth create --environment https://{org}.crm7.dynamics.com
 ```
 
 ### Step 2: アプリ・ページ確認
@@ -405,7 +405,7 @@ pac model genpage upload `
 > **PAC CLI v2.6.4 以降**: `--prompt` と `--agent-message` フラグが必須。省略するとエラーになる。
 > **デプロイのタイムアウト対策**: 新規ページ作成時は `--prompt` と `--agent-message` を **英語の短い文字列**（例: `--prompt "kanban" --agent-message "kanban board"`）にする。日本語の長い説明文はサーバー側でタイムアウト（「タスクが取り消されました」）を引き起こしやすい（2026-04-21 検証済み: 日本語で3回失敗 → 英語短縮で成功）。既存ページ更新時（`--page-id`）はこの問題は発生しにくい。
 
-### Step 5.5: SiteMap 更新（デプロイ後に必ず実施 — 省略禁止）
+### 補足 5.5: SiteMap 更新（デプロイ後に必ず実施 — 省略禁止）
 
 > **絶対ルール**: `pac model genpage upload` を実行したら、**同じ作業内で必ず SiteMap を更新する**。
 > ユーザーに「SiteMap も更新しますか？」と聞かない。デプロイの一部として自動的に行う。
@@ -587,7 +587,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 
 デザインパターン・UI カタログ・チャート選定ガイドの詳細は [デザインテンプレート](references/design-template.md) を参照。
 
-### Step 0: ユーザーに質問する（最重要 — 必ず最初に行う）
+### Phase B-0: ユーザーに質問する（最重要 — 必ず最初に行う）
 
 ページ作成を依頼されたら、以下を質問する:
 
@@ -608,7 +608,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 > 4. **特に見たいチャートや UI はありますか？**（任意）
 >    例: トレンドライン、ドーナツ、ガントチャート、地図、ヒートマップ...
 
-### Step 1: 構築パターンの提案
+### Phase B-1: 構築パターンの提案
 
 ユーザーの回答に基づき、6 つの構築パターンから最適なものを選ぶ:
 
@@ -623,7 +623,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 
 選んだパターンのレイアウト・使用コンポーネントを提案し、承認を得る。
 
-### Step 2: 最小デプロイ（Tier 1）
+### Phase B-2: 最小デプロイ（Tier 1）
 
 初回デプロイに含める要素（安定稼働を優先）:
 
@@ -648,7 +648,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 
 **初回デプロイ後、Tier 2 の改善を提案する。**
 
-### Step 3: チャート・ビジュアル追加（Tier 2 — ユーザーに提案）
+### Phase B-3: チャート・ビジュアル追加（Tier 2 — ユーザーに提案）
 
 > デプロイが完了しました！ さらに強化するなら、以下がおすすめです:
 >
@@ -667,7 +667,7 @@ Generative Pages は **いきなり KPI ダッシュボードを作らない**�
 >
 > どれを追加しますか？
 
-### Step 4: 高度な UI（Tier 3 — さらなる提案）
+### Phase B-4: 高度な UI（Tier 3 — さらなる提案）
 
 > 視覚的な改善を適用しました。さらに改善するなら:
 >

@@ -30,7 +30,7 @@ DATAVERSE_URL = os.environ["DATAVERSE_URL"].rstrip("/")
 SOLUTION_NAME = os.environ.get("SOLUTION_NAME", "IncidentManagement")
 PREFIX = os.environ.get("PUBLISHER_PREFIX", "geek")
 
-BOT_ID = "26ce6549-7837-f111-88b3-0022482f3ac7"
+BOT_ID = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 BOT_NAME = "News agent"
 BOT_SCHEMA = f"{PREFIX}_news_agent"
 

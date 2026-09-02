@@ -15,7 +15,7 @@ h = {
     "Content-Type": "application/json; charset=utf-8",
 }
 
-bot_id = "05be3e2f-9133-f111-88b5-7ced8dea312a"
+bot_id = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 
 # configuration に instructions と description を含めてみる
 config = {

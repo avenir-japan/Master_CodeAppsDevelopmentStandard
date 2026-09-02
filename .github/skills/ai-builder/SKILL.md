@@ -261,7 +261,7 @@ modelDescription: AI Prompt Sample
 
 action:
   kind: InvokeAIBuilderModelTaskAction
-  aIModelId: 5f6a74ff-cd92-4f6b-a7f2-37e2be122105
+  aIModelId: ${AI_MODEL_ID}
 
 outputMode: All
 ```

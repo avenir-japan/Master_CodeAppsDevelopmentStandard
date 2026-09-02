@@ -67,6 +67,9 @@ triggers:
 | [環境変数ガイド](references/environment-variables.md)                        | 環境変数の型、使い方、納品時の差し替えパターン               |
 | [ライセンス確認ルール](references/license-requirements.md)                   | 固定値を断定せず、最新 docs を確認するための確認観点         |
 | [認証リファレンス](references/auth-patterns.md)                              | auth_helper.py の詳細実装・認証パターン                      |
+| [ブラウザ自動化方針](references/browser-automation.md)                        | VS Code 統合ブラウザを使った検証手順の標準化                 |
+| [対話型セットアップ](references/interactive-setup.md)                         | 初期確認を AskUserQuestion で整理する導入導線                |
+| sdk-update-check.md                                                           | npm SDK と upstream skills の追従確認手順                    |
 | [アイコン作成](references/icon-creation.md)                                  | Pillow による PNG/SVG アイコン生成・API 登録パターン         |
 | [HTML メールテンプレート](references/html-email-template.md)                 | HTML メールのデザインシステム・カラーパレット・基本原則      |
 | [テンプレートコンポーネント](references/template-components.md)              | HTML メールの各コンポーネント詳細                            |
@@ -152,6 +155,17 @@ $env:PP_USE_INTERACTIVE_BROWSER = "1"
 #### 公開 API
 
 認証パターンの詳細実装は [認証リファレンス](references/auth-patterns.md) を参照。
+
+### 事前検証: MCP クライアント状態チェック
+
+MCP クライアント依存の作業に入る前は、`.github/skills/standard/scripts/check_mcp_client.py` で
+対象クライアントの有効状態を確認する。初期段階で不一致を検知し、後続作業の手戻りを防ぐ。
+
+### 定期点検: SDK / upstream skills 更新チェック
+
+依存更新や upstream 公式 skills の追従要否を確認するときは、
+`.github/scripts/check-sdk-updates.mjs` を dry-run で実行して差分を確認する。
+運用手順は `standard/references/sdk-update-check.md` を正本とする。
 
 ## 参照ドキュメント
 

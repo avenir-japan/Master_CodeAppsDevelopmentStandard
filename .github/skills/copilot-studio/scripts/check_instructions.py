@@ -14,7 +14,7 @@ h = {
     "OData-Version": "4.0",
 }
 
-bot_id = "05be3e2f-9133-f111-88b5-7ced8dea312a"
+bot_id = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 r = requests.get(
     f"{API}/botcomponents",
     headers=h,

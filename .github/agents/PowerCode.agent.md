@@ -22,9 +22,12 @@ Power Platform コードファースト開発エキスパート。
 | Code Apps          | .github/skills/code-apps/SKILL.md        |
 | Canvas App         | .github/skills/canvas-app/SKILL.md       |
 | 仕様書変換         | .github/skills/spec-to-markdown/SKILL.md |
+| 仕様統合           | .github/skills/spec-builder/SKILL.md     |
 | Power Automate     | .github/skills/power-automate/SKILL.md   |
 | Copilot Studio     | .github/skills/copilot-studio/SKILL.md   |
 | AI Builder         | .github/skills/ai-builder/SKILL.md       |
 | Generative Page    | .github/skills/generative-page/SKILL.md  |
 | モデル駆動型アプリ | .github/skills/model-driven-app/SKILL.md |
 | アーキテクチャ判断 | .github/skills/architecture/SKILL.md     |
+| SDK 更新確認       | .github/skills/standard/SKILL.md         |
+| スキル更新標準化   | .github/skills/update-skills/SKILL.md    |

@@ -6,8 +6,8 @@ from auth_helper import api_patch, api_post, api_get, get_session
 
 s = get_session()
 url = os.getenv("DATAVERSE_URL").rstrip("/")
-comp_id = "cf20b37f-bd2a-4b77-8889-4cfc01a570a0"
-bot_id = "05be3e2f-9133-f111-88b5-7ced8dea312a"
+comp_id = os.environ.get("BOTCOMPONENT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+bot_id = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 desc_text = "社内のインシデント管理AIエージェント"
 
 def check():

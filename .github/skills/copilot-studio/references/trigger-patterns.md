@@ -6,8 +6,8 @@
 
 ```python
 # ★ リファレンスフロー定義（新しいメールが届いたとき (V3)）
-# Dataverse workflow ID: 98f51416-e036-f111-88b4-7c1e527df0b0
-# Flow API ID: f2ebc605-2439-a8e2-1987-97877e6371f7
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + Office 365 Outlook の 2 つ
 connection_refs = {
@@ -38,7 +38,7 @@ trigger = {
                 "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
             },
             "parameters": {
-                "subjectFilter": "【社内インシデント】",  # 件名フィルタ
+                "subjectFilter": "【件名キーワード】",  # 件名フィルタ
             },
             "authentication": "@parameters('$authentication')",
         },
@@ -83,8 +83,8 @@ Teams 連携はユーザーの要望を正確にヒアリングして 3 つの�
 
 ```python
 # ★ リファレンスフロー定義（チャネルに新しいメッセージが追加されたとき）
-# Dataverse workflow ID: 2aa1648c-fa36-f111-88b4-7c1e527df0b0
-# Flow API ID: 98cbd6c3-99e1-7a13-acbc-1b888a3e67a3
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + Microsoft Teams
 connection_refs = {
@@ -190,8 +190,8 @@ info = parse_teams_channel_url("https://teams.cloud.microsoft/l/channel/19%3A...
 
 ```python
 # ★ リファレンスフロー定義（チャットに新しいメッセージが追加されたとき）
-# Dataverse workflow ID: 37ec69e6-fa36-f111-88b4-7c1e527df0b0
-# Flow API ID: 1385db20-9a7d-3c86-489c-3488cac530fc
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + Microsoft Teams（チャネルと同じ）
 connection_refs = {
@@ -273,8 +273,8 @@ action = {
 
 ```python
 # ★ リファレンスフロー定義（Recurring Copilot Trigger）
-# Dataverse workflow ID: 1c816283-f936-f111-88b4-7c1e527df0b0
-# Flow API ID: a7e51ff0-c5dd-28fb-98b9-889bd198cb4e
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio コネクタのみ（トリガー用コネクタ不要）
 connection_refs = {
@@ -363,8 +363,8 @@ extensionData:
 
 ```python
 # ★ リファレンスフロー定義（行が追加、変更、または削除された場合）
-# Dataverse workflow ID: 10530cf4-fd36-f111-88b4-002248262d0e
-# Flow API ID: 650ed264-3581-9e43-fb23-de6b2acfb21d
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + Dataverse
 connection_refs = {
@@ -466,8 +466,8 @@ action = {
 
 ```python
 # ★ リファレンスフロー定義（ファイルが作成されたとき (プロパティのみ)）
-# Dataverse workflow ID: 9fea80e2-fc36-f111-88b4-7c1e527df0b0
-# Flow API ID: 1450ecd5-70da-03a2-5455-4e7894d61dac
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + SharePoint
 connection_refs = {
@@ -544,7 +544,7 @@ action = {
 | パラメータ | 説明                               | 例                                          |
 | ---------- | ---------------------------------- | ------------------------------------------- |
 | `dataset`  | SharePoint サイト URL              | `https://contoso.sharepoint.com/sites/demo` |
-| `table`    | ドキュメントライブラリの ID (GUID) | `54fe7b63-ec46-4800-8c2f-e6e6ab27adbb`      |
+| `table`    | ドキュメントライブラリの ID (GUID) | `{document-library-id}`      |
 
 #### SharePoint トリガーの 2 種類
 
@@ -570,8 +570,8 @@ action = {
 
 ```python
 # ★ リファレンスフロー定義（ファイルが作成されたとき）
-# Dataverse workflow ID: 9b8af32c-ff36-f111-88b4-002248262d0e
-# Flow API ID: 6c8f0e4d-5a03-1d74-13a8-8b1ee291c73d
+# Dataverse workflow ID: {workflow-id}
+# Flow API ID: {flow-api-id}
 
 # connectionReferences: Copilot Studio + OneDrive for Business
 connection_refs = {

@@ -632,7 +632,7 @@ except Exception as e:
 ## .env 必須項目
 
 ```env
-DATAVERSE_URL=https://xxx.crm7.dynamics.com
+DATAVERSE_URL=https://{org}.crm7.dynamics.com
 SOLUTION_NAME=SolutionName
 PUBLISHER_PREFIX=prefix
 # 接続 ID はハードコードしない。deploy_flow.py が PowerApps API で自動検索する

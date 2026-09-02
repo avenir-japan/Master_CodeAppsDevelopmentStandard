@@ -75,14 +75,15 @@ triggers: # スキル発動条件キーワード（必須）
 
 ---
 
-## スキル一覧（12 スキル）
+## スキル一覧（14 スキル）
 
 ### architecture — アーキテクチャ・基盤
 
-| スキル                                | 説明                                                                           |
-| ------------------------------------- | ------------------------------------------------------------------------------ |
-| [architecture](architecture/SKILL.md) | Power Platform 全体の構成方針を設計し、最適なコンポーネント構成を決定する。    |
-| [standard](standard/SKILL.md)         | 共通認証・環境変数・ソリューション運用など、全スキル共通の開発基盤を提供する。 |
+| スキル                                  | 説明                                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------------ |
+| [architecture](architecture/SKILL.md)   | Power Platform 全体の構成方針を設計し、最適なコンポーネント構成を決定する。    |
+| [standard](standard/SKILL.md)           | 共通認証・環境変数・ソリューション運用など、全スキル共通の開発基盤を提供する。 |
+| [update-skills](update-skills/SKILL.md) | スキル更新の標準化、検証、PR 作成・更新運用を一貫して実施する。                |
 
 ### data — データ層
 
@@ -113,19 +114,22 @@ triggers: # スキル発動条件キーワード（必須）
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | [ai-builder](ai-builder/SKILL.md)             | AI Builder の AI プロンプトを作成し、エージェントのツールとして組み込む。                                      |
 | [spec-to-markdown](spec-to-markdown/SKILL.md) | PDF・PowerPoint・Excel 等の仕様書を markdown 化し、Power Platform 開発向けの factsheet / document を整理する。 |
+| [spec-builder](spec-builder/SKILL.md)         | 仕様書・画像を staging 変換し、要件ドキュメント一式へ統合する。                                                |
 
 ---
 
 ## 目的別の入口
 
-| やりたいこと                               | 最初に読むスキル                                                                                                                                                  |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 何から始めるか決めたい                     | [architecture](architecture/SKILL.md)                                                                                                                             |
-| 既存仕様書を整理して要件化したい           | [spec-to-markdown](spec-to-markdown/SKILL.md)                                                                                                                     |
-| Dataverse のテーブル・列・権限から固めたい | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                        |
-| UI 実装にすぐ入りたい                      | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
-| 自動化・通知・外部トリガーを作りたい       | [power-automate](power-automate/SKILL.md)                                                                                                                         |
-| エージェントや AI ツールを作りたい         | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                   |
+| やりたいこと                                  | 最初に読むスキル                                                                                                                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 何から始めるか決めたい                        | [architecture](architecture/SKILL.md)                                                                                                                             |
+| 既存仕様書を整理して要件化したい              | [spec-to-markdown](spec-to-markdown/SKILL.md)                                                                                                                     |
+| 仕様入力を要件文書へ自動統合したい            | [spec-builder](spec-builder/SKILL.md)                                                                                                                             |
+| SDK や upstream skills の更新追従を確認したい | [standard](standard/SKILL.md)                                                                                                                                     |
+| Dataverse のテーブル・列・権限から固めたい    | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                        |
+| UI 実装にすぐ入りたい                         | [code-apps](code-apps/SKILL.md) / [canvas-app](canvas-app/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) / [generative-page](generative-page/SKILL.md) |
+| 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md)                                                                                                                         |
+| エージェントや AI ツールを作りたい            | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                   |
 
 ---
 
@@ -144,4 +148,5 @@ triggers: # スキル発動条件キーワード（必須）
 5. power-automate     → フロー作成
 6. dataverse          → テーブル設計・構築・セキュリティロール設定（必要時）
 7. ai-builder         → AI プロンプト追加（必要時。最新ライセンス条件を確認）
+8. update-skills      → スキル更新・PR 連携・検証の標準化（標準運用へ反映する場合）
 ```

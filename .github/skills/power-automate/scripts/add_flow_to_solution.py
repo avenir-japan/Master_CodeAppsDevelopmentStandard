@@ -9,7 +9,7 @@ load_dotenv()
 
 URL = os.environ["DATAVERSE_URL"].rstrip("/")
 SOL = os.environ.get("SOLUTION_NAME", "IncidentManagement")
-FLOW_ID = "7bfda812-803b-4d5e-a992-b5af6153c572"
+FLOW_ID = os.environ.get("FLOW_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 
 token = get_token()
 h = {"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Accept": "application/json", "OData-MaxVersion": "4.0", "OData-Version": "4.0"}

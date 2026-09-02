@@ -6,7 +6,8 @@ from auth_helper import get_session
 
 s = get_session()
 url = os.getenv("DATAVERSE_URL").rstrip("/")
-bot_id = "05be3e2f-9133-f111-88b5-7ced8dea312a"
+bot_id = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+component_id = os.environ.get("BOTCOMPONENT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 
 # 1. Bot レコード全体
 print("=== Bot Record ===")
@@ -46,7 +47,7 @@ for c in comps:
 
 # 4. Check botcomponent description column specifically
 print("\n=== botcomponent 'description' column check ===")
-r3 = s.get(f"{url}/api/data/v9.2/botcomponents(cf20b37f-bd2a-4b77-8889-4cfc01a570a0)?$select=description,data")
+r3 = s.get(f"{url}/api/data/v9.2/botcomponents({component_id})?$select=description,data")
 bc = r3.json()
 print(f"  description: {bc.get('description', '(null)')}")
 print(f"  data[:200]: {(bc.get('data','') or '')[:200]}")

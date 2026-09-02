@@ -6,7 +6,7 @@ from auth_helper import get_token, DATAVERSE_URL
 
 token = get_token()
 API = DATAVERSE_URL + "/api/data/v9.2"
-bot_id = "419c29eb-8f33-f111-88b5-7ced8dea312a"
+bot_id = os.environ.get("BOT_ID", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 h = {
     "Authorization": f"Bearer {token}",
     "Accept": "application/json",
