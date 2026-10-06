@@ -95,6 +95,8 @@ spec/                          ← スキル専用ディレクトリ
    - `is_completed=false` または更新差分ありのファイルのみ再処理
    - 全件完了時は既存 `spec/output/docs/` を参照して開発を継続
 
+`pending_skills.json` と仮の staging を作成した段階では、本文の抽出は未完了。ここで処理が終わる場合は、準備済みの成果物、未完了の抽出・統合工程、次に行う操作を分けて報告する。
+
 ## staging → docs 統合フロー
 
 staging の変換完了後、以下の手順で docs を更新する。
@@ -102,10 +104,10 @@ staging の変換完了後、以下の手順で docs を更新する。
 1. `spec/.cache/conversion-checklist.json` を読み、`is_completed=false` のファイルがないか確認する
 2. `is_completed=false` が残っていれば、対象の staging ファイルを読んで内容を補完する
 3. 全 staging ファイルを横断し、各 docs の `要確認` を実際の要件に書き換える：
-   - `business-requirements.md` → ステークホルダー・ユーザーストーリー・業務フロー
-   - `functional-requirements.md` → 機能一覧(MoSCoW)・データモデル・非機能要件
-   - `design-requirements.md` → 全体構成・コンポーネント・リスク・実装タスク分解（★全体構成・コンポーネント選定は [architecture スキル](../architecture/SKILL.md) の判断を正として転記する）
-   - `test-requirements.md` → テストシナリオ・受け入れ条件（functional の機能一覧 # と対応。条件本文の正は functional 側）
+   - `business-requirements.md` → 開発段階、目的・検証仮説、対象範囲と対象外、成功条件、ステークホルダー・ユーザーストーリー・業務フロー。開発段階や範囲が不明なら推測せず `要確認` とする
+   - `functional-requirements.md` → 機能一覧(MoSCoW)・データモデル・非機能要件。今回の対象と対象外が分かるよう業務要件の範囲を反映する
+   - `design-requirements.md` → 全体構成・コンポーネント・リスク・実装タスク分解。PoC / MVPでは目的に必要な構成と本番化時に判断する事項を区別し、フローのアクションも目的達成と必要な検証に必要な範囲に絞る（★全体構成・コンポーネント選定は [architecture スキル](../architecture/SKILL.md) の判断を正として転記する）
+   - `test-requirements.md` → テストシナリオ・受け入れ条件（functional の機能一覧 # と対応。条件本文の正は functional 側）。PoC / MVPでは検証目的と未検証の範囲を区別し、結果を本番品質の保証として記載しない
 4. `index.md` の処理状況テーブルも合わせて更新する
 5. 推測で埋めず、情報不足は `要確認` として残す
 
@@ -134,12 +136,14 @@ staging の変換完了後、以下の手順で docs を更新する。
 ## `spec/output/docs/` で整理する観点
 
 ### index.md
+
 - ドキュメント一覧（各 docs へのリンクと役割）
 - 処理状況テーブル
 - 開発利用フロー（番号付き手順）
 
 ### business-requirements.md
-- 概要（対象業務・プロジェクト背景・スコープ）
+
+- 概要（対象業務・プロジェクト背景・開発段階・目的・検証仮説・スコープと対象外・成功条件）
 - ステークホルダー / ロール（ロール・担当業務・関心事の表）
 - ユーザーストーリー（As a…I want…so that…形式）
 - 業務フロー
@@ -147,9 +151,10 @@ staging の変換完了後、以下の手順で docs を更新する。
 - 要件変更履歴（変更理由を必ず併記）
 
 ### functional-requirements.md
-- 機能一覧（MoSCoW 優先度・受け入れ条件の表 — **受け入れ条件の正はここ**）
+
+- 機能一覧（MoSCoW 優先度・受け入れ条件の表 — **受け入れ条件の正はここ**。今回の対象範囲と対象外は business-requirements の判断を反映する）
 - Dataverse テーブル候補（テーブル名・主な列・リレーション）
-- UI 要件（Code Apps / Model-Driven Apps / Cowork プラグイン — 選定の確定は [architecture スキル](../architecture/SKILL.md) を優先）
+- UI 要件（Teams / Microsoft 365 Copilot を優先し、画面 UI が本当に必要なら Canvas App を基本案とする。Canvas App では要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案し、実現性・ライセンス・費用とユーザー承認を確認。選定の確定は [architecture スキル](../architecture/SKILL.md) を優先）
 - Power Automate の自動化要件
 - Copilot Studio / AI Builder の利用余地（採用可否・v1/v2 判断は architecture スキルに従う）
 - 外部連携
@@ -162,6 +167,7 @@ staging の変換完了後、以下の手順で docs を更新する。
 > 本ドキュメントには architecture スキルの判断フロー・[設計アウトプットテンプレート](../architecture/references/design-patterns.md#2-設計アウトプットテンプレート)で確定した結果を転記する。
 
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）
+- 採用した構成・実装範囲と、PoC / MVPで対象外にした本番向け作り込みや後続判断事項
 - コンポーネント設計（種別・役割・依存の表 — architecture スキルの「コンポーネント構成」表と整合させる）
 - セキュリティ / 権限 / 監査（区分・内容・対応方針の表）
 - 設計上のリスク（リスク・影響度・発生確率・対応方針の表）
@@ -170,7 +176,8 @@ staging の変換完了後、以下の手順で docs を更新する。
 - 要件変更履歴（変更理由を必ず併記）
 
 ### test-requirements.md
-- テスト戦略（テスト方針・環境・自動化範囲）
+
+- テスト戦略（テスト方針・環境・自動化範囲・今回確認する目的・未検証の範囲）
 - テストシナリオ（シナリオ名・前提条件・操作手順・期待結果・優先度の表）
 - 受け入れ条件（functional-requirements の機能 # を参照し確認方法を定義 — **条件本文の正は functional 側、二重管理しない**）
 - 非機能テスト（区分・テスト内容・合格基準の表 — 区分は functional の非機能要件と一致させる）

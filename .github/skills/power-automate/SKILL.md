@@ -114,6 +114,8 @@ Dataverse API: https://{org}.crm7.dynamics.com/.default      ← workflow テー
 
 ```text
 設計原則:
+  - PoC / MVP では、目的の実現と必要な検証に必要なアクションに絞り、本番向けの拡張を自動的に加えない
+  - アクション数の削減で正しさや必要な検証が損なわれる場合は削らず、追加の作り込みが必要なら理由を明示して案件ごとに判断する
   - まず Power Automate の既定アクションで実現できるかを確認する
   - Graph HTTP は「既定アクションが存在しない」「既定アクションのスキーマが不安定」「既定アクションでは必要な操作が表現できない」場合だけ使う
   - Teams / Groups のように複数コネクタで到達できる処理は、対象リソースに最も近い既定コネクタを優先する
@@ -342,6 +344,12 @@ Power Automate UI で手動追加したパラメータと API でデプロイし
 詳細: references/trigger-action-patterns.md の
 「Power Apps V2 トリガー」「PowerApp 応答アクション」セクションを参照
 ```
+
+### Microsoft 365 Copilot Chat に返すリンク
+
+- Microsoft 365 Copilot Chat でクリック可能なリンクを含む応答を返す場合、成功応答の `message` を `[表示名](URL)` の Markdown リンク形式にする。検証したケースでは、プレーン URL ではなく Markdown 形式が必要だった
+- 表示用 `message` と機械可読な URL 出力は別に保つ。既存の URL 出力契約を Markdown 文字列へ置き換えない
+- 成功応答の表示だけを変更し、失敗応答と共有リンク作成後に応答する実行順を維持する。応答変更後はこれらを回帰確認する
 
 ### PowerApps API 接続検索のタイムアウト対策
 

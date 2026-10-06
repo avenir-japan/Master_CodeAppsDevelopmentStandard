@@ -316,9 +316,14 @@ def build_business_requirements_doc(batch_started_at: str, results: list[Convers
 
 ## 2. 概要
 
+- **開発段階**（PoC / MVP / 本番 / その他）: 要確認
 - **対象業務 / 目的**: 要確認
 - **プロジェクト背景**: 要確認
 - **スコープ**: 要確認
+- **対象外・後続判断事項**: 要確認
+- **検証目的・仮説 / 成功条件**: 要確認
+
+<!-- 開発段階・目的・範囲の正本を案件ごとに指定する。SPEC.md と本書が食い違う場合は要確認として判断を待つ。PoC / MVP の結果を本番品質の保証として扱わない -->
 
 ## 3. ステークホルダー / ロール
 
@@ -366,6 +371,7 @@ def build_functional_requirements_doc(batch_started_at: str, results: list[Conve
 ## 2. 機能一覧
 
 <!-- Must / Should / Could / Won't で優先度を記載 (MoSCoW) -->
+<!-- 今回の対象範囲と対象外は business-requirements.md の判断を反映する -->
 
 | # | 機能名 | 優先度 (MoSCoW) | 概要 | 受け入れ条件 |
 | --- | --- | --- | --- | --- |
@@ -446,7 +452,11 @@ def build_design_requirements_doc(batch_started_at: str, results: list[Conversio
 
 ## 2. Power Platform 全体構成案
 
-<!-- architecture スキルの設計アウトプットテンプレート（references/design-patterns.md §2）に従い、Mermaid 構成図（複数カラム形式の subgraph）で記載する -->
+<!-- architecture スキルの設計アウトプットテンプレート（references/design-patterns.md §2）に従い、PoC / MVP の目的に必要な構成と本番化時の後続判断を区別し、Mermaid 構成図（複数カラム形式の subgraph）で記載する -->
+
+- **今回実現する目的・範囲**: 要確認
+- **対象外・本番化時の後続判断**: 要確認
+- **フロー設計**: 目的達成と必要な検証に必要な処理に絞る。必要なアクションを機械的に削減しない
 
 要確認
 
@@ -506,8 +516,12 @@ def build_test_requirements_doc(batch_started_at: str, results: list[ConversionR
 ## 2. テスト戦略
 
 - **テスト方針**: 要確認
+- **今回確認する目的・成功条件**: 要確認
+- **未検証の範囲 / 本番化時に確認する事項**: 要確認
 - **テスト環境**: 要確認
 - **自動化範囲**: 要確認
+
+<!-- PoC / MVP の検証結果は、本番品質や本番運用の保証として扱わない -->
 
 ## 3. テストシナリオ
 

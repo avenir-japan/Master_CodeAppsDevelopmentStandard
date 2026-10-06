@@ -1,5 +1,9 @@
 # Copilot Studio トリガー トラブルシューティング・設計ガイド
 
+## Instructions の JSON 例で式解釈エラーが出る場合
+
+GPT Instructions に出力形式の raw JSON 例を追加した後、`ExpressionSegment` / `ContentValidationError` が報告された事例がある。保存できたことだけでは、式解釈を含む実行時の成功は保証されない。エラーが出た場合は JSON 例に含まれる波括弧を確認し、例示を波括弧なしのキー名・型・必須項目の説明に置き換えて再検証する。raw JSON が常に失敗するという意味ではなく、この事例だけで原因を特定したものでもない。
+
 ## フロー後処理パターン
 
 ### ExecuteCopilot の応答は利用できない（重要）

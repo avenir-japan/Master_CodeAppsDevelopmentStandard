@@ -1,21 +1,21 @@
 # アーキテクチャ設計 リファレンス
 
 > **既定提案**: 検証導入パッケージでは、まず Teams / Microsoft 365 Copilot を入口にした対話型パターンを第一候補にする。
-> 画面 UI が必要な場合のみ Canvas App を優先的に検討し、Code Apps やその他の拡張パターンは案件要件と追加ライセンス評価に応じて採用する。
+> 画面 UI が本当に必要な場合は Canvas App を基本案とし、利用するデータ・コネクタのライセンスを確認する。Canvas App では仕様・技術要件を満たすのが難しい場合、Code Apps / Model-Driven Apps も代替候補として提案し、実現性・ライセンス・費用を確認してユーザー承認後に採用を決める。
 
 ## 7. 統合アーキテクチャパターン集
 
-### パターン A: 必要時の業務アプリ（Canvas App / Code Apps + 通知）
+### パターン A: 必要時の業務アプリ（Canvas App + 通知）
 
 ```
-[Dataverse] ←→ [Canvas App / Code Apps]  ← ユーザーがデータ操作
+[採用済みデータソース] ←→ [Canvas App]  ← ユーザーがデータ操作
       ↓ レコード変更
 [Power Automate] → メール/Teams 通知
 ```
 
-**使うスキル**: `code-apps` / `canvas-app` → `power-automate`
+**使うスキル**: `canvas-app` → `power-automate`（データソース・コネクタのライセンスを確認）
 
-### パターン A2: 業務アプリ（Model-Driven + 通知）
+### パターン A2: 追加ライセンス承認時の例外案（Model-Driven + 通知）
 
 ```
 [Dataverse] ←→ [Model-Driven Apps]  ← テーブル定義から自動生成 UI
@@ -25,8 +25,7 @@
 
 **使うスキル**: `model-driven-app` → `power-automate`
 
-> **パターン A vs A2 の判断**: カスタム UI が不要で標準ビュー/フォームで十分なら A2（最速）。
-> 画面 UI が必要で、まずベースライセンス範囲内を優先するなら A の Canvas App、カンバン・ダッシュボード・カスタムビジュアルが必要なら A の Code Apps を比較する。
+> **パターン A vs A2 の判断**: A を基本案とする。Canvas App では要件を満たすのが難しい場合に A2 も代替候補として提示し、Dataverse のライセンス条件・実現性・費用を確認してユーザー承認後に採用を決める。
 
 ### パターン B: 標準対話 UI（Teams / M365 Copilot + ナレッジ）
 
@@ -62,12 +61,12 @@
 
 **使うスキル**: `copilot-studio`（[market-research-report.md](../../copilot-studio/references/market-research-report.md) を参照）
 
-### パターン E: 拡張フルスタック業務システム
+### パターン E: 追加条件を要する拡張業務システム
 
 ```
 [Dataverse]
     ↑↓
-[Code Apps] ←→ ユーザー操作
+[Canvas App] ←→ ユーザー操作（画面が必要な場合）
     ↓ レコード変更
 [Power Automate] → 通知 / 承認 / 外部連携
     ↓
@@ -78,7 +77,7 @@
 
 **使うスキル**: 全フェーズスキルを順番に適用
 
-> **位置づけ**: パターン E は拡張パターンとして扱う。検証導入パッケージの既定提案ではなく、要件と追加ライセンス評価に応じて採用する。
+> **位置づけ**: パターン E は拡張パターンとして扱う。Canvas App では仕様・技術要件を満たしにくい場合の代替候補として、Dataverse 等のライセンスと利用条件を確認して提案し、明示承認後に採用する。
 
 ---
 
@@ -91,9 +90,14 @@
 
 ### 1. 要件サマリー
 
+- 開発段階: {PoC / MVP / 本番 / その他 / 要確認}
+- 検証目的・仮説（PoC / MVP の場合）: {何を確かめるか}
+- 対象範囲 / 対象外・後続判断事項: {今回実施することと、今回扱わないこと}
 - 管理対象: {何を管理するか}
 - 主なユーザー: {誰が使うか}
 - 主要操作: {何をするか}
+
+PoC / MVP の場合は、この段階で確かめる内容と本番化時に改めて判断する事項を分ける。フローを含む構成は、目的達成と必要な検証に必要な処理に絞り、検証結果を本番運用の保証として扱わない。
 
 ### 2. アーキテクチャパターン
 
@@ -101,16 +105,15 @@
 
 ### 3. コンポーネント構成
 
-| コンポーネント | 用途                 | 必要性  |
-| -------------- | -------------------- | ------- |
-| Teams / M365 Copilot | {入口 / チャネルの概要} | ✅ / ❌ |
-| Dataverse      | {テーブル構成の概要} | ✅ 必須 |
-| Code Apps      | {画面の概要}         | ✅ / ❌ |
-| Canvas App     | {画面の概要}         | ✅ / ❌ |
-| Model-Driven   | {アプリの概要}       | ✅ / ❌ |
-| Power Automate | {フローの概要}       | ✅ / ❌ |
-| Copilot Studio | {エージェントの概要} | ✅ / ❌ |
-| AI Builder     | {プロンプトの概要}   | ✅ / ❌ |
+| コンポーネント             | 用途                                     | 必要性  |
+| -------------------------- | ---------------------------------------- | ------- |
+| Teams / M365 Copilot       | {入口 / チャネルの概要}                  | ✅ / ❌ |
+| Dataverse カスタムテーブル | {採用する場合のテーブル構成}             | ✅ / ❌ |
+| Canvas App                 | {必要時の画面・利用データの概要}         | ✅ / ❌ |
+| Model-Driven（代替案）     | {必要な場合のアプリ概要・ライセンス条件} | ✅ / ❌ |
+| Power Automate             | {フローの概要}                           | ✅ / ❌ |
+| Copilot Studio             | {エージェントの概要}                     | ✅ / ❌ |
+| AI Builder                 | {プロンプトの概要}                       | ✅ / ❌ |
 
 ### 4. 判断根拠
 
@@ -119,14 +122,13 @@
 
 ### 5. 構築フェーズ
 
-1. Phase 1: Dataverse — {テーブル数}テーブル
+1. Phase 1: Dataverse カスタムテーブル — {テーブル数}テーブル（※ 採用時のみ）
 2. Phase 2: Copilot Studio / Teams / M365 Copilot — {対話 UI の概要}（※ 不要なら省略）
-3. Phase 2: Canvas App — {画面数}画面（※ 不要なら省略）
-4. Phase 2: Code Apps — {画面数}画面（※ 不要なら省略）
-5. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Canvas App / Code Apps と排他）
-6. Phase 2.5: Power Automate — {フロー数}フロー（※ 不要なら省略）
-7. Phase 3: Copilot Studio — {エージェント数}エージェント（※ 不要なら省略）
-8. Phase 4: AI Builder — {プロンプト数}プロンプト（※ 不要なら省略）
+3. Phase 2: Canvas App — {画面数}画面（※ 画面 UI が必要な場合のみ）
+4. Phase 2: Model-Driven Apps — テーブルから自動生成（※ Canvas App では難しい場合に代替提案し、ライセンス確認・明示承認後）
+5. Phase 2.5: Power Automate — {フロー数}フロー（※ 不要なら省略）
+6. Phase 3: Copilot Studio — {エージェント数}エージェント（※ 不要なら省略）
+7. Phase 4: AI Builder — {プロンプト数}プロンプト（※ 不要なら省略）
 
 この設計で進めてよいですか？
 ```
@@ -135,15 +137,15 @@
 
 ## 9. よくある判断ミスと対策
 
-| ミス                                                             | 正しい判断                                                                 |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 通知だけなのに Copilot Studio を使う                             | Power Automate 単体で十分。LLM が不要なら使わない                          |
-| 確定的な処理に Copilot Studio を使う                             | 条件分岐が固定なら Power Automate。LLM のハルシネーションリスクを避ける    |
-| Power Automate で自然言語処理を頑張る                            | Copilot Studio に任せる。フローの条件分岐で自然言語を扱うのは脆い          |
-| AI Builder で対話機能を作ろうとする                              | Copilot Studio を使う。AI Builder は単発の入力→出力処理向き                |
-| Canvas Apps で複雑な UI を作る                                   | Code Apps に切り替える。ドラッグ&ドロップのカンバンは Canvas Apps では困難 |
-| 標準 CRUD だけなのに Code Apps でフルスクラッチ                  | Model-Driven Apps なら自動生成で最速。カスタム UI 不要なら MDA を検討      |
-| 全要件に Copilot Studio を使う                                   | 対話が不要な部分は Power Automate / Code Apps で。適材適所                 |
-| Power Automate フロー内に AI Builder アクションを API でデプロイ | API では `InvalidOpenApiFlow` エラー。AI Builder ステップは UI で手動追加  |
+| ミス                                                             | 正しい判断                                                                                          |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 通知だけなのに Copilot Studio を使う                             | Power Automate 単体で十分。LLM が不要なら使わない                                                   |
+| 確定的な処理に Copilot Studio を使う                             | 条件分岐が固定なら Power Automate。LLM のハルシネーションリスクを避ける                             |
+| Power Automate で自然言語処理を頑張る                            | Copilot Studio に任せる。フローの条件分岐で自然言語を扱うのは脆い                                   |
+| AI Builder で対話機能を作ろうとする                              | Copilot Studio を使う。AI Builder は単発の入力→出力処理向き                                         |
+| Canvas Apps で複雑な UI を作る                                   | Code Apps / Model-Driven Apps も代替候補として比較し、実現性・ライセンス・費用を確認する            |
+| 標準 CRUD なら無条件に Model-Driven Apps を使う                  | まず Canvas App を基本案として検討し、難しい場合に Model-Driven Apps も提案。ライセンスと承認を確認 |
+| 全要件に Copilot Studio を使う                                   | 対話が不要な部分は Power Automate / 必要時の Canvas App で扱う                                      |
+| Power Automate フロー内に AI Builder アクションを API でデプロイ | API では `InvalidOpenApiFlow` エラー。AI Builder ステップは UI で手動追加                           |
 
 ---

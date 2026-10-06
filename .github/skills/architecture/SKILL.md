@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: "Power Platform ソリューションの全体アーキテクチャを設計する。Copilot Studio / Power Automate / Code Apps / AI Builder の使い分け判断、コンポーネント選定、統合パターンを決定する。"
+description: "Power Platform ソリューションの全体アーキテクチャを設計する。Copilot Studio / Power Automate / Canvas App を基本案とする画面UI / Code Apps・Model-Driven Apps の代替提案 / AI Builder の使い分け判断、コンポーネント選定、統合パターンを決定する。"
 category: architecture
 triggers:
   - "アーキテクチャ設計"
@@ -24,18 +24,27 @@ triggers:
 > **このスキルの位置づけ**: Phase 0（設計）の最初に読む。個別コンポーネントのスキル（`copilot-studio`, `power-automate` 等）に入る前に、全体像を確定させる。
 
 > [!IMPORTANT]
-> **UI 実装方式（Code Apps / Canvas Apps / Model-Driven Apps）は、設計時に必ずユーザーへ確認してから確定する。**
-> 技術的には Code Apps が適して見える場合でも、顧客要望・保守体制・市民開発者の関与・モバイル要件・既存資産によって Canvas Apps が選ばれることがある。
-> 逆に Canvas Apps が早そうに見えても、複雑な UI や長期保守を考えると Code Apps が適切な場合がある。
-> したがって、AI が独断で UI 方式を確定して実装に入ってはいけない。
+> **構成案の採用・実装着手前に、[共通の実現可能性ゲート](../standard/references/power-platform-development-standard.md)を必ず通す。** コンポーネント単体だけでなく、採用するアクションと入力から出力までの重要経路について公式情報で制限・前提を確認する。公式情報で可否を判断できない重要経路は最小構成で実機検証し、未確認・不適合が残る間は本実装に入らない。代替構成は再判定し、ユーザーの承認を得る。
+
+## 開発段階と設計範囲
+
+- 構成案を作る前に、案件の開発段階、PoC / MVPの場合に検証する目的・仮説、対象範囲と対象外を確認する。マスターの既定提案はPoC / MVPだが、案件の確定要件を上書きせず、未確認事項は `要確認` として扱う
+- 構成・機能・検証範囲は目的に必要な大きさにとどめ、本番向けの作り込みや運用対策を自動的に追加しない。後続判断が必要な事項は、理由とともに設計書へ分けて記録する
+- PoC / MVPで採用するPower Automateフローは、目的達成と必要な検証に必要なアクション数に絞る。正しさや検証可能性を損なう単純な削減はしない
+
+> [!IMPORTANT]
+> **画面 UI の要否と実装方式は、設計時に必ずユーザーへ確認してから確定する。**
+> 画面 UI が本当に必要な場合は、まず Canvas Apps を基本案として検討する。仕様・技術要件により Canvas Apps では実現が難しい場合は、Code Apps / Model-Driven Apps も代替候補としてユーザーに提案する。代替案は実現性・ライセンス条件を確認し、ユーザーの承認を得るまで採用確定しない。
 
 ## この標準での既定提案
 
 このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
 
 - 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
-- **Canvas Apps（標準コネクタ）** は既定スコープに含むが、工数を踏まえて必要時のみ採用候補とする
-- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **追加ライセンス評価項目** として案件ごとに判断する
+- **Canvas Apps** は画面 UI が本当に必要な場合の基本案とし、利用するデータソース・コネクタのライセンス条件を確認する
+- Canvas Apps では仕様・技術要件を満たせない場合、**Code Apps / Model-Driven Apps** も代替候補として提案する。実現性・ライセンス・費用を確認し、ユーザー承認後に採否を決める
+- Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **追加ライセンス評価項目** として案件ごとに判断する
+- 利用者と実行主体のベースライセンス適合を確認し、Copilot Credits 非消費を原則とする。追加ライセンスまたは Credits 消費が避けられない場合は代替案を先に検討し、条件と費用影響を示した例外案についてユーザーの明示承認を得る
 - 個別スキルは技術手順の正本として残し、このスキルでは **何を既定提案にするか** を決める
 
 ---
@@ -58,7 +67,7 @@ triggers:
 ## 2. 判断フローチャート
 
 > **先に確認すること**: 利用者向けの入口が必要な場合、まず Teams / Microsoft 365 Copilot で要件を満たせるかを確認する。
-> 画面 UI が必要な場合だけ、Canvas Apps / Model-Driven Apps / Code Apps の比較に進む。
+> 画面 UI が本当に必要な場合だけ、Canvas Apps（標準コネクタ）を候補にする。必要な機能が追加ライセンスを要する場合は通常案として採用せず、代替構成または承認済みの例外案を検討する。
 
 ### 2.1 メイン判断: 「何を実現したいか？」
 
@@ -71,7 +80,7 @@ triggers:
     ├─ イベント/条件に基づく自動処理？ ──→ YES ──→ 【Power Automate】（§4 へ）
     │                                     NO
     │                                     ↓
-    ├─ データの閲覧・編集 UI が必要？ ──→ YES ──→ 【Code Apps / Canvas Apps / Model-Driven Apps】（§5 へ）
+    ├─ データの閲覧・編集 UI が必要？ ──→ YES ──→ 【Canvas Apps を基本案に検討】（§5 へ）
     │                                    NO
     │                                    ↓
     ├─ 再利用可能な AI 処理が必要？ ──→ YES ──→ 【AI Builder】（§6 へ）
@@ -84,16 +93,16 @@ triggers:
 
 多くの要件は **複数コンポーネントの組み合わせ** になる。以下のパターンで判断する:
 
-| パターン                | 構成                                                                  | 典型的なユースケース                  |
-| ----------------------- | --------------------------------------------------------------------- | ------------------------------------- |
-| **標準対話 UI**         | Teams / Microsoft 365 Copilot + Copilot Studio                        | 社内 FAQ、案内、自然言語問い合わせ    |
-| **CRUD + 通知**         | Code Apps / Canvas Apps / Model-Driven Apps + Power Automate          | インシデント管理、資産管理、申請管理  |
-| **対話 + データ操作**   | Copilot Studio + Dataverse（ナレッジ）                                | ヘルプデスク、FAQ、データ照会         |
-| **対話 + 外部連携**     | Copilot Studio + MCP Server / コネクタ                                | メール処理、ドキュメント分析          |
-| **対話 + 定期実行**     | Copilot Studio + Power Automate（スケジュールトリガー）               | ニュース配信、定期レポート            |
-| **対話 + イベント駆動** | Copilot Studio + Power Automate（メール/Teams トリガー）              | メール自動応答、問い合わせ対応        |
-| **AI 分析 + 対話**      | AI Builder + Copilot Studio                                           | ドキュメント分類 + 対話で結果説明     |
-| **フルスタック**        | Dataverse + Code Apps / Canvas Apps + Power Automate + Copilot Studio | 業務アプリ + 自動化 + AI アシスタント |
+| パターン                | 構成                                                      | 典型的なユースケース                 |
+| ----------------------- | --------------------------------------------------------- | ------------------------------------ |
+| **標準対話 UI**         | Teams / Microsoft 365 Copilot + Copilot Studio            | 社内 FAQ、案内、自然言語問い合わせ   |
+| **CRUD + 通知**         | Canvas Apps（画面が必要な場合）+ Power Automate           | インシデント管理、資産管理、申請管理 |
+| **対話 + データ操作**   | Copilot Studio + Dataverse（ナレッジ）                    | ヘルプデスク、FAQ、データ照会        |
+| **対話 + 外部連携**     | Copilot Studio + MCP Server / コネクタ                    | メール処理、ドキュメント分析         |
+| **対話 + 定期実行**     | Copilot Studio + Power Automate（スケジュールトリガー）   | ニュース配信、定期レポート           |
+| **対話 + イベント駆動** | Copilot Studio + Power Automate（メール/Teams トリガー）  | メール自動応答、問い合わせ対応       |
+| **AI 分析 + 対話**      | AI Builder + Copilot Studio                               | ドキュメント分類 + 対話で結果説明    |
+| **拡張パターン**        | Dataverse + Canvas Apps + Power Automate + Copilot Studio | 追加ライセンスを要する場合は例外承認 |
 
 ---
 
@@ -117,7 +126,7 @@ triggers:
 | 決まった手順を100%確実に実行したい | → **Power Automate**（確定的フロー）     |
 | 大量データの一括処理（1000件+）    | → **Power Automate**（ループ + バッチ）  |
 | LLM を使わない単純な条件分岐       | → **Power Automate**（コスト効率が良い） |
-| UI でのデータ入力・編集            | → **Code Apps / Canvas Apps**            |
+| UI でのデータ入力・編集            | → **Canvas Apps** を基本案に検討         |
 | 認証・承認ワークフロー             | → **Power Automate**（承認コネクタ）     |
 
 ### 構築モード: 生成オーケストレーション一択
@@ -185,7 +194,7 @@ AskUserQuestion の確認文言例:
 | ユーザーとの対話が必要     | → **Copilot Studio**               |
 | あいまいな入力の解釈が必要 | → **Copilot Studio**（LLM で判断） |
 | 自然言語でのレポート生成   | → **Copilot Studio**               |
-| リッチな UI が必要         | → **Code Apps**                    |
+| 画面 UI が必要             | → **Canvas Apps** を基本案に検討   |
 
 ### Power Automate 単体 vs Copilot Studio + トリガーの判断
 
@@ -259,21 +268,21 @@ AskUserQuestion の確認文言例:
 
 ---
 
-## 5. Code Apps vs Canvas Apps vs Model-Driven Apps の判断ポイント
+## 5. 画面 UI の判断ポイント
 
 > [!IMPORTANT]
 > この判断は **推奨案を作るための基準** であり、最終決定ではない。
 > UI 方式を決める設計では、必ず以下を提示してユーザー確認を取る:
 >
-> - 推奨方式（Code Apps / Canvas Apps / Model-Driven Apps）
+> - 画面 UI が本当に必要か、および基本案（Canvas Apps）
+> - Canvas Apps では難しい要件がある場合、代替候補（Code Apps / Model-Driven Apps）と実現性・ライセンス条件
 > - 推奨理由
 > - 代替方式を選んだ場合のメリット・制約
 > - 顧客要望・保守者・モバイル利用・既存資産の前提
 >
-> 確認文言の例: **「入口は Teams / Microsoft 365 Copilot を標準提案にしますか。画面 UI が必要なら Canvas Apps / Model-Driven Apps / Code Apps のどれで進めますか？」**
+> 確認文言の例: **「Teams / Microsoft 365 Copilot だけで足りますか。画面 UI が必要なら Canvas Apps の利用データとライセンス条件を確認して進めますか？」**
 
-> **既定提案の補足**: まず Teams / Microsoft 365 Copilot を標準チャネルとして提案し、
-> 画面 UI が必要と判断された場合にのみ、以下の比較で Canvas Apps / Model-Driven Apps / Code Apps を選定する。
+> **既定提案の補足**: まず Teams / Microsoft 365 Copilot を標準チャネルとして提案する。画面 UI が本当に必要な場合は Canvas Apps を基本案として利用データ・コネクタの条件を確認し、Canvas Apps では要件を満たせない場合に限り Code Apps / Model-Driven Apps も代替案として比較提案する。
 
 ```
 Q: Teams / Microsoft 365 Copilot だけで要件を満たせる？
@@ -282,24 +291,16 @@ Q: Teams / Microsoft 365 Copilot だけで要件を満たせる？
 │   └─ → Teams / Microsoft 365 Copilot + Copilot Studio を第一候補
 │
 └─ NO
-  └─ Q: UI の複雑さは？
-
-    ├─ 標準的な業務フォーム（Dataverse テーブルの CRUD が中心）
-    │   └─ Q: カスタム UI が必要？
-    │       ├─ 不要。標準ビュー/フォームで十分 → Model-Driven Apps
-    │       └─ 必要 → 下記へ
-    │
-    ├─ シンプル（一覧 + フォーム程度）
-    │   └─ Q: ベースライセンス範囲内で成立させたい？
-    │       ├─ YES → Canvas Apps
-    │       └─ NO / 別要件あり → Canvas Apps と Code Apps を比較
-    │
-    ├─ 中程度（ダッシュボード + 複数画面 + フィルタ）
-    │   └─ → Canvas Apps / Code Apps を比較
-    │
-    └─ 複雑（カンバン + ガントチャート + インライン編集 + カスタムビジュアル）
-      └─ → Code Apps を含めて比較（追加ライセンス評価を忘れない）
+  └─ Q: 画面 UI が本当に必要？
+    ├─ NO  → Teams / Microsoft 365 Copilot や自動処理で構成を再検討
+    └─ YES → Canvas Apps を基本案として利用データ・コネクタの条件を確認
+          ├─ 要件を満たせる → Canvas Apps を推奨
+          └─ 仕様・技術要件で実現が難しい → Code Apps / Model-Driven Apps も
+           代替候補として実現性・ライセンス・費用を比較し、ユーザーへ提案
+           採用はユーザー承認後に確定
 ```
+
+以下の比較表は各方式の技術特性を示す。Canvas Apps を基本案とし、Canvas Apps では要件実現が難しい場合に Code Apps / Model-Driven Apps を代替候補として比較提案する。ライセンス条件を確認し、ユーザー承認前に採用確定しない。
 
 | 判断ポイント                                         | Code Apps              | Canvas Apps          | Model-Driven Apps             |
 | ---------------------------------------------------- | ---------------------- | -------------------- | ----------------------------- |
@@ -316,41 +317,29 @@ Q: Teams / Microsoft 365 Copilot だけで要件を満たせる？
 | セキュリティロール連携                               | △ 手動実装             | △ 手動実装           | ✅ ネイティブ統合             |
 | ビュー/ダッシュボード自動生成                        | ❌ 手動実装            | ❌ 手動実装          | ✅ テーブルから自動生成       |
 
-### このプロジェクトの標準: Code Apps
+### この標準での画面 UI
 
-本プロジェクトでは **Code Apps（TypeScript + React + Tailwind + shadcn/ui）** を標準とする。
-Canvas Apps を選択するのは、**以下の条件をすべて満たす場合に限る**:
-
-```
-Canvas Apps を選ぶ 3 条件（すべて該当する場合のみ）:
-  ① ユーザー数が十数人程度（〜20人）
-  ② 画面数が数画面（〜5画面）で機能がシンプル
-  ③ コア業務ではない（補助的・部門限定の業務）
-
-上記を 1 つでも満たさない場合 → Code Apps
-```
+画面 UI が本当に必要な場合は **Canvas Apps** を基本案として検討し、利用するコネクタ・データソースのライセンス条件を確認する。Canvas Apps では仕様・技術要件を満たすのが難しい場合は、**Code Apps / Model-Driven Apps** も代替候補として提案し、実現性・ライセンス・費用の確認と承認後に採否を決める。
 
 ### Model-Driven Apps を選ぶ条件
 
-**Model-Driven Apps は以下の条件をすべて満たす場合に選択する**:
+**Canvas Apps では要件を満たすのが難しく、Model-Driven Apps を代替案として提案する場合は、以下の適合条件と Dataverse のライセンス要件を確認する**:
 
 ```
-Model-Driven Apps を選ぶ 4 条件（すべて該当する場合のみ）:
+Model-Driven Apps の適合性を確認する 4 条件:
   ① Dataverse テーブルの標準 CRUD が主要な操作（ビュー + フォーム中心）
   ② カスタムビジュアル（カンバン・ガントチャート等）が不要
   ③ Dataverse のビジネスルール・セキュリティロールをフル活用したい
   ④ テーブル定義から自動生成される UI で十分（最速デプロイ優先）
 
-上記を 1 つでも満たさない場合 → Code Apps
+条件を満たさない場合も含め、Canvas Apps / Code Apps / Model-Driven Apps の適合性と制約を比較し、代替案としてユーザーに提示する。採用方式は承認後に確定する。
 ```
 
-> **判断の理由**: Model-Driven Apps はテーブル定義からビュー・フォーム・ナビゲーションが自動生成されるため、
+> **適合性の目安**: Model-Driven Apps はテーブル定義からビュー・フォーム・ナビゲーションが自動生成されるため、
 > 標準的な業務データ管理アプリを最速で構築できる。ビジネスルール・セキュリティロールとのネイティブ統合も強み。
-> ただし UI のカスタマイズ性は限定的なため、独自のビジュアルが必要な場合は Code Apps を選択する。
+> ただし UI のカスタマイズ性は限定的なため、独自のビジュアルが必要な場合は Code Apps も含む代替案を比較し、実現性・ライセンス・費用を確認する。
 
-> **Code Apps との使い分け**: Code Apps は保守性・拡張性・UI カスタマイズ性に優れる。
-> Canvas Apps は「小規模・シンプル・非コア」の 3 条件が揃った場合のみコスト効率で勝る。
-> 迷ったら独断で確定せず、Code Apps / Canvas Apps / Model-Driven Apps の候補を提示してユーザーに確認する。
+> **代替案の扱い**: Model-Driven Apps は Dataverse の利用権・ライセンス条件を確認してから提案する。Code Apps / Model-Driven Apps は候補として提案できるが、実現性・ライセンス・費用を明示し、ユーザー承認前に採用確定しない。
 
 ---
 
@@ -423,8 +412,8 @@ Q: その AI 処理は再利用するか？
 
 - [ ] **自然言語対話が必要か？** → YES なら Copilot Studio を含む構成
 - [ ] **イベント駆動の自動処理が必要か？** → YES なら Power Automate を含む構成
-- [ ] **データ操作 UI が必要か？** → YES なら Code Apps / Canvas Apps / Model-Driven Apps を含む構成
-- [ ] **標準ビュー/フォームで十分か？** → YES なら Model-Driven Apps が最速。カスタム UI なら Code Apps
+- [ ] **データ操作の画面 UI が本当に必要か？** → YES なら Canvas Apps を基本案としてデータソース・コネクタの利用条件を確認
+- [ ] **Canvas Apps では要件実現が難しいか？** → YES なら Code Apps / Model-Driven Apps も代替候補として比較提案し、実現性・ライセンス・費用とユーザー承認を確認
 - [ ] **再利用可能な AI 処理が必要か？** → YES なら AI Builder を含む構成
 - [ ] **確定的な処理か、LLM 判断が必要か？** → 確定的なら Power Automate、LLM なら Copilot Studio
 - [ ] **応答文の生成が必要か？** → YES なら Copilot Studio
@@ -433,13 +422,13 @@ Q: その AI 処理は再利用するか？
 
 ## 関連スキル
 
-| スキル                                           | 次に読む場面                                                    |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| [standard](../standard/SKILL.md)                 | `.env`・認証・ソリューション運用の共通前提を固める              |
-| [dataverse](../dataverse/SKILL.md)               | テーブル・列・リレーション・権限を具体化する                    |
-| [code-apps](../code-apps/SKILL.md)               | Code Apps で実装すると確定した後に UI を作る                    |
-| [canvas-app](../canvas-app/SKILL.md)             | Canvas App で実装すると確定した後に添付・staging パターンを使う |
-| [model-driven-app](../model-driven-app/SKILL.md) | Model-Driven Apps で標準 CRUD 中心に進める                      |
-| [power-automate](../power-automate/SKILL.md)     | 確定的フロー・外部トリガー・接続参照を設計する                  |
-| [copilot-studio](../copilot-studio/SKILL.md)     | 対話型エージェントや生成オーケストレーションを入れる            |
-| [ai-builder](../ai-builder/SKILL.md)             | 再利用可能な AI プロンプトを共通部品として切り出す              |
+| スキル                                           | 次に読む場面                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| [standard](../standard/SKILL.md)                 | `.env`・認証・ソリューション運用の共通前提を固める           |
+| [dataverse](../dataverse/SKILL.md)               | テーブル・列・リレーション・権限を具体化する                 |
+| [code-apps](../code-apps/SKILL.md)               | Canvas Apps では難しい要件の代替候補として提案する場合に参照 |
+| [canvas-app](../canvas-app/SKILL.md)             | 画面 UI が必要と確定した後に構成・添付を設計する             |
+| [model-driven-app](../model-driven-app/SKILL.md) | Canvas Apps では難しい要件の代替候補として提案する場合に参照 |
+| [power-automate](../power-automate/SKILL.md)     | 確定的フロー・外部トリガー・接続参照を設計する               |
+| [copilot-studio](../copilot-studio/SKILL.md)     | 対話型エージェントや生成オーケストレーションを入れる         |
+| [ai-builder](../ai-builder/SKILL.md)             | 再利用可能な AI プロンプトを共通部品として切り出す           |

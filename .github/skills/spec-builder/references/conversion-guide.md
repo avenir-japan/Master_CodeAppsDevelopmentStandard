@@ -104,12 +104,14 @@ python convert_documents.py \
 ## 6. docs の構成
 
 ### index.md
+
 - ドキュメント一覧（各 docs へのリンク・役割・主な利用者）
 - 処理状況テーブル
 - 開発利用フロー（番号付き手順）
 
 ### business-requirements.md
-- 概要（対象業務・プロジェクト背景・スコープ）
+
+- 概要（対象業務・プロジェクト背景・開発段階・目的・検証仮説・スコープと対象外・成功条件）
 - ステークホルダー / ロール（表）
 - ユーザーストーリー（As a…I want…so that…形式）
 - 業務フロー
@@ -117,9 +119,10 @@ python convert_documents.py \
 - 要件変更履歴（理由を併記）
 
 ### functional-requirements.md
-- 機能一覧（MoSCoW 優先度・受け入れ条件の表 — 受け入れ条件の正はここ）
+
+- 機能一覧（MoSCoW 優先度・受け入れ条件の表 — 受け入れ条件の正はここ。今回の対象範囲と対象外は business-requirements の判断を反映）
 - Dataverse テーブル候補（表）
-- UI 要件 / 自動化要件 / AI 連携要件（コンポーネント選定は `.github/skills/architecture/SKILL.md` の判断フローを優先。Cowork プラグイン第一候補・Canvas Apps は常に対象外・外部ユーザー向けは Azure 既定）
+- UI 要件 / 自動化要件 / AI 連携要件（コンポーネント選定は `.github/skills/architecture/SKILL.md` の判断フローを優先。画面 UI が本当に必要なら Canvas App を基本案とし、Canvas App では要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案。実現性・ライセンス・費用を確認し、外部ユーザー向けの構成も案件要件と実現可能性で判断）
 - 非機能要件（パフォーマンス・セキュリティ・可用性・スケーラビリティ・ユーザビリティの表 — test の非機能テストと区分を一致させる）
 - 要件変更履歴（理由を併記）
 
@@ -129,6 +132,7 @@ python convert_documents.py \
 > architecture スキルの判断フロー・設計アウトプットテンプレート（`references/design-patterns.md` §2）で確定した結果を転記する。
 
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）
+- 採用した構成・実装範囲と、PoC / MVPで対象外にした本番向け作り込みや後続判断事項
 - コンポーネント設計（表 — architecture スキルの「コンポーネント構成」表と整合させる）
 - セキュリティ / 権限 / 監査（表）
 - 設計上のリスク（影響度・発生確率・対応方針の表）
@@ -137,7 +141,8 @@ python convert_documents.py \
 - 要件変更履歴（理由を併記）
 
 ### test-requirements.md
-- テスト戦略
+
+- テスト戦略（今回確認する目的・未検証の範囲を含める。PoC / MVPの結果を本番品質の保証として扱わない）
 - テストシナリオ（前提条件・操作手順・期待結果・優先度の表）
 - 受け入れ条件（functional の機能 # を参照し確認方法を定義 — 条件本文の正は functional 側、二重管理しない）
 - 非機能テスト（合格基準の表 — 区分は functional の非機能要件と一致させる）
@@ -156,6 +161,8 @@ python convert_documents.py \
 - 画像以外は anthropics/skills（`context_hint` を参照して抽出観点を確認）
 - 推測で埋めず、情報不足は `要確認`
 - OCR 抽出では表を markdown table 化し、判読不能箇所は `[判読不可]` とする
+
+設計案・作成時の説明・現在の入力資料が食い違う場合は、各記述の出所と確定状況を分けて記録する。現行資料の内容を抽出した事実と、採用する仕様が確定したことは同義ではない。判断が変わる矛盾は `要確認` に残し、旧記述を現行の定義として転記しない。差分検索では変更履歴中の言及と現在有効な記述を区別する。
 
 補足: anthropics/skills（Claude）も画像読解は可能だが、この運用では OCR を agent-ocr に固定する。
 

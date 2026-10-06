@@ -81,7 +81,7 @@ work/
 - 利用者 / ロール
 - Dataverse テーブル候補
 - 主要列 / マスタ / リレーション候補
-- Code Apps / Model-Driven Apps の UI 要件
+- UI / チャネル要件（Teams / Microsoft 365 Copilot 優先、画面 UI が本当に必要なら Canvas App を基本案とする。Canvas App では要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案し、実現性・ライセンス・費用を確認）
 - Power Automate の自動化要件
 - Copilot Studio / AI Builder の利用余地
 - 外部連携

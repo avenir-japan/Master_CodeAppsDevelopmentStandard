@@ -43,9 +43,19 @@ triggers:
 このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
 
 - 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
-- **Canvas App（標準コネクタ）** は既定スコープに含むが、工数を踏まえて必要時のみ採用候補とする
-- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **案件ごとの追加ライセンス評価項目** として扱う
+- **Canvas App** は画面 UI が本当に必要な場合の基本案とし、利用するデータソース・コネクタのライセンスを確認する
+- Canvas App では仕様・技術要件を満たすのが難しい場合、**Code Apps / Model-Driven Apps** も代替候補として提案する。実現性・ライセンス・費用を明示し、ユーザー承認後に採否を確定する
+- Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **案件ごとの追加ライセンス評価項目** として扱う
+- 利用者と実行主体のライセンス適合を確認し、原則は既定ベースライセンス内、Copilot Credits 消費ゼロとする。消費・追加ライセンスが避けられない場合は代替案を先に検討し、例外案は条件と費用影響を示してユーザーの明示承認を得る
 - 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
+- このマスターの既定サービスは **PoC / MVP** とし、本番開発相当の完成度や運用保証を既定の前提にしない。構成・機能・検証範囲・作り込み度は、PoC / MVP の目的と確認すべき仮説に必要な範囲に合わせる
+- 本番向けの機能・複雑さ・運用対策を自動的に追加しない。PoC / MVP の目的を超える範囲が必要な場合は、その理由と影響を示して案件ごとに判断する
+
+## 開発着手前の実現可能性ゲート（必須）
+
+すべての Power Platform 案件で、採用する構成・機能・アクションとそれらの接続経路について、設計承認・本実装より前に最新の Microsoft 公式情報で対応可否と制限を確認する。案件固有の入力規模・チャネル・権限・ライセンス条件と照合し、利用者と実行主体の双方について原則ベースライセンス内で適合すること、Copilot Credits を消費しないことを別々に判定する。Credits の非消費はチャネル、認証利用者、トリガー、実行主体、機能の適用条件に基づいて確認し、未確認を非消費と扱わない。公式情報だけでは重要経路の可否を判断できない場合は、当該経路を最小構成で実機検証する。確認結果、公式 URL、確認日、検証結果、未解決事項、代替案を設計に記録する。
+
+**重要経路に技術・ライセンス・Credits の未確認または不適合が残る場合、通常案として通過させず本実装を開始しない。** ベースライセンス内かつCredits非消費の代替案を先に検討し、実現が難しい場合は追加条件と費用影響を添えた例外案を提示して、ユーザーの明示承認を得る。技術的不確実性を解消する最小限の実機検証のみ許可し、解消できなければ代替構成を再設計する。詳細な判定・チェックリストは [Power Platform 開発標準の Phase 0](references/power-platform-development-standard.md) を参照。
 
 ## Copilot 向け優先判断基準
 
@@ -67,17 +77,22 @@ triggers:
 | [環境変数ガイド](references/environment-variables.md)                        | 環境変数の型、使い方、納品時の差し替えパターン               |
 | [ライセンス確認ルール](references/license-requirements.md)                   | 固定値を断定せず、最新 docs を確認するための確認観点         |
 | [認証リファレンス](references/auth-patterns.md)                              | auth_helper.py の詳細実装・認証パターン                      |
-| [ブラウザ自動化方針](references/browser-automation.md)                        | VS Code 統合ブラウザを使った検証手順の標準化                 |
-| [対話型セットアップ](references/interactive-setup.md)                         | 初期確認を AskUserQuestion で整理する導入導線                |
-| sdk-update-check.md                                                           | npm SDK と upstream skills の追従確認手順                    |
+| [ブラウザ自動化方針](references/browser-automation.md)                       | VS Code 統合ブラウザを使った検証手順の標準化                 |
+| [対話型セットアップ](references/interactive-setup.md)                        | 初期確認を AskUserQuestion で整理する導入導線                |
+| sdk-update-check.md                                                          | npm SDK と upstream skills の追従確認手順                    |
 | [アイコン作成](references/icon-creation.md)                                  | Pillow による PNG/SVG アイコン生成・API 登録パターン         |
 | [HTML メールテンプレート](references/html-email-template.md)                 | HTML メールのデザインシステム・カラーパレット・基本原則      |
 | [テンプレートコンポーネント](references/template-components.md)              | HTML メールの各コンポーネント詳細                            |
 
 ## 大前提: 一つのソリューション内に開発
 
-Dataverse テーブル・Code Apps・Power Automate フロー・Copilot Studio エージェントは **すべて同一のソリューション内** に含める。
+採用した Dataverse テーブル・Canvas App・Power Automate フロー・Copilot Studio エージェントは **原則として同一のソリューション内** に含める。
 `.env` の `SOLUTION_NAME` と `PUBLISHER_PREFIX` を全フェーズで統一して使用する。
+
+初期化では、採用した構成に必要な Publisher・Solution と、必要に応じて環境変数・接続参照を準備する。
+Dataverse カスタムテーブルの作成は初期化の必須工程ではない。要件で採用した場合のみ
+[`dataverse`](../dataverse/SKILL.md) のテーブル構築工程へ進み、採用しない場合もソリューション管理は継続する。
+ライセンスの適用条件は構成ごとに最新の公式情報で確認する。
 
 ## 共通基盤: .env と認証
 
@@ -196,19 +211,18 @@ MCP クライアント依存の作業に入る前は、`.github/skills/standard/
 ## 関連スキル
 
 > **採用優先順位の扱い**: 下表は利用可能な実装スキルの一覧であり、既定提案の優先順位そのものではない。
-> 優先順位は「Teams / Microsoft 365 Copilot を先頭、Canvas App は必要時のみ、その他は案件判断」を正本とする。
+> 優先順位は「Teams / Microsoft 365 Copilot を先頭、画面 UI が本当に必要なら Canvas App を基本案とし、Canvas App では難しい場合に Code Apps / Model-Driven Apps も代替提案」を正本とする。代替案は実現性・ライセンス・費用を確認し、ユーザー承認後に採否を確定する。
 
-| フェーズ                  | スキル             | 内容                                                                        |
-| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
-| Phase 1: Dataverse 構築   | `dataverse`        | テーブル設計・作成・ローカライズ・デモデータ                                |
-| Phase 1.5: Security Role  | `dataverse`        | カスタムセキュリティロール作成・権限設定                                    |
-| Phase 2: Copilot Studio   | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験                               |
-| Phase 2: Code Apps        | `code-apps`        | 初期化・デプロイ・Dataverse 接続                                            |
-| Phase 2: Code Apps UI     | `code-apps`        | CodeAppsStarter デザインシステム・コンポーネント                            |
-| Phase 2: Canvas App       | `canvas-app`       | MCP + coauthoring、Git Integration、限定移送、添付・SharePoint staging 運用 |
-| Phase 2: Model-Driven App | `model-driven-app` | モデル駆動型アプリ作成・SiteMap・公開                                       |
-| Phase 2.5: Power Automate | `power-automate`   | クラウドフロー作成・接続参照                                                |
-| Phase 3: Copilot Studio   | `copilot-studio`   | エージェント構築・生成オーケストレーション                                  |
+| フェーズ                          | スキル             | 内容                                                              |
+| --------------------------------- | ------------------ | ----------------------------------------------------------------- |
+| Phase 1: Dataverse 構築（採用時） | `dataverse`        | カスタムテーブル採用時の設計・作成・ローカライズ・デモデータ      |
+| Phase 1.5: Security Role          | `dataverse`        | カスタムセキュリティロール作成・権限設定                          |
+| Phase 2: Copilot Studio           | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験                     |
+| 代替候補: Code Apps               | `code-apps`        | Canvas App では要件実現が難しい場合に比較する技術資料             |
+| Phase 2: Canvas App               | `canvas-app`       | 必要な画面 UI、Git Integration、添付・SharePoint staging 運用     |
+| 代替候補: Model-Driven App        | `model-driven-app` | Canvas App では要件実現が難しい場合にライセンス条件と合わせて比較 |
+| Phase 2.5: Power Automate         | `power-automate`   | クラウドフロー作成・接続参照                                      |
+| Phase 3: Copilot Studio           | `copilot-studio`   | エージェント構築・生成オーケストレーション                        |
 
 ## クイックリファレンス: 絶対遵守ルール
 
