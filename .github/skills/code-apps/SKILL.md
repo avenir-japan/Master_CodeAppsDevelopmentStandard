@@ -83,7 +83,7 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 - Code Apps は **Single-Page Application (SPA)** を対象とする。
 - Microsoft の推奨 CLI は `npx power-apps` 系で、`pac code` は将来廃止予定。
 - ただし本スキルでは、`npx power-apps push` のテナント解決不具合に当たる場合のみ `pac code push` を **暫定ワークアラウンド** として許容する。
-- 利用者には **Power Apps Premium ライセンス** が必要。
+- 利用者には **Power Apps Premium の利用権** が必要。Microsoft Learn は Power Apps Premium ライセンス、従量課金、App Pass、auto-claim を利用条件として挙げている。案件で適用する付与方法と費用は [公式の前提条件](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/overview#license-end-users-with-power-apps-premium) で確認する。
 - Power Apps mobile / Windows アプリ、Power Platform Git integration、SharePoint forms integration など、Code Apps では未対応の機能がある前提で設計する。
 
 ## サブリファレンス（必要に応じて参照）

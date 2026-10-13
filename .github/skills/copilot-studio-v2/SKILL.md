@@ -53,7 +53,7 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 4. [手動作成チェックリスト](references/manual-creation-checklist.md) に沿って、作成直後の確認を行う
 5. 設定変更や調査では **BotConfiguration JSON** と **botcomponents 構造** を前提に扱う
 6. MCP サーバー追加前に `standard/scripts/check_mcp_client.py studio` で事前確認し、その後 UI で手動追加して **Confirm** と再公開まで行う
-7. アイコン設定と公開前確認は [アイコンと公開の最小ガイド](references/icon-and-publish.md) を参照する
+7. アイコン設定と公開前確認は [アイコンと公開の最小ガイド](references/icon-and-publish.md) と [外部入力と公開前チェック](../copilot-studio/references/external-input-release-check.md) を参照する
 8. 異常時は本スキルの references を優先して切り分ける
 
 ## 事前検証スクリプト（推奨）
@@ -236,7 +236,7 @@ UI での見え方、MCP の Confirm 状態、再公開の要否も含めて確�
 | [アイコンと公開の最小ガイド](references/icon-and-publish.md)             | アイコン準備、UI 反映確認、公開前後の最小確認項目                 |
 | [公開時の説明文テンプレート](references/publish-description-template.md) | 短い説明、長い説明、開発元表示の文案テンプレート                  |
 | [MCP サーバーの追加](references/mcp-servers.md)                          | Copilot Studio UI での手動追加手順と Confirm の注意点             |
-| [verify 実行テンプレート](references/verify-run-template.md)             | AGENT_BOTID 指定と verify_config / verify_agent の実行例           |
+| [verify 実行テンプレート](references/verify-run-template.md)             | AGENT_BOTID 指定と verify_config / verify_agent の実行例          |
 | [トラブルシューティング](references/troubleshooting.md)                  | v2 で頻出するエラーと対処                                         |
 
 ## このマスターで意図的に含めていないもの

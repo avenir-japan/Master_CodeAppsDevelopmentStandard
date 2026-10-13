@@ -7,7 +7,7 @@ Power Platform Dataverse デプロイスクリプト用 共通認証ヘルパー
   本モジュールの対象外。
 
 認証の仕組み（2 層キャッシュ）:
-  1. AuthenticationRecord (.auth_record.json)
+    1. AuthenticationRecord (ブラウザー認証時は .auth_record_browser.json)
      - アカウント情報（テナント・ユーザー等）を保存
      - これだけではトークンは保存されない
   2. TokenCachePersistenceOptions (MSAL 永続トークンキャッシュ)
@@ -15,12 +15,12 @@ Power Platform Dataverse デプロイスクリプト用 共通認証ヘルパー
      - AuthenticationRecord と組み合わせることでサイレントリフレッシュが可能
 
 動作:
-  - 初回: DeviceCodeCredential でデバイスコード認証
+    - 初回: PP_USE_INTERACTIVE_BROWSER=true の場合はブラウザー対話認証
          → AuthenticationRecord をファイルに保存
          → MSAL トークンキャッシュにリフレッシュトークンを永続化
   - 2回目以降: AuthenticationRecord をロード
          → MSAL キャッシュからリフレッシュトークンを取得
-         → サイレントリフレッシュ（デバイスコード不要）
+         → サイレントリフレッシュ
 
 使い方:
   from auth_helper import get_token, get_session, retry_metadata
@@ -263,7 +263,7 @@ def get_token(scope: str | None = None) -> str:
     """
     指定スコープのアクセストークン文字列を返す。
 
-    初回はデバイスコード認証が走り、AuthenticationRecord が保存される。
+    初回は設定した認証方式で対話認証が走り、AuthenticationRecord が保存される。
     2回目以降はインメモリキャッシュから取得する。
 
     Args:
@@ -351,6 +351,12 @@ def authenticate(scope: str | None = None) -> AuthenticationRecord:
         raise ValueError(
             "スコープが未指定です。DATAVERSE_URL を .env に設定するか scope 引数を渡してください。"
         )
+
+    if PREFER_BROWSER_AUTH:
+        credential = _ensure_browser_credential()
+        record = credential.authenticate(scopes=[scope])
+        _save_browser_auth_record(record)
+        return record
 
     credential = _ensure_credential()
     record = credential.authenticate(scopes=[scope])
@@ -554,4 +560,4 @@ if __name__ == "__main__":
     record = authenticate()
     print(f"認証成功: {record.username}")
     print(f"テナント: {record.tenant_id}")
-    print(f"認証レコード保存先: {AUTH_RECORD_PATH}")
+    print(f"認証レコード保存先: {_BROWSER_AUTH_RECORD_PATH if PREFER_BROWSER_AUTH else AUTH_RECORD_PATH}")

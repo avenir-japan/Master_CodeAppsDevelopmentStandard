@@ -388,13 +388,17 @@ def build_functional_requirements_doc(batch_started_at: str, results: list[Conve
 ## 4. UI 要件
 
 <!-- コンポーネント選定は architecture スキル（.github/skills/architecture/SKILL.md）の判断フローを優先する -->
-<!-- ここでは要件の列挙にとどめ、選定の確定は architecture スキルで行う（Cowork プラグイン第一候補・Canvas Apps は常に対象外・外部ユーザー向けは Azure 既定） -->
+<!-- 対話チャネルを優先し、画面 UI が本当に必要なら Canvas App を基本案とする。Canvas App で要件を満たしにくい場合は Code Apps / Model-Driven Apps も代替候補として評価する。ここでは要件の列挙にとどめ、選定の確定は architecture スキルで行う -->
 
-### Code Apps / Model-Driven Apps
+### Canvas App（画面 UI が必要な場合の基本案）
 
 - 要確認
 
-### Copilot Cowork プラグイン（データ入力の接点）
+### Code Apps / Model-Driven Apps（代替候補）
+
+- 要確認
+
+### Teams / Microsoft 365 Copilot（対話チャネル）
 
 - 要確認
 
@@ -452,7 +456,7 @@ def build_design_requirements_doc(batch_started_at: str, results: list[Conversio
 
 ## 2. Power Platform 全体構成案
 
-<!-- architecture スキルの設計アウトプットテンプレート（references/design-patterns.md §2）に従い、PoC / MVP の目的に必要な構成と本番化時の後続判断を区別し、Mermaid 構成図（複数カラム形式の subgraph）で記載する -->
+<!-- architecture スキルの設計アウトプットテンプレート（references/design-patterns.md §8）に従い、PoC / MVP の目的に必要な構成と本番化時の後続判断を区別し、Mermaid 構成図（複数カラム形式の subgraph）で記載する -->
 
 - **今回実現する目的・範囲**: 要確認
 - **対象外・本番化時の後続判断**: 要確認
@@ -460,9 +464,19 @@ def build_design_requirements_doc(batch_started_at: str, results: list[Conversio
 
 要確認
 
+### Phase 0 実現可能性判定
+
+<!-- 開発着手前の実現可能性ゲートの判定表を重要経路ごとに記入するか、判定表の参照先を示す。公式根拠 URL・確認日、想定最大規模、利用者と実行主体のライセンス、Copilot Credits、実機検証結果、代替案と承認結果を確認する -->
+
+- **判定表または参照先**: 要確認
+- **未確認・不適合の重要経路と対応**: 要確認
+- **採用構成・例外案の承認者と承認結果**: 要確認
+
+未確認・不適合の重要経路が残る場合は本実装に進まない。
+
 ## 3. コンポーネント設計
 
-<!-- architecture スキルの「コンポーネント構成」表と整合させる（Cowork プラグイン第一候補・Canvas Apps は常に対象外） -->
+<!-- architecture スキルの「コンポーネント構成」表と整合させる。対話チャネルを優先し、画面 UI が本当に必要なら Canvas App を基本案、難しい場合は Code Apps / Model-Driven Apps を代替候補とする -->
 
 | コンポーネント | 種別 | 役割 | 依存 | 備考 |
 | --- | --- | --- | --- | --- |

@@ -62,7 +62,7 @@ triggers:
 - GitHub Copilot の既定モデルは GPT-5.4 とし、軽作業は軽量モデル、コード量が多い実装はコード特化モデルも候補にしつつ、アーキテクチャ設計、原因不明の障害調査、横断リファクタリング、納品前の高リスクレビューでは、まず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
 - 納品、ALM、環境移送の相談では、まず `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` に分類する
 - リポジトリを GitHub へ反映する場合、コミット後の変更点説明、更新箇所の要約、ユーザー向け報告は日本語で行う
-- 環境変数だけで終わらせず、マネージド / アンマネージド選定、マネージドプロパティ、接続参照、顧客初期設定作業まで確認する
+- 環境変数の採否は参照方式と顧客初期設定のしやすさで判断し、マネージド / アンマネージド選定、マネージドプロパティ、接続参照、顧客初期設定作業まで確認する（判断基準は [環境変数ガイド](references/environment-variables.md) を参照）
 - 顧客テナント固有の URL、実 ID、シークレット、接続資格情報、承認要否は Copilot が仮決めしない
 - ライセンス、認証、チャネル設定は固定値を断定せず、最新の公式情報確認と顧客承認を前提に案内する
 - マネージド案件では、顧客のアンマネージド層編集を既定にせず、再提供運用を優先して案内する
@@ -131,18 +131,18 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 ### 共通認証: auth_helper.py
 
 共通実装は `.github/skills/standard/scripts/auth_helper.py` にあり、案件スクリプトでは必要に応じてプロジェクト直下へコピーして利用する。
-**ユーザーに何度もデバイスコード認証を求めない** 2 層キャッシュ構成。
+**ユーザーに何度も対話認証を求めない** 2 層キャッシュ構成。
 
 ```
-層1: AuthenticationRecord (.auth_record.json)
+層1: AuthenticationRecord (ブラウザー認証では .auth_record_browser.json)
   - アカウント情報（テナント・ユーザー ID）を保存
-  - `auth_helper.py` と同じディレクトリに .auth_record.json として永続化
+  - `auth_helper.py` と同じディレクトリに永続化（Device Code 利用時は .auth_record.json）
 
 層2: TokenCachePersistenceOptions (MSAL OS 資格情報ストア)
   - リフレッシュトークン・アクセストークンを永続化
-  - サイレントリフレッシュでデバイスコード不要
+  - サイレントリフレッシュで再認証を抑える
 
-初回: DeviceCodeCredential → ブラウザで認証 → キャッシュ保存
+初回（社内開発）: InteractiveBrowserCredential → ブラウザーで認証 → キャッシュ保存
 2回目以降: キャッシュから自動取得（認証プロンプトなし）
 ```
 
@@ -151,9 +151,8 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 弊社の標準開発テナントでは Device Code 認証が条件付きアクセスや利用制限で一律失敗する前提で扱う。
 そのため、Power Platform 開発ではブラウザ対話認証を既定とする。
 
-```powershell
-$env:PP_USE_INTERACTIVE_BROWSER = "1"
-```
+案件の `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を設定する（`setup_environment.py --profile` が自動設定）。
+顧客テナントへの納品時に社内の `.env` や認証キャッシュを含めず、顧客環境の認証設定は個別に確認する。
 
 ```text
 使いどころ:

@@ -18,16 +18,16 @@ Code Apps サンプルを**世界中の開発者が再利用・カスタマイ�
 
 以下のパターンをコード・設定ファイル全体から検出する。
 
-| カテゴリ | 検出パターン | 対処 |
-|---|---|---|
-| テナント ID | 32桁 GUID（`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` 形式の実値） | `{your-tenant-id}` に置換 |
-| 環境 ID | 同上 | `{your-environment-id}` に置換 |
-| Dataverse URL | `https://[a-z0-9]+\.crm[0-9]*\.dynamics\.com` 形式の実 URL | `https://{org}.crm.dynamics.com/` に置換 |
-| Bot ID / Schema | 実 GUID、実スキーマ名（`xxx_yyy` 形式で明らかに固有のもの） | `{your-bot-id}` / `{your-bot-schema}` に置換 |
-| フロー Workflow ID | GUID 形式の実値 | `{your-flow-workflow-id}` に置換 |
-| 接続 ID / CONNREF | 実接続 ID 文字列 | `{your-connection-id}` に置換 |
-| メールアドレス | `@` を含む実アドレス（example.com 以外） | `admin@example.com` に置換 |
-| PAC 認証プロファイル名 | 実プロファイル名 | `{YourProfileName}` に置換 |
+| カテゴリ               | 検出パターン                                                   | 対処                                         |
+| ---------------------- | -------------------------------------------------------------- | -------------------------------------------- |
+| テナント ID            | 32桁 GUID（`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` 形式の実値） | `{your-tenant-id}` に置換                    |
+| 環境 ID                | 同上                                                           | `{your-environment-id}` に置換               |
+| Dataverse URL          | `https://[a-z0-9]+\.crm[0-9]*\.dynamics\.com` 形式の実 URL     | `https://{org}.crm.dynamics.com/` に置換     |
+| Bot ID / Schema        | 実 GUID、実スキーマ名（`xxx_yyy` 形式で明らかに固有のもの）    | `{your-bot-id}` / `{your-bot-schema}` に置換 |
+| フロー Workflow ID     | GUID 形式の実値                                                | `{your-flow-workflow-id}` に置換             |
+| 接続 ID / CONNREF      | 実接続 ID 文字列                                               | `{your-connection-id}` に置換                |
+| メールアドレス         | `@` を含む実アドレス（example.com 以外）                       | `admin@example.com` に置換                   |
+| PAC 認証プロファイル名 | 実プロファイル名                                               | `{YourProfileName}` に置換                   |
 
 ### 1-2. コード内ハードコードチェック
 
@@ -139,7 +139,7 @@ parseJsonEnv("VITE_CODEAPPS_NAV_SECTIONS_JSON", defaultNav)
 # {サンプル名}（{業務テーマ}）— カスタマイズガイド
 # ==========================================================
 # このファイルをプロジェクトルートの .env にコピーして値を入力してください。
-# 共通 .env.example（.github/skills/standard/references/.env.example）に記載の共通変数（DATAVERSE_URL / TENANT_ID 等）も別途必要です。
+# プロジェクトルートの .env.example に記載の共通変数（DATAVERSE_URL / TENANT_ID 等）も別途必要です。
 # ==========================================================
 
 # ── アプリ表示（変更推奨） ──────────────────────────────────
@@ -172,7 +172,7 @@ VITE_FEATURE_{機能名}=false    # {機能の説明}
 
 ### 必須構成
 
-```markdown
+````markdown
 # {サンプル名} — {業務テーマ}
 
 {サンプルの一行説明}
@@ -184,29 +184,29 @@ VITE_FEATURE_{機能名}=false    # {機能の説明}
 
 ## 画面構成
 
-| ページ | パス | 説明 |
-|---|---|---|
+| ページ     | パス      | 説明   |
+| ---------- | --------- | ------ |
 | {ページ名} | `/{path}` | {説明} |
 
 ## Dataverse テーブル
 
 `{prefix}` は `PUBLISHER_PREFIX` の値（例: `PUBLISHER_PREFIX=myco` → `myco_{table}`）
 
-| テーブル論理名 | 用途 |
-|---|---|
+| テーブル論理名     | 用途   |
+| ------------------ | ------ |
 | `{prefix}_{table}` | {説明} |
 
 ## カスタマイズポイント
 
-| 変更箇所 | 説明 |
-|---|---|
-| `VITE_CODEAPPS_APP_NAME`（.env） | アプリ名を変更 |
+| 変更箇所                          | 説明                                 |
+| --------------------------------- | ------------------------------------ |
+| `VITE_CODEAPPS_APP_NAME`（.env）  | アプリ名を変更                       |
 | `src/config.ts` の `NAV_SECTIONS` | ページ構成を変更（コードで直接編集） |
-| `VITE_FEATURE_*`（.env） | 機能の有効/無効を切替 |
+| `VITE_FEATURE_*`（.env）          | 機能の有効/無効を切替                |
 
 ## セットアップ手順
 
-```bash
+````bash
 # 1. 共通設定（共通 .env.example（standard/references）→ .env にコピー）
 # 2. サンプル固有設定（samples/{name}/.env.example の内容を .env に追記）
 # 3. Dataverse テーブルの作成
@@ -226,7 +226,8 @@ npm run dev
 | フラグ | デフォルト | 有効化すると |
 |---|---|---|
 | `VITE_FEATURE_{機能名}` | `false` | {説明} |
-```
+````
+````
 
 ---
 

@@ -7,6 +7,7 @@
 - このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く
 - 既定の UI / チャネル優先順位は **Teams / Microsoft 365 Copilot → 画面 UI が本当に必要なら Canvas App を基本案** とする。Canvas App のデータソース・コネクタのライセンスは案件ごとに確認する
 - Canvas App では仕様・技術要件を満たすのが難しい場合は **Code Apps / Model-Driven Apps** も代替候補として提案し、実現性・ライセンス・費用を確認してユーザー承認後に採否を決める
+- Code Apps の利用者には Premium の利用権が必要。Premium ライセンスの割り当て以外に従量課金、App Pass、auto-claim も公式の前提条件に挙げられているため、案件に適用する付与方法と費用を確認する（[Microsoft Learn](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/overview#license-end-users-with-power-apps-premium)、確認日: 2026-10-08）
 - Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、**追加ライセンス評価項目の代表例** として案件ごとに確認する
 - ライセンス要件は、納品形態ではなく構成に依存する
 - Copilot Credits、Code Apps、Copilot Studio の課金条件は更新されやすい
@@ -93,8 +94,8 @@ GitHub Copilot や VS Code 上のエージェントで調査する場合は、Mi
 避けるべき書き方:
 
 - 長期間正しい前提で Copilot Credits の固定消費量を書く
-- Code Apps のライセンスを無条件で断定する
-- 顧客固有条件を無視して一律に Premium 必須とする
+- Code Apps の Premium 利用権という前提を省略する、または付与方法を Premium ライセンスの直接割り当てだけに限定する
+- 顧客固有条件を無視して付与方法や費用を一律に決める
 
 ## 7. 関連ドキュメント
 

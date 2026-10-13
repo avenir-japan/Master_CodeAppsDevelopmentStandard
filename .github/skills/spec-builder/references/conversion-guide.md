@@ -129,9 +129,10 @@ python convert_documents.py \
 ### design-requirements.md
 
 > ★ 全体構成・コンポーネント選定・構築フェーズは `.github/skills/architecture/SKILL.md` を正とし、
-> architecture スキルの判断フロー・設計アウトプットテンプレート（`references/design-patterns.md` §2）で確定した結果を転記する。
+> architecture スキルの判断フロー・設計アウトプットテンプレート（`references/design-patterns.md` §8）で確定した結果を転記する。
 
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）
+- Phase 0 実現可能性判定（重要経路ごとの判定表または参照先、未確認・不適合への対応、承認者と承認結果）
 - 採用した構成・実装範囲と、PoC / MVPで対象外にした本番向け作り込みや後続判断事項
 - コンポーネント設計（表 — architecture スキルの「コンポーネント構成」表と整合させる）
 - セキュリティ / 権限 / 監査（表）

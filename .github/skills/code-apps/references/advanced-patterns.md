@@ -57,7 +57,7 @@ export const appConfig: AppConfig =
   configs[import.meta.env.MODE] ?? configs["production"]!;
 ```
 
-> ⚠️ **注意**: 機密データは環境変数やアプリコードに保存せず、必ずデータソース（Dataverse など）に保存してください。
+> **注意**: `import.meta.env` の値はビルドされたクライアントコードから参照できるため、シークレットを入れない。Dataverse の通常の列に保存するだけでは機密保護にならない。シークレットが必要な場合は、サーバー側の処理で Key Vault 等の適切な保管先を参照し、クライアントへ値を返さない。Power Platform の Secret 型環境変数を使う場合も、参照する処理とアクセス権を個別に設計する。
 
 ---
 
@@ -116,7 +116,10 @@ export class LocalCache {
 import { useState, useCallback } from "react";
 import { LocalCache } from "../utils/cache";
 
-export function useCachedConnector<T>(cacheKey: string, ttlMs: number = 300000) {
+export function useCachedConnector<T>(
+  cacheKey: string,
+  ttlMs: number = 300000,
+) {
   const [data, setData] = useState<T | null>(() => LocalCache.get<T>(cacheKey));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -151,7 +154,7 @@ export function useCachedConnector<T>(cacheKey: string, ttlMs: number = 300000) 
         setIsLoading(false);
       }
     },
-    [cacheKey, ttlMs]
+    [cacheKey, ttlMs],
   );
 
   return { data, isLoading, error, execute };
@@ -313,7 +316,10 @@ interface UserCardProps {
 
 export const UserCard = memo<UserCardProps>(({ name, email }) => (
   <Card>
-    <CardHeader header={<Text>{name}</Text>} description={<Text>{email}</Text>} />
+    <CardHeader
+      header={<Text>{name}</Text>}
+      description={<Text>{email}</Text>}
+    />
   </Card>
 ));
 
@@ -327,7 +333,7 @@ UserCard.displayName = "UserCard";
 
 export function debounce<T extends (...args: Parameters<T>) => void>(
   fn: T,
-  delayMs: number
+  delayMs: number,
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
@@ -385,7 +391,7 @@ export function usePagination<T>(pageSize: number = 50) {
         }));
       }
     },
-    [state.currentPage, pageSize]
+    [state.currentPage, pageSize],
   );
 
   const reset = useCallback(() => {

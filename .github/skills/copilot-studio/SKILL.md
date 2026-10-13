@@ -48,6 +48,7 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
 | [トラブルシューティング](references/troubleshooting.md)                        | トリガー以外を含む障害切り分け・復旧手順                             |
 | [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
+| [外部入力と公開前チェック](references/external-input-release-check.md)         | knowledge・MCP・トリガー入力の信頼境界と公開前の試験                 |
 | [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
 | [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
 | [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
@@ -68,10 +69,14 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | ナレッジ                 | データソース（Dataverse テーブル / SharePoint / ファイル等）                  |
 | ツール                   | MCP Server の接続先・用途                                                     |
 | チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                |
+| 外部入力と操作権限       | ナレッジ・MCP・トリガーの入力元、接続主体、許可操作と公開前テスト             |
 
 ```
 フロー: 設計提示 → ユーザー承認 → アイコン画像提案 → ユーザー選択 → UI で Bot 作成 → スクリプトで設定適用
 ```
+
+公開前には[外部入力と公開前チェック](references/external-input-release-check.md)を適用する。
+設定の機械的検証と、想定利用者での操作・応答確認を別の合格条件として記録する。
 
 ## アイコン画像提案（設計承認後・構築前）
 

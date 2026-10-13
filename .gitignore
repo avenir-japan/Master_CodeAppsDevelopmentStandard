@@ -37,6 +37,7 @@ Thumbs.db
 
 # Authentication cache (auth_helper.py)
 .auth_record.json
+.auth_record_browser.json
 
 # Power Platform
 .power/

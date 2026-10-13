@@ -23,9 +23,12 @@ source control や ALM の正本は別で考える。
 ### 2.1 必須要件
 
 - `.NET 10 SDK` 以上
-- Power Apps Studio で対象 App を開ける権限
+- 対象環境と Canvas App を編集できる組織アカウント
+- Power Apps Studio で作成・保存済みの対象 App（新規の場合も空の App を先に保存する）
 - coauthoring を有効にした Designer セッション
 - Canvas Apps plugin の導入
+
+plugin は最初の App レコードの作成や coauthoring の有効化はできない。接続後に、保存済みの空 App の画面や式を AI で作成できる。
 
 ### 2.1.1 GitHub Copilot を第一候補にした導入方針
 
@@ -47,10 +50,10 @@ Copilot CLI / Claude Code で導入する場合の代表コマンド:
 
 ### 2.1.2 VS Code Copilot と Copilot CLI / Claude Code の違い
 
-| 利用形態                  | plugin の入口                                  | MCP 設定の考え方                                                  | この repo との関係                         |
-| ------------------------- | ---------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
-| GitHub Copilot in VS Code | 拡張機能ビューの Agent Plugin / MCP Server     | `.vscode/mcp.json` またはユーザー設定で `canvas-authoring` を登録 | この repo の標準運用と最も相性がよい       |
-| Copilot CLI / Claude Code | `/plugin marketplace add` と `/plugin install` | plugin 側のセットアップフローで MCP を登録                        | 導入入口は異なるが、接続後の運用基準は同じ |
+| 利用形態                  | plugin の入口                                  | MCP 設定の考え方                                                      | この repo との関係                         |
+| ------------------------- | ---------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------ |
+| GitHub Copilot in VS Code | 拡張機能ビューの Agent Plugin / MCP Server     | plugin が登録する `canvas-authoring` に `configure-canvas-mcp` で接続 | この repo の標準運用と最も相性がよい       |
+| Copilot CLI / Claude Code | `/plugin marketplace add` と `/plugin install` | plugin 側のセットアップフローで MCP を登録                            | 導入入口は異なるが、接続後の運用基準は同じ |
 
 どちらの入口でも、最終的に必要なのは同じである。
 
@@ -61,8 +64,7 @@ Copilot CLI / Claude Code で導入する場合の代表コマンド:
 ### 2.2 plugin が提供する代表機能
 
 - `configure-canvas-mcp`
-- `generate-canvas-app`
-- `edit-canvas-app`
+- `canvas-app`（空 App の画面生成と既存 App の編集）
 
 ### 2.3 MCP 側の代表ツール
 
@@ -81,89 +83,35 @@ Copilot CLI / Claude Code で導入する場合の代表コマンド:
 1. Power Apps Studio で対象 App を開く
 2. Settings → Updates → Coauthoring を有効にする
 3. Designer の URL を取得する
-4. `configure-canvas-mcp` 相当の手順で environment ID / app ID / cluster を設定する
+4. `configure-canvas-mcp` に Designer の完全な編集 URL を渡して接続する
 5. Designer タブを閉じずに維持する
 
 ### 3.0 ゼロから最初の疎通確認までの一本道
 
 GitHub Copilot を使って **最初の `list_controls` 成功** まで到達する最短手順は次のとおり。
 
-1. `.NET 10 SDK` が入っていることを確認する
+1. `dotnet --list-sdks` で `.NET 10 SDK` 以上を確認する
 2. Canvas Apps plugin を導入する
-3. Power Apps Studio で対象 app を開く
+3. 対象環境で App を作成・保存する（既存 App があればそれを開く）
 4. Settings → Updates → Coauthoring を有効にする
-5. Designer の URL を控える
-6. `configure-canvas-mcp` を実行するか、`.vscode/mcp.json` に `canvas-authoring` を登録する
-7. Designer タブを閉じない
-8. `connect` を実行する
-9. `list_controls` を 1 回実行する
+5. Designer の完全な編集 URL を控え、タブを開いたままにする
+6. `configure-canvas-mcp` にその URL を渡して接続する
+7. `list_controls` を 1 回実行し、対象 App と整合することを確認する
 
-この 9 手順で `list_controls` が成功すれば、**MCP の最初の疎通確認は完了** とみなしてよい。
+この手順で `list_controls` が成功すれば、**MCP の最初の疎通確認は完了** とみなしてよい。
 
 もし `list_controls` が `Not connected` で失敗したら、まず設定ミスよりも前に `connect` 未実行かセッション切れを疑う。
 
-### 3.1 VS Code Copilot のローカル設定
+### 3.1 VS Code Copilot の接続
 
-VS Code Copilot では、Canvas Authoring MCP を `.vscode/mcp.json` に登録する運用が分かりやすい。
-設定値は Designer の URL から取得した `environment ID`、`app ID`、`cluster category` を使う。
+VS Code の拡張機能ビューで `@agentPlugins canvas apps` を検索し、Microsoft 発行の Canvas Apps plugin を導入する。
+plugin は `canvas-authoring` MCP を登録するため、通常は `.vscode/mcp.json` にサーバーを手動登録しない。
+Chat の Agent モードで `configure-canvas-mcp` を起動し、Power Apps Studio の編集画面のアドレスバーから完全な URL を渡す。
+plugin は URL の `/e/` 配下から environment ID、URL デコードした `app-id` の末尾から app ID、ホスト名から `environment_category` を判定して `connect` する。
+app player や Power Apps ホーム画面の URL は使わず、実際に開いている Designer の URL と対象環境を照合する。
+接続が成功したら `list_controls` で疎通を確認する。
 
-最小構成の例は次のとおり。
-
-```json
-{
-  "servers": {
-    "canvas-authoring": {
-      "type": "stdio",
-      "command": "dnx",
-      "args": [
-        "Microsoft.PowerApps.CanvasAuthoring.McpServer",
-        "--yes",
-        "--prerelease",
-        "--source",
-        "https://api.nuget.org/v3/index.json"
-      ],
-      "env": {
-        "CANVAS_ENVIRONMENT_ID": "{ENVIRONMENT_ID}",
-        "CANVAS_APP_ID": "{APP_ID}",
-        "CANVAS_CLUSTER_CATEGORY": "{CLUSTER_CATEGORY}"
-      }
-    }
-  }
-}
-```
-
-そのまま流用しやすいテンプレート:
-
-```json
-{
-  "servers": {
-    "canvas-authoring": {
-      "type": "stdio",
-      "command": "dnx",
-      "args": [
-        "Microsoft.PowerApps.CanvasAuthoring.McpServer",
-        "--yes",
-        "--prerelease",
-        "--source",
-        "https://api.nuget.org/v3/index.json"
-      ],
-      "env": {
-        "CANVAS_ENVIRONMENT_ID": "<ENVIRONMENT_ID>",
-        "CANVAS_APP_ID": "<APP_ID>",
-        "CANVAS_CLUSTER_CATEGORY": "<CLUSTER_CATEGORY>"
-      }
-    }
-  }
-}
-```
-
-置換が必要な値:
-
-- `<ENVIRONMENT_ID>`: `make.powerapps.com/e/{environmentId}/...` の値
-- `<APP_ID>`: Designer URL の `app-id` の GUID
-- `<CLUSTER_CATEGORY>`: `configure-canvas-mcp` または Designer URL から得た cluster category
-
-`environment ID` は `make.powerapps.com/e/{environmentId}/canvas/...` の `e/` 配下の値、`app ID` は `app-id` の末尾 GUID を使う。
+手動 MCP 設定や接続用 wrapper を使う場合は、導入済み plugin の現行仕様と `connect` の引数を確認してから設定する。旧来の `CANVAS_CLUSTER_CATEGORY` を含む固定設定例を流用しない。
 
 > [!IMPORTANT]
 > Designer タブは前面表示し続ける必要はないが、閉じると coauthoring セッションが切れる。
@@ -183,9 +131,9 @@ VS Code Copilot では、Canvas Authoring MCP を `.vscode/mcp.json` に登録�
 
 ## 4. 新規 App を作る流れ
 
-1. 自然言語で要件を伝える
-2. 必要に応じて画面イメージ、利用者、デバイス、データソース前提を補足する
-3. AI が control / data source / API を確認しながら `pa.yaml` を生成する
+1. 対象環境で空 App を作成・保存し、coauthoring を有効にして Designer を開いておく
+2. 自然言語で要件を伝え、必要に応じて画面イメージ、利用者、デバイス、データソース前提を補足する
+3. 接続後、専用作業ディレクトリへ初回同期し、AI が control / data source / API を確認しながら `pa.yaml` を生成する
 4. `compile_canvas` で検証する
 5. Designer 上で見た目と動作を確認する
 6. Save、必要なら Publish する
@@ -193,11 +141,26 @@ VS Code Copilot では、Canvas Authoring MCP を `.vscode/mcp.json` に登録�
 ## 5. 既存 App を編集する流れ
 
 1. 対象 App を coauthoring セッションで開く
-2. `sync_canvas` で現在状態をローカルへ同期する
+2. 専用作業ディレクトリへ `sync_canvas` で現在状態を初回同期する
 3. 変更内容を自然言語で伝える
 4. 生成・修正された `pa.yaml` を `compile_canvas` で検証する
 5. Designer 上で結果を確認する
 6. Save、必要なら Publish する
+
+### 同期時の上書き防止
+
+`sync_canvas` は同名のローカル `.pa.yaml` を **上書きする**。同期前に対象 App とディレクトリを確認し、未コミット・未退避のローカル変更がある場合は差分を確認して保護する。
+最初の同期は App 専用ディレクトリで行い、同期時に `.pa.yaml` 以外のファイルを混在させない。リポジトリのルートや異なる App の作業領域を指定しない。
+編集後の作業ディレクトリへ安易に再同期しない。サーバー側の状態を再確認するときは別の空ディレクトリへ同期し、作業コピーと差分を比較する。
+
+### 接続と変更の安全確認
+
+- 対象環境、Designer の App URL、`connect` の接続先、実行アカウントと編集権限を照合する。必要な権限だけを持つアカウントを使う。
+- 利用する connector / data source が組織の DLP ポリシーとライセンス条件に適合するか確認する。接続の追加は [data source and connector boundary](data-source-and-connector-boundary.md) に従う。
+- AI の提案する操作とツール引数を確認し、外部データから誘導された予期しない変更やアクセス要求は承認しない。
+- パスワード、アクセストークン、接続文字列などをプロンプト、ログ、リポジトリへ記録しない。開発用 App で確認してから本番適用を判断する。
+
+公式の前提・セキュリティ事項は [Canvas Apps plugin README](https://github.com/microsoft/power-platform-skills/tree/main/plugins/canvas-apps)、接続引数は [configure-canvas-mcp](https://github.com/microsoft/power-platform-skills/blob/main/plugins/canvas-apps/skills/configure-canvas-mcp/SKILL.md) を参照する。
 
 ## 6. 何を AI ができて、何をできないか
 

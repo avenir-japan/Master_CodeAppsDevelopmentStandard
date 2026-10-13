@@ -18,6 +18,20 @@ Canvas App の AI 編集、coauthoring、single app / package、UI 調整で頻�
 
 セットアップ自体の流れは [ai-codegen-workflow](ai-codegen-workflow.md) を参照。
 
+### 1.1.1 plugin / MCP ツールが起動しない
+
+- VS Code では拡張機能ビューで `@agentPlugins canvas apps` を検索し、Microsoft 発行の plugin が有効か確認する。見つからなければ plugin 対応状況と組織ポリシーを確認し、必要に応じて VS Code を再読み込みする。
+- `canvas-authoring` ツールが見えない場合は Chat の Configure Tools を確認し、plugin の更新と MCP サーバー起動エラーを調べる。
+- `dotnet` / `dnx` が見つからない場合は runtime だけでなく `.NET 10 SDK` を導入し、端末とエージェントを再起動する。`dotnet --list-sdks` に 10.x 以降があることを確認する。
+- MCP パッケージの取得が失敗する場合は `dotnet nuget list source` で有効な NuGet ソースを確認する。組織で許可されたソースにパッケージがない場合は管理者へ相談し、旧式の固定 `--source` 設定を無断で追加しない。
+
+### 1.1.2 接続・認証が失敗する
+
+- Studio の編集画面の完全な URL を使う。app player やホーム画面の URL、未保存の空 App では接続できない。Designer タブのサインイン状態、coauthoring と編集権限を確認する。
+- 異なるアカウントに接続した場合は正しい組織アカウントで再接続する。特定アカウントの指定が必要な場合だけ `login_hint` を渡し、URL から UPN を推測しない。
+- 401 / 403 でキャッシュされたアカウントが選ばれる場合は `force_account_select: true` を試す。B2B ゲストの場合のみホストテナントの `tenant_id` を確認して渡す。認証フローの選択は本人の希望または失敗時の切り分けに限定する。
+- 接続が途中で切れたら Studio で App を開き直し、`configure-canvas-mcp` から再接続する。
+
 ### 1.2 compile は通るが画面が変わらない
 
 - compile が成功しても画面が変わらない場合は、まず **別の app を開いていないか** を疑う。

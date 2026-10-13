@@ -1,4 +1,6 @@
 .env
+.auth_record.json
+.auth_record_browser.json
 .venv/
 __pycache__/
 *.pyc

@@ -104,6 +104,12 @@ Microsoft Learn の現行フローでは、Canvas App の AI 主導編集は **C
 
 前提条件と手順は [AI codegen workflow](references/ai-codegen-workflow.md) を参照する。
 
+公開前にサーバー側の状態を確認する場合、作業中の YAML を上書きしないよう、
+`sync_canvas` は別の空ディレクトリへ実行して差分を確認する。最終変更後に
+`compile_canvas` のエラーがないことを検証し、Designer で Save / Publish する。
+対象画面・データ接続・フロー呼び出しを実機で確認し、コンパイル成功だけを
+公開・業務動作の成功と扱わない。同期の注意点は [AI codegen workflow](references/ai-codegen-workflow.md) を参照する。
+
 ## Git Integration は source control の標準
 
 Git Integration は、Canvas App をチームで管理するための **source control モード** として扱う。

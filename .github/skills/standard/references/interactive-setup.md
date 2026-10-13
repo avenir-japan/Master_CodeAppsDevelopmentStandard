@@ -6,24 +6,24 @@
 > 前提: PAC CLI がインストール済み（VS Code 拡張機能『Power Platform Tools』 or `dotnet tool install --global Microsoft.PowerApps.CLI.Tool`）。
 > PAC CLI は npm では配布されていない。`@microsoft/power-apps-cli` は別物（Code Apps 用の `power-apps` コマンド）なので混同しないこと。
 
-## 標準フロー（PAC プロファイル → 環境選択 → デバイスコード認証）
+## 標準フロー（PAC プロファイル → 環境選択 → ブラウザー対話認証）
 
 このスキルの推奨セットアップは次の 4 ステップで、`scripts/setup_environment.py` が自動化する。
 
 1. **PAC プロファイルから環境を取得** — `pac auth list` のプロファイルを `pac org who` で解決し、環境候補（URL / 環境 ID）を一覧化する。
 2. **どの環境にするか AskUserQuestion** — エージェントが一覧をユーザーに提示し、利用環境を選ばせる。
-3. **デバイスコード認証** — 選択環境で `.env` を構成し、`auth_helper.py` のデバイスコード認証をトリガーする。ブラウザを開く前に [ブラウザ自動化方針](browser-automation.md)に従って `AskUserQuestion` で Edge プロファイルを確認し、回答後に表示されたコードと URL をユーザーへ伝えてサインインしてもらう。
-4. **auth_helper に認証を保存** — 認証成功時に `AuthenticationRecord`（`~/.power-platform-cli/auth_record_{TENANT_ID}.json`、ホームディレクトリ配下でマシン全体共有）と MSAL 永続キャッシュへ保存され、以降は**このマシン上のどのプロジェクトでも** Python スクリプトはデバイスコード入力なしで認証される。
+3. **ブラウザー対話認証** — 社内開発環境用 `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を設定し、`auth_helper.py` でブラウザー認証する。ブラウザーを開く前に [ブラウザ自動化方針](browser-automation.md)に従って利用する Edge プロファイルを確認する。
+4. **auth_helper に認証を保存** — 認証成功時に `AuthenticationRecord`（`auth_helper.py` と同じディレクトリの `.auth_record_browser.json`）と MSAL 永続キャッシュへ保存する。以降は同じ構成のスクリプトでキャッシュから認証する。
 
 ```powershell
 # 1〜2: 環境候補を一覧表示（この出力を AskUserQuestion で提示する）
 python .github/skills/standard/scripts/setup_environment.py --list
 
-# 3〜4: 選択した環境で .env を構成し、デバイスコード認証 → 認証レコード保存
+# 3〜4: 選択した環境で .env を構成し、ブラウザー認証 → 認証レコード保存
 python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileName>" `
   --solution "<SolutionName>" --prefix "<prefix>" --display "<表示名>"
 
-# 既存 .env でデバイスコード認証だけ実行したいとき
+# 既存 .env で認証だけ実行したいとき
 python .github/skills/standard/scripts/setup_environment.py --auth-only
 ```
 
@@ -36,7 +36,7 @@ cp .github/skills/standard/references/gitignore-template .gitignore
 ```
 
 - このマスターリポジトリを正本として扱う。upstream の `.github` を上書き取得しない。
-- `setup_environment.py`、`.env.example`、`gitignore-template` が `standard` 配下に存在することを確認する。
+- `setup_environment.py` と `gitignore-template` が `standard` 配下に、正本の `.env.example` がリポジトリ直下に存在することを確認する。
 
 > ブラウザ操作（ポータルのフォーム入力等）は **VS Code 統合ブラウザツール**を使う。
 > Playwright MCP のインストール・`.vscode/mcp.json` への登録は行わない
@@ -72,7 +72,7 @@ PAC CLI が未インストール、または `pac auth create` が実行でき�
 | Tenant ID            | `TENANT_ID`     |
 | Environment ID       | `ENV_ID`        |
 
-> この場合 `PAC_AUTH_PROFILE` は空欄のままで可。Python 認証は `auth_helper.py` のデバイスコードフローで行われる。
+> この場合 `PAC_AUTH_PROFILE` は空欄のままで可。社内開発では `PP_USE_INTERACTIVE_BROWSER=true` を設定して `auth_helper.py` のブラウザー対話認証を使う。
 
 セッション詳細から値を取得したら **Step 4（.env 作成）** に進む。
 
@@ -106,22 +106,23 @@ python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileN
   --solution "<SolutionName>" --prefix "<prefix>" --display "<表示名>"
 ```
 
-手動で行う場合は `.env.example` をコピーして埋める。
+手動で行う場合はリポジトリ直下の `.env.example` をコピーして埋める。
 
 ```powershell
-cp .github/skills/standard/references/.env.example .env
+Copy-Item .env.example .env
 ```
 
 自動設定される値:
 
-| .env キー          | 取得元                                                           |
-| ------------------ | ---------------------------------------------------------------- |
-| `DATAVERSE_URL`    | `pac org who` の OrgUrl                                          |
-| `ENV_ID`           | `pac org who` の EnvironmentId                                   |
-| `TENANT_ID`        | ユーザードメインの OIDC ディスカバリ（`token_endpoint` の GUID） |
-| `PAC_AUTH_PROFILE` | 選択したプロファイル名                                           |
+| .env キー                    | 取得元                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DATAVERSE_URL`              | `pac org who` の OrgUrl                                          |
+| `ENV_ID`                     | `pac org who` の EnvironmentId                                   |
+| `TENANT_ID`                  | ユーザードメインの OIDC ディスカバリ（`token_endpoint` の GUID） |
+| `PAC_AUTH_PROFILE`           | 選択したプロファイル名                                           |
+| `PP_USE_INTERACTIVE_BROWSER` | 社内開発テナント向けに `true` を設定                             |
 
-## Step 5: Python 認証環境のセットアップ（デバイスコード認証）
+## Step 5: Python 認証環境のセットアップ（ブラウザー対話認証）
 
 ```powershell
 cd .github/skills/standard/scripts
@@ -130,33 +131,29 @@ pip install -r requirements.txt
 
 `.env` に `DATAVERSE_URL` と `TENANT_ID` が設定済みなので、auth_helper.py が利用可能になる。
 
-### Python の Dataverse 認証はデバイスコード認証（初回のみ）
+### 社内開発の Dataverse 認証はブラウザー対話認証（初回のみ）
 
-`setup_environment.py --profile`（または `--auth-only`）はデバイスコード認証をトリガーする。
-ブラウザを開く前に `AskUserQuestion` で使用する Edge プロファイルを確認する。
-**エージェントは回答後に表示されたコードと URL をユーザーに伝え**、選択されたプロファイルで
-サインインしてもらう。
+`setup_environment.py --profile` は `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を保存して認証する。
+`--auth-only` では既存の `.env` に同設定が必要。ブラウザーを開く前に利用する Edge プロファイルを確認し、社内アカウントでサインインする。
 
 ```
 ========================================
-  デバイスコード認証
-  1. ブラウザで https://login.microsoft.com/device を開く
-  2. コード XXXXXXXXX を入力
+  ブラウザー対話認証
+  ブラウザーのサインイン画面で社内アカウントを選択する
 ========================================
 ```
 
 サインインが成功すると `auth_helper.py` が 2 層キャッシュへ認証を保存する:
 
-1. **AuthenticationRecord**（`.auth_record.json`）— アカウント情報
+1. **AuthenticationRecord**（`.auth_record_browser.json`、スクリプトフォルダ直下）— アカウント情報
 2. **MSAL 永続トークンキャッシュ** — リフレッシュトークン（OS 資格情報ストア）
 
-これにより 2 回目以降はサイレントリフレッシュとなり、**デバイスコード入力は不要**になる。
+これにより 2 回目以降はサイレントリフレッシュできる。認証が期限切れになった場合はブラウザーで再認証する。
 
 > **PAC プロファイルでの Python トークン取得について**: 一部の PAC CLI バージョンには
 > `pac auth token` サブコマンドが無く、PAC プロファイルから Dataverse トークンを直接取得できない。
-> `auth_helper.py` は PAC トークン取得を試み、失敗時は自動でデバイスコードフローへフォールバックする。
-> そのため **Python 側の正式な認証経路はデバイスコード認証（キャッシュ済み）** とみなす。
-> `PAC_AUTH_PROFILE` は環境メタデータ（URL / 環境 ID）の取得元として `.env` に保持する。
+> `auth_helper.py` は PAC プロファイルからトークンを取得しない。`PAC_AUTH_PROFILE` は環境メタデータ（URL / 環境 ID）の取得元として `.env` に保持する。
+> 顧客テナントへの納品時は社内開発用の `.env` や認証記録を渡さず、顧客側の認証・接続設定を別途確認する。
 
 ## Step 6: 既存パブリッシャーの確認と選択
 
@@ -230,6 +227,7 @@ PUBLISHER_PREFIX={prefix}
 
 # PAC CLI 認証プロファイル
 PAC_AUTH_PROFILE={ProfileName}
+PP_USE_INTERACTIVE_BROWSER=true
 ```
 
 確認後、設計フェーズ（architecture スキル）へ進む。
@@ -245,7 +243,7 @@ Step 3: setup_environment.py --list → 環境選択（AskUserQuestion）
   ↓
 Step 4: setup_environment.py --profile → .env 生成（URL/環境 ID/テナント自動設定）
   ↓
-Step 5: pip install → デバイスコード認証（コードを伝達 → サインイン → auth_helper が認証保存）
+Step 5: pip install → ブラウザー対話認証（サインイン → auth_helper が認証保存）
   ↓
 Step 6: パブリッシャー一覧 → 選択（AskUserQuestion）
   ↓

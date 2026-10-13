@@ -106,7 +106,7 @@ staging の変換完了後、以下の手順で docs を更新する。
 3. 全 staging ファイルを横断し、各 docs の `要確認` を実際の要件に書き換える：
    - `business-requirements.md` → 開発段階、目的・検証仮説、対象範囲と対象外、成功条件、ステークホルダー・ユーザーストーリー・業務フロー。開発段階や範囲が不明なら推測せず `要確認` とする
    - `functional-requirements.md` → 機能一覧(MoSCoW)・データモデル・非機能要件。今回の対象と対象外が分かるよう業務要件の範囲を反映する
-   - `design-requirements.md` → 全体構成・コンポーネント・リスク・実装タスク分解。PoC / MVPでは目的に必要な構成と本番化時に判断する事項を区別し、フローのアクションも目的達成と必要な検証に必要な範囲に絞る（★全体構成・コンポーネント選定は [architecture スキル](../architecture/SKILL.md) の判断を正として転記する）
+   - `design-requirements.md` → 全体構成・コンポーネント・リスク・実装タスク分解。Phase 0 の重要経路ごとの判定表または参照先、未確認事項、採用構成・例外案の承認結果も記録する。PoC / MVPでは目的に必要な構成と本番化時に判断する事項を区別し、フローのアクションも目的達成と必要な検証に必要な範囲に絞る（★全体構成・コンポーネント選定は [architecture スキル](../architecture/SKILL.md) の判断を正として転記する）
    - `test-requirements.md` → テストシナリオ・受け入れ条件（functional の機能一覧 # と対応。条件本文の正は functional 側）。PoC / MVPでは検証目的と未検証の範囲を区別し、結果を本番品質の保証として記載しない
 4. `index.md` の処理状況テーブルも合わせて更新する
 5. 推測で埋めず、情報不足は `要確認` として残す
@@ -164,9 +164,10 @@ staging の変換完了後、以下の手順で docs を更新する。
 ### design-requirements.md
 
 > ★ 全体構成・コンポーネント選定・構築フェーズは [architecture スキル](../architecture/SKILL.md) を正とする。
-> 本ドキュメントには architecture スキルの判断フロー・[設計アウトプットテンプレート](../architecture/references/design-patterns.md#2-設計アウトプットテンプレート)で確定した結果を転記する。
+> 本ドキュメントには architecture スキルの判断フロー・[設計アウトプットテンプレート](../architecture/references/design-patterns.md#8-設計アウトプットテンプレート)で確定した結果を転記する。
 
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）
+- Phase 0 実現可能性判定（重要経路ごとの判定表または参照先、未確認・不適合への対応、承認者と承認結果）
 - 採用した構成・実装範囲と、PoC / MVPで対象外にした本番向け作り込みや後続判断事項
 - コンポーネント設計（種別・役割・依存の表 — architecture スキルの「コンポーネント構成」表と整合させる）
 - セキュリティ / 権限 / 監査（区分・内容・対応方針の表）
