@@ -197,6 +197,12 @@ def build_factsheet(
 - Message: {message}
 
 ## 2. Power Platform requirement summary
+### Source facts and source locations
+- 要確認
+
+### Open questions and proposal hypotheses (not confirmed facts)
+- 要確認
+
 ### Business objective
 - 要確認
 
@@ -274,6 +280,9 @@ def build_document(
 {chr(10).join(table_lines)}
 
 ## 3. Cross-document requirements summary
+
+### Source facts, open questions, and proposal hypotheses
+- 要確認
 
 ### Business scope
 - 要確認

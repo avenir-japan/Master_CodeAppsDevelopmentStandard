@@ -29,6 +29,7 @@ Power Platform 開発で使いやすい **factsheet 群** と **全体 document.
 - 既定入力: `work/spec-to-markdown/input/`
 - 既定出力: `work/spec-to-markdown/output/<input-set>-<timestamp>/`
 - `--input` / `--output` を指定した場合はそのパスを優先する
+- 入力の元資料は読み取り専用として扱い、移動・削除しない
 
 ### 推奨の始め方
 
@@ -48,6 +49,7 @@ Power Platform 開発で使いやすい **factsheet 群** と **全体 document.
 2. 各ファイルごとに `factsheets/*.md` を作る
 3. 横断要件を `document.md` にまとめる
 4. 不明点・矛盾点・未記載事項は推測で埋めず `要確認` として残す
+5. 資料から確認できた事実は出典を示し、未確認事項や改善案は事実と区別した仮説・提案として記録する
 
 ## 出力フォルダ構成
 
