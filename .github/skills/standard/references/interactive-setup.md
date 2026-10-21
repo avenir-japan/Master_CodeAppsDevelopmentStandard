@@ -10,10 +10,10 @@
 
 このスキルの推奨セットアップは次の 4 ステップで、`scripts/setup_environment.py` が自動化する。
 
-1. **PAC プロファイルから環境を取得** — `pac auth list` のプロファイルを `pac org who` で解決し、環境候補（URL / 環境 ID）を一覧化する。
+1. **PAC プロファイルから環境を取得** — `pac auth list` のプロファイルを `pac org who` で解決し、環境候補（URL / 環境 ID）を一覧化する。`--list` 後は元のアクティブプロファイルを復元する。
 2. **どの環境にするか AskUserQuestion** — エージェントが一覧をユーザーに提示し、利用環境を選ばせる。
 3. **ブラウザー対話認証** — 社内開発環境用 `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を設定し、`auth_helper.py` でブラウザー認証する。ブラウザーを開く前に [ブラウザ自動化方針](browser-automation.md)に従って利用する Edge プロファイルを確認する。
-4. **auth_helper に認証を保存** — 認証成功時に `AuthenticationRecord`（`auth_helper.py` と同じディレクトリの `.auth_record_browser.json`）と MSAL 永続キャッシュへ保存する。以降は同じ構成のスクリプトでキャッシュから認証する。
+4. **auth_helper に認証を保存** — 認証成功時に `AuthenticationRecord`（`~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`）と MSAL 永続キャッシュへ保存する。以降は同じテナント・クライアント ID のスクリプトでキャッシュから認証する。
 
 ```powershell
 # 1〜2: 環境候補を一覧表示（この出力を AskUserQuestion で提示する）
@@ -26,6 +26,8 @@ python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileN
 # 既存 .env で認証だけ実行したいとき
 python .github/skills/standard/scripts/setup_environment.py --auth-only
 ```
+
+初回は `pac auth create --name <ProfileName>` で開発テナントの PAC プロファイルを用意し、`--profile` 実行時にブラウザーでサインインする。既存の PAC プロファイルと案件用 `.env` がある場合はそのまま利用し、必要なら `--auth-only` で Python 認証を確認する。端末上の認証レコードと MSAL キャッシュが有効ならサイレントに再利用される。`.env` は案件ごとに保持し、マスターや顧客への納品物には含めない。
 
 > 以降の Step 1〜8 は、この自動フローの各段階の詳細・手動フォールバックである。
 
@@ -93,7 +95,7 @@ python .github/skills/standard/scripts/setup_environment.py --list
 2    | Production (active) | Prod         | yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy | https://{org-prod}.crm.dynamics.com
 ```
 
-> ユーザーが番号で選べるようにする。`--list` は手動の `pac env list` でも代替できる。
+> ユーザーが番号で選べるようにする。`--list` は候補取得後に元のアクティブプロファイルへ戻す（復元失敗時はエラー）。手動の `pac env list` でも代替できる。
 
 ## Step 4: .env の作成
 
@@ -145,15 +147,15 @@ pip install -r requirements.txt
 
 サインインが成功すると `auth_helper.py` が 2 層キャッシュへ認証を保存する:
 
-1. **AuthenticationRecord**（`.auth_record_browser.json`、スクリプトフォルダ直下）— アカウント情報
+1. **AuthenticationRecord**（`~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`、明示したクライアント ID は末尾に `_{client_id}` を付加）— アカウント情報
 2. **MSAL 永続トークンキャッシュ** — リフレッシュトークン（OS 資格情報ストア）
 
-これにより 2 回目以降はサイレントリフレッシュできる。認証が期限切れになった場合はブラウザーで再認証する。
+レコードの読み込み時には `.env` の `TENANT_ID` との一致を確認する。旧スクリプトフォルダのレコードはテナント一致を確認できた場合のみ移行する。これにより 2 回目以降はサイレントリフレッシュできる。認証が期限切れになった場合はブラウザーで再認証する。
 
 > **PAC プロファイルでの Python トークン取得について**: 一部の PAC CLI バージョンには
 > `pac auth token` サブコマンドが無く、PAC プロファイルから Dataverse トークンを直接取得できない。
 > `auth_helper.py` は PAC プロファイルからトークンを取得しない。`PAC_AUTH_PROFILE` は環境メタデータ（URL / 環境 ID）の取得元として `.env` に保持する。
-> 顧客テナントへの納品時は社内開発用の `.env` や認証記録を渡さず、顧客側の認証・接続設定を別途確認する。
+> 顧客テナントへの納品はソリューションの手動インポートで行う。社内開発用の `.env` や認証記録を渡さず、顧客側の認証・接続設定を別途確認する。
 
 ## Step 6: 既存パブリッシャーの確認と選択
 

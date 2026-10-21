@@ -7,7 +7,7 @@ Power Platform Dataverse デプロイスクリプト用 共通認証ヘルパー
   本モジュールの対象外。
 
 認証の仕組み（2 層キャッシュ）:
-    1. AuthenticationRecord (ブラウザー認証時は .auth_record_browser.json)
+    1. AuthenticationRecord (~/.power-platform-cli/ にテナント別に保存)
      - アカウント情報（テナント・ユーザー等）を保存
      - これだけではトークンは保存されない
   2. TokenCachePersistenceOptions (MSAL 永続トークンキャッシュ)
@@ -66,9 +66,10 @@ TENANT_ID: str = os.getenv("TENANT_ID", "")
 DATAVERSE_URL: str = os.getenv("DATAVERSE_URL", "").rstrip("/")
 PREFER_BROWSER_AUTH: bool = os.getenv("PP_USE_INTERACTIVE_BROWSER", "").strip().lower() in {"1", "true", "yes"}
 
-# AuthenticationRecord の保存先（auth_helper.py と同じディレクトリの .auth_record.json）
 _PROJECT_ROOT = Path(__file__).resolve().parent
-AUTH_RECORD_PATH: Path = _PROJECT_ROOT / ".auth_record.json"
+_AUTH_RECORD_DIR = Path.home() / ".power-platform-cli"
+AUTH_RECORD_PATH: Path = _AUTH_RECORD_DIR / f"auth_record_{TENANT_ID or 'default'}_device.json"
+_BROWSER_AUTH_RECORD_PATH: Path = _AUTH_RECORD_DIR / f"auth_record_{TENANT_ID or 'default'}_browser.json"
 
 # Dataverse Web API のデフォルトスコープ
 _DEFAULT_SCOPE = f"{DATAVERSE_URL}/.default" if DATAVERSE_URL else ""
@@ -76,18 +77,46 @@ _DEFAULT_SCOPE = f"{DATAVERSE_URL}/.default" if DATAVERSE_URL else ""
 # ---------- 内部キャッシュ ----------
 
 _credential: DeviceCodeCredential | None = None
-_browser_credential: InteractiveBrowserCredential | None = None
-
-# ブラウザー認証用 AuthenticationRecord の保存先
-_BROWSER_AUTH_RECORD_PATH: Path = _PROJECT_ROOT / ".auth_record_browser.json"
+_browser_credentials: dict[str, InteractiveBrowserCredential] = {}
 
 
-def _interactive_browser_credential_kwargs() -> dict:
+def _browser_record_path(client_id: str | None = None) -> Path:
+    if client_id:
+        return _BROWSER_AUTH_RECORD_PATH.with_name(
+            f"{_BROWSER_AUTH_RECORD_PATH.stem}_{client_id}{_BROWSER_AUTH_RECORD_PATH.suffix}"
+        )
+    return _BROWSER_AUTH_RECORD_PATH
+
+
+def _load_auth_record(path: Path, legacy_path: Path | None = None) -> AuthenticationRecord | None:
+    if not path.exists() and legacy_path is not None and legacy_path.is_file() and TENANT_ID:
+        try:
+            legacy_record = AuthenticationRecord.deserialize(legacy_path.read_text(encoding="utf-8"))
+            if legacy_record.tenant_id == TENANT_ID:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(legacy_record.serialize(), encoding="utf-8")
+        except (ValueError, OSError, json.JSONDecodeError):
+            pass
+
+    if path.is_file():
+        try:
+            record = AuthenticationRecord.deserialize(path.read_text(encoding="utf-8"))
+            if TENANT_ID and record.tenant_id != TENANT_ID:
+                print(f"[auth_helper] 認証キャッシュのテナントが不一致: {path}", file=sys.stderr)
+                return None
+            return record
+        except (ValueError, OSError, json.JSONDecodeError):
+            pass
+    return None
+
+
+def _interactive_browser_credential_kwargs(client_id: str | None = None) -> dict:
     """InteractiveBrowserCredential 用の共通 kwargs を返す。"""
     use_persistent_cache = not os.environ.get("PP_NO_PERSISTENT_CACHE")
 
     kwargs: dict = {
         "tenant_id": TENANT_ID or None,
+        "client_id": client_id,
     }
 
     if use_persistent_cache:
@@ -99,7 +128,7 @@ def _interactive_browser_credential_kwargs() -> dict:
     return {k: v for k, v in kwargs.items() if v is not None}
 
 
-def _ensure_browser_credential() -> InteractiveBrowserCredential:
+def _ensure_browser_credential(client_id: str | None = None) -> InteractiveBrowserCredential:
     """InteractiveBrowserCredential のシングルトンを返す（AuthenticationRecord 付き）。
 
     AuthenticationRecord を永続化ファイルからロードすることで、
@@ -107,46 +136,45 @@ def _ensure_browser_credential() -> InteractiveBrowserCredential:
     これにより、同一プロセス内で複数スコープのトークンを取得する際に
     毎回ブラウザーが開く問題を解消する。
     """
-    global _browser_credential  # noqa: PLW0603
-    if _browser_credential is not None:
-        return _browser_credential
+    key = client_id or ""
+    if key in _browser_credentials:
+        return _browser_credentials[key]
 
-    kwargs = _interactive_browser_credential_kwargs()
+    kwargs = _interactive_browser_credential_kwargs(client_id)
 
-    # AuthenticationRecord をロード（存在すればサイレント認証が可能になる）
-    if _BROWSER_AUTH_RECORD_PATH.exists():
-        try:
-            serialized = _BROWSER_AUTH_RECORD_PATH.read_text(encoding="utf-8")
-            auth_record = AuthenticationRecord.deserialize(serialized)
-            kwargs["authentication_record"] = auth_record
-        except (ValueError, OSError, json.JSONDecodeError):
-            pass  # 破損時は無視して対話認証にフォールバック
+    legacy_path = _PROJECT_ROOT / ".auth_record_browser.json" if not client_id else None
+    auth_record = _load_auth_record(_browser_record_path(client_id), legacy_path)
+    if auth_record is not None:
+        kwargs["authentication_record"] = auth_record
 
-    _browser_credential = InteractiveBrowserCredential(**kwargs)
-    return _browser_credential
+    _browser_credentials[key] = InteractiveBrowserCredential(**kwargs)
+    return _browser_credentials[key]
 
 
-def _save_browser_auth_record(record: AuthenticationRecord) -> None:
+def _save_browser_auth_record(record: AuthenticationRecord, client_id: str | None = None) -> None:
     """ブラウザー認証用の AuthenticationRecord をファイルに永続化する。"""
-    _BROWSER_AUTH_RECORD_PATH.write_text(record.serialize(), encoding="utf-8")
+    path = _browser_record_path(client_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(record.serialize(), encoding="utf-8")
 
 
-def _get_interactive_browser_token(scope: str) -> str:
+def _get_interactive_browser_token(scope: str, client_id: str | None = None) -> str:
     """デバイスコード認証がポリシーで拒否される環境向けのフォールバック。
 
     シングルトン credential + AuthenticationRecord により、
     初回のみブラウザー認証が走り、以降はサイレントリフレッシュで取得する。
     """
-    credential = _ensure_browser_credential()
+    credential = _ensure_browser_credential(client_id)
+    path = _browser_record_path(client_id)
 
     # まず authenticate() でサイレント or 対話認証を試み、AuthenticationRecord を保存
-    if not _BROWSER_AUTH_RECORD_PATH.exists():
+    if _load_auth_record(path) is None:
         print(
             "[auth_helper] ブラウザー対話認証（初回）を開始します。",
             file=sys.stderr,
         )
         record = credential.authenticate(scopes=[scope])
-        _save_browser_auth_record(record)
+        _save_browser_auth_record(record, client_id)
         token = credential.get_token(scope)
     else:
         try:
@@ -157,16 +185,15 @@ def _get_interactive_browser_token(scope: str) -> str:
                 "[auth_helper] キャッシュ期限切れ — ブラウザー再認証します。",
                 file=sys.stderr,
             )
-            global _browser_credential  # noqa: PLW0603
-            _browser_credential = None
+            _browser_credentials.pop(client_id or "", None)
             # 古いレコードを削除して再構築
-            _BROWSER_AUTH_RECORD_PATH.unlink(missing_ok=True)
-            credential = _ensure_browser_credential()
+            path.unlink(missing_ok=True)
+            credential = _ensure_browser_credential(client_id)
             record = credential.authenticate(scopes=[scope])
-            _save_browser_auth_record(record)
+            _save_browser_auth_record(record, client_id)
             token = credential.get_token(scope)
 
-    _inmemory_tokens[scope] = (token.token, token.expires_on)
+    _inmemory_tokens[(scope, client_id or "")] = (token.token, token.expires_on)
     return token.token
 
 
@@ -210,20 +237,7 @@ def _build_credential() -> DeviceCodeCredential:
         )
         kwargs["cache_persistence_options"] = cache_options
 
-    auth_record: AuthenticationRecord | None = None
-    if AUTH_RECORD_PATH.exists():
-        try:
-            serialized = AUTH_RECORD_PATH.read_text(encoding="utf-8")
-            auth_record = AuthenticationRecord.deserialize(serialized)
-            print(
-                f"[auth_helper] 認証キャッシュをロードしました: {AUTH_RECORD_PATH}",
-                file=sys.stderr,
-            )
-        except (ValueError, OSError, json.JSONDecodeError) as exc:
-            print(
-                f"[auth_helper] 認証キャッシュの読み込みに失敗（初回認証に切り替え）: {exc}",
-                file=sys.stderr,
-            )
+    auth_record = _load_auth_record(AUTH_RECORD_PATH, _PROJECT_ROOT / ".auth_record.json")
 
     # None の値を除外（未設定パラメータはライブラリの既定値を使う）
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -244,6 +258,7 @@ def _ensure_credential() -> DeviceCodeCredential:
 
 def _save_auth_record(record: AuthenticationRecord) -> None:
     """AuthenticationRecord をファイルに永続化する。"""
+    AUTH_RECORD_PATH.parent.mkdir(parents=True, exist_ok=True)
     AUTH_RECORD_PATH.write_text(record.serialize(), encoding="utf-8")
     print(
         f"[auth_helper] 認証レコードを保存しました: {AUTH_RECORD_PATH}",
@@ -256,10 +271,10 @@ def _save_auth_record(record: AuthenticationRecord) -> None:
 # Python 3.14 で MSAL 内部トークンキャッシュが壊れる問題の回避策:
 # 自前でスコープ別のインメモリキャッシュを管理する。
 # credential.get_token() は同じスコープで 1 回だけ呼び、結果をキャッシュする。
-_inmemory_tokens: dict[str, tuple[str, float]] = {}  # scope -> (token_str, expires_on)
+_inmemory_tokens: dict[tuple[str, str], tuple[str, float]] = {}
 
 
-def get_token(scope: str | None = None) -> str:
+def get_token(scope: str | None = None, client_id: str | None = None) -> str:
     """
     指定スコープのアクセストークン文字列を返す。
 
@@ -280,19 +295,20 @@ def get_token(scope: str | None = None) -> str:
         )
 
     # インメモリキャッシュから返す（有効期限 60 秒前まで）
-    if scope in _inmemory_tokens:
-        token_str, expires_on = _inmemory_tokens[scope]
+    cache_key = (scope, client_id or "")
+    if cache_key in _inmemory_tokens:
+        token_str, expires_on = _inmemory_tokens[cache_key]
         if time.time() < expires_on - 60:
             return token_str
 
-    if PREFER_BROWSER_AUTH:
-        return _get_interactive_browser_token(scope)
+    if PREFER_BROWSER_AUTH or client_id:
+        return _get_interactive_browser_token(scope, client_id)
 
     credential = _ensure_credential()
 
     # キャッシュが存在しない場合は明示的に authenticate() を呼んで
     # AuthenticationRecord を永続化してからトークンを取得する
-    if not AUTH_RECORD_PATH.exists():
+    if _load_auth_record(AUTH_RECORD_PATH) is None:
         try:
             record = credential.authenticate(scopes=[scope])
             _save_auth_record(record)
@@ -328,11 +344,11 @@ def get_token(scope: str | None = None) -> str:
         _save_auth_record(record)
         token = _credential.get_token(scope)
 
-    _inmemory_tokens[scope] = (token.token, token.expires_on)
+    _inmemory_tokens[cache_key] = (token.token, token.expires_on)
     return token.token
 
 
-def authenticate(scope: str | None = None) -> AuthenticationRecord:
+def authenticate(scope: str | None = None, client_id: str | None = None) -> AuthenticationRecord:
     """
     明示的に対話認証を実行し、AuthenticationRecord を保存して返す。
 
@@ -352,10 +368,13 @@ def authenticate(scope: str | None = None) -> AuthenticationRecord:
             "スコープが未指定です。DATAVERSE_URL を .env に設定するか scope 引数を渡してください。"
         )
 
-    if PREFER_BROWSER_AUTH:
-        credential = _ensure_browser_credential()
+    if PREFER_BROWSER_AUTH or client_id:
+        credential = _ensure_browser_credential(client_id) if client_id else _ensure_browser_credential()
         record = credential.authenticate(scopes=[scope])
-        _save_browser_auth_record(record)
+        if client_id:
+            _save_browser_auth_record(record, client_id)
+        else:
+            _save_browser_auth_record(record)
         return record
 
     credential = _ensure_credential()
@@ -364,7 +383,7 @@ def authenticate(scope: str | None = None) -> AuthenticationRecord:
     return record
 
 
-def get_session(scope: str | None = None) -> requests.Session:
+def get_session(scope: str | None = None, client_id: str | None = None) -> requests.Session:
     """
     Bearer トークンが設定された requests.Session を返す。
 
@@ -374,7 +393,7 @@ def get_session(scope: str | None = None) -> requests.Session:
     Returns:
         Authorization ヘッダー付き requests.Session。
     """
-    token = get_token(scope)
+    token = get_token(scope, client_id)
     session = requests.Session()
     session.headers.update(
         {

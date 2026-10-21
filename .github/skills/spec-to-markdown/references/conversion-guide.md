@@ -56,6 +56,7 @@ work/spec-to-markdown/input/
 - `python convert_documents.py` の既定入力は `input/` 全体
 - `python convert_documents.py --input <repo-root>/work/spec-to-markdown/input/customer-a` とすると `customer-a-<timestamp>/` 配下へ出力される
 - `--output` を省略すると、毎回タイムスタンプ付きの別フォルダになるため上書き事故を避けやすい
+- 入力ファイルは読み取り専用として扱い、元資料を移動・削除しない。変換結果は出力フォルダに作成する
 
 ## 3. 対応対象
 
@@ -80,6 +81,8 @@ work/spec-to-markdown/input/
 - Converted at:
 
 ## 2. Power Platform requirement summary
+### Source facts and source locations
+### Open questions and proposal hypotheses (not confirmed facts)
 ### Business objective
 ### Users / roles
 ### Dataverse tables
@@ -104,6 +107,7 @@ work/spec-to-markdown/input/
 ## 2. Source documents
 
 ## 3. Cross-document requirements summary
+### Source facts, open questions, and proposal hypotheses
 ### Business scope
 ### Users / roles
 ### Dataverse design candidates

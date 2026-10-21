@@ -57,8 +57,26 @@ git clone https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard . &
 ```
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
+
+社内開発テナントで初めて使う場合は、PAC にサインインして環境を選び、Python 側のブラウザー認証も済ませます。
+
+```powershell
+pac auth create --name "<ProfileName>"
+python -m pip install -r .github/skills/standard/scripts/requirements.txt
+python .github/skills/standard/scripts/setup_environment.py --list
+python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileName>" `
+  --solution "<SolutionName>" --prefix "<prefix>" --display "<表示名>"
+```
+
+既に PAC プロファイルと案件用 `.env` がある場合は作り直さず、`--auth-only` で Python 認証を確認できます。`--list` は候補の取得後に元の PAC アクティブプロファイルを復元します。
+
+```powershell
+python .github/skills/standard/scripts/setup_environment.py --auth-only
+```
+
+同じ開発端末・テナントの認証レコードと MSAL キャッシュが有効なら再サインインせず利用できます。顧客環境への引き渡しはソリューションの手動インポートで行い、開発者の `.env` や認証キャッシュは渡しません。詳細は [インタラクティブ環境セットアップ手順](./.github/skills/standard/references/interactive-setup.md) を参照してください。
 
 > [!NOTE]
 > `.` へ clone するため、空ディレクトリで実行してください。既存ファイルがある場所で実行すると上書きリスクがあります。
