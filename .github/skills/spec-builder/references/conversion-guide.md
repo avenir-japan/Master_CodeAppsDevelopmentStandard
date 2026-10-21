@@ -56,8 +56,8 @@ powershell -ExecutionPolicy Bypass -File run_windows.ps1
 - checklist: `<repo-root>/spec/.cache/conversion-checklist.json`
 - pending JSON: checklist と同じ `spec/.cache/` に自動配置
 
-`spec/input/` に変換対象がない場合、`convert_documents.py` はワークスペース・フォルダ全体をスキャンし、変換候補になりうるファイル（対応拡張子）がないか確認する。見つかった場合は候補一覧を提示するので、`spec/input/` に移動するか `--input` で対象パスを指定する。
-**「移動」は元ファイルの削除まで含む。** `spec/input/` へコピーした後、元の場所のファイルを残したままにしない（重複ファイルがワークスペースに残るのを防ぐため）。
+`spec/input/` に変換対象がない場合、`convert_documents.py` はワークスペース・フォルダ全体をスキャンし、変換候補になりうるファイル（対応拡張子）がないか確認する。見つかった場合は候補一覧を提示するので、元の場所を `--input` で指定するか、必要に応じて `spec/input/` へコピーする。
+元資料は移動・削除しない。コピーする場合も元ファイルは保持し、重複する候補は入力パスを指定して区別する。
 オプション（checklist のパスを変えると pending JSON も同じディレクトリに移動する）:
 
 ```bash

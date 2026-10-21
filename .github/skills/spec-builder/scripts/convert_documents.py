@@ -324,6 +324,7 @@ def build_business_requirements_doc(batch_started_at: str, results: list[Convers
 - **検証目的・仮説 / 成功条件**: 要確認
 
 <!-- 開発段階・目的・範囲の正本を案件ごとに指定する。SPEC.md と本書が食い違う場合は要確認として判断を待つ。PoC / MVP の結果を本番品質の保証として扱わない -->
+<!-- 資料由来の事実には出典を示し、未確認事項と改善仮説・提案を区別する -->
 
 ## 3. ステークホルダー / ロール
 
@@ -449,6 +450,7 @@ def build_design_requirements_doc(batch_started_at: str, results: list[Conversio
 
 <!-- 全体構成・コンポーネント選定・構築フェーズは architecture スキル（.github/skills/architecture/SKILL.md）を正とする -->
 <!-- 本ドキュメントには architecture スキルの判断フロー・設計アウトプットテンプレートで確定した結果を転記する -->
+<!-- 事実と出典、未確認事項、To-Be 業務フローと役割・承認境界、KPI 仮説・測定方法、推奨案と代替案を区別し、採用の承認結果を記録する -->
 
 ## 1. 変換対象ファイル
 
@@ -647,7 +649,7 @@ def main() -> int:
             raise SystemExit(
                 f"`{input_path}` に変換対象ファイルが見つかりません。"
                 " ワークスペース全体をスキャンしたところ、以下の変換候補ファイルが見つかりました。"
-                f" `{DEFAULT_INPUT_DIR}` に移動するか `--input` で対象を指定してください。\n"
+                f" 元の場所を `--input` で指定するか、必要なら `{DEFAULT_INPUT_DIR}` にコピーしてください。元ファイルは移動・削除しないでください。\n"
                 f"{candidate_list}"
             )
         raise SystemExit(
