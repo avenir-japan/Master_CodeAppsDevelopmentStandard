@@ -169,12 +169,22 @@ def command_list() -> int:
         print(exc, file=sys.stderr)
         return 1
 
+    active_profile = next((profile["name"] for profile in profiles if profile["active"]), None)
     rows = []
-    for profile in profiles:
-        info = org_who(profile["name"])
-        if info is None:
-            continue
-        rows.append({**profile, **info})
+    restored = None
+    try:
+        for profile in profiles:
+            info = org_who(profile["name"])
+            if info is None:
+                continue
+            rows.append({**profile, **info})
+    finally:
+        if active_profile:
+            restored = run_command(["pac", "auth", "select", "--name", active_profile])
+
+    if restored is not None and restored.returncode != 0:
+        print(f"元の PAC プロファイル '{active_profile}' の復元に失敗しました。", file=sys.stderr)
+        return 1
 
     if not rows:
         print("環境を持つ PAC プロファイルが見つかりません。pac auth create で作成してください。")

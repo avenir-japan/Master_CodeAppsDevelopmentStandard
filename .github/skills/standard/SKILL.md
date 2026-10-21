@@ -134,9 +134,10 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 **ユーザーに何度も対話認証を求めない** 2 層キャッシュ構成。
 
 ```
-層1: AuthenticationRecord (ブラウザー認証では .auth_record_browser.json)
+層1: AuthenticationRecord (ブラウザー認証では ~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json)
   - アカウント情報（テナント・ユーザー ID）を保存
-  - `auth_helper.py` と同じディレクトリに永続化（Device Code 利用時は .auth_record.json）
+  - 開発端末のホームディレクトリに保存。Device Code は auth_record_{TENANT_ID}_device.json
+  - 明示した client_id はブラウザーのファイル名末尾とメモリキャッシュを分離し、読み込み時は TENANT_ID の一致を確認
 
 層2: TokenCachePersistenceOptions (MSAL OS 資格情報ストア)
   - リフレッシュトークン・アクセストークンを永続化

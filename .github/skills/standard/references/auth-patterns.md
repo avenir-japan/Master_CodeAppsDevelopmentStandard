@@ -38,14 +38,14 @@ PP_USE_INTERACTIVE_BROWSER=true
 ### 動作
 
 1. 初回: ブラウザーが開き Azure AD ログイン → MFA 完了 → トークン取得
-2. `AuthenticationRecord` をファイル (`.auth_record_browser.json`) に保存
+2. `AuthenticationRecord` をホームディレクトリの `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json` に保存
 3. 2回目以降: ファイルからレコードをロード → サイレントリフレッシュ（ブラウザー不要）
 4. キャッシュ期限切れ時: 自動的にブラウザーで再認証
 
 ### 注意点
 
 - WSL や SSH リモート環境では `localhost` リダイレクトが機能しない場合がある
-- その場合は Windows ローカルで認証を完了させてからレコードファイルをコピー
+- その場合は Windows ローカルで認証を完了する。認証レコード単体ではトークンを移せないため、実行環境ごとにサインインする
 
 ---
 
@@ -100,16 +100,18 @@ Python 3.14 では MSAL 内部トークンキャッシュ (`msal/token_cache.py`
 3. `TypeError` や `ClientAuthenticationError` 発生時は新しい credential を永続キャッシュなしで再構築
 4. `PP_NO_PERSISTENT_CACHE=1` 環境変数で OS 永続キャッシュを無効化可能
 
-```bash
+```powershell
 # Python 3.14 でキャッシュ破損が発生する場合
-$env:PP_NO_PERSISTENT_CACHE="1"; Remove-Item .auth_record.json -ErrorAction SilentlyContinue; python ./setup_dataverse.py
+$tenantId = "<.env の TENANT_ID>"
+$env:PP_NO_PERSISTENT_CACHE="1"; Remove-Item (Join-Path $HOME ".power-platform-cli/auth_record_${tenantId}_device.json") -ErrorAction SilentlyContinue; python ./setup_dataverse.py
 ```
 
 #### ブラウザー対話認証 (`PP_USE_INTERACTIVE_BROWSER=true`) のサイレントリフレッシュ
 
 `PP_USE_INTERACTIVE_BROWSER=true` 設定時、`InteractiveBrowserCredential` はシングルトン + `AuthenticationRecord` 永続化により **初回のみ** ブラウザーが開く。
 
-- 認証レコードファイル: `.auth_record_browser.json`（スクリプトフォルダ直下）
+- 認証レコードファイル: `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`（明示した `client_id` には `_{client_id}` を付けて分離）
+- 旧スクリプトフォルダのレコードは `TENANT_ID` が一致した場合のみ移行し、読み込み時もテナント不一致のレコードは再認証する
 - 動作:
   1. 初回: `authenticate()` でブラウザー認証 → `AuthenticationRecord` をファイルに保存
   2. 2回目以降: `AuthenticationRecord` をロード → 永続キャッシュからサイレントリフレッシュ
@@ -118,6 +120,7 @@ $env:PP_NO_PERSISTENT_CACHE="1"; Remove-Item .auth_record.json -ErrorAction Sile
 - **異なるスコープ** (`Dataverse` / `Flow API` / `PowerApps API`) でも同一 credential + 同一キャッシュからサイレント取得
 - ブラウザーが何度も開く場合はレコードファイルを削除して再認証:
 
-```bash
-Remove-Item .auth_record_browser.json -ErrorAction SilentlyContinue; python ./scripts/deploy_save_flow.py
+```powershell
+$tenantId = "<.env の TENANT_ID>"
+Remove-Item (Join-Path $HOME ".power-platform-cli/auth_record_${tenantId}_browser.json") -ErrorAction SilentlyContinue; python ./scripts/deploy_save_flow.py
 ```
