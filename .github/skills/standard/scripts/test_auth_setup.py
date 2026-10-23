@@ -8,7 +8,10 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import auth_helper
+import initialize_workspace
 import setup_environment
+from azure.core.exceptions import ClientAuthenticationError
+from azure.identity import AuthenticationRequiredError
 
 
 class AuthSetupTests(unittest.TestCase):
@@ -90,6 +93,56 @@ class AuthSetupTests(unittest.TestCase):
             credential.authenticate.assert_not_called()
             credential.get_token.assert_called_once_with("test.scope")
 
+    def test_browser_cache_failure_preserves_record_and_requires_explicit_reauth(self):
+        with TemporaryDirectory() as directory:
+            record_path = Path(directory) / "auth_record_internal_browser.json"
+            record_path.write_text('{"tenant_id": "internal"}', encoding="utf-8")
+            credential = MagicMock()
+            credential.get_token.side_effect = ClientAuthenticationError(message="permission denied")
+            with (
+                patch.object(auth_helper, "TENANT_ID", "internal"),
+                patch.object(auth_helper, "PREFER_BROWSER_AUTH", True),
+                patch.object(auth_helper, "_BROWSER_AUTH_RECORD_PATH", record_path),
+                patch.object(auth_helper.AuthenticationRecord, "deserialize", side_effect=lambda text: SimpleNamespace(tenant_id=json.loads(text)["tenant_id"])),
+                patch.object(auth_helper, "InteractiveBrowserCredential", return_value=credential) as build_credential,
+                patch.object(auth_helper, "_browser_credentials", {}),
+                patch.object(auth_helper, "_inmemory_tokens", {}),
+            ):
+                with self.assertRaises(ClientAuthenticationError):
+                    auth_helper.get_token("test.scope")
+                self.assertTrue(record_path.exists())
+                self.assertTrue(build_credential.call_args.kwargs["disable_automatic_authentication"])
+            credential.authenticate.assert_not_called()
+
+    def test_browser_interaction_required_preserves_record(self):
+        with TemporaryDirectory() as directory:
+            record_path = Path(directory) / "auth_record_internal_browser.json"
+            record_path.write_text('{"tenant_id": "internal"}', encoding="utf-8")
+            credential = MagicMock()
+            credential.get_token.side_effect = AuthenticationRequiredError(message="sign in required", scopes=["test.scope"])
+            with (
+                patch.object(auth_helper, "TENANT_ID", "internal"),
+                patch.object(auth_helper, "PREFER_BROWSER_AUTH", True),
+                patch.object(auth_helper, "_BROWSER_AUTH_RECORD_PATH", record_path),
+                patch.object(auth_helper.AuthenticationRecord, "deserialize", side_effect=lambda text: SimpleNamespace(tenant_id=json.loads(text)["tenant_id"])),
+                patch.object(auth_helper, "InteractiveBrowserCredential", return_value=credential),
+                patch.object(auth_helper, "_browser_credentials", {}),
+                patch.object(auth_helper, "_inmemory_tokens", {}),
+            ):
+                with self.assertRaises(AuthenticationRequiredError):
+                    auth_helper.get_token("test.scope")
+                self.assertTrue(record_path.exists())
+            credential.authenticate.assert_not_called()
+
+    def test_persistent_caches_do_not_allow_plaintext_fallback(self):
+        with patch.dict("os.environ", {"PP_NO_PERSISTENT_CACHE": ""}):
+            browser_options = auth_helper._interactive_browser_credential_kwargs()["cache_persistence_options"]
+            with patch.object(auth_helper, "DeviceCodeCredential") as device_credential:
+                auth_helper._build_credential()
+            device_options = device_credential.call_args.kwargs["cache_persistence_options"]
+        self.assertFalse(browser_options.allow_unencrypted_storage)
+        self.assertFalse(device_options.allow_unencrypted_storage)
+
     def test_client_ids_use_separate_records_and_memory_tokens(self):
         with TemporaryDirectory() as directory:
             record_path = Path(directory) / "auth_record_internal_browser.json"
@@ -166,6 +219,74 @@ class AuthSetupTests(unittest.TestCase):
         ):
             self.assertEqual(setup_environment.command_profile(args, Path(".")), 0)
         self.assertEqual(upsert.call_args.args[1]["PP_USE_INTERACTIVE_BROWSER"], "true")
+
+    def test_profile_does_not_change_env_when_tenant_resolution_fails(self):
+        args = Namespace(profile="other", solution=None, display=None, prefix=None, no_auth=False)
+        with TemporaryDirectory() as directory:
+            repo_root = Path(directory)
+            env_path = repo_root / ".env"
+            original = "DATAVERSE_URL=https://old.example.test/\nTENANT_ID=old-tenant\n"
+            env_path.write_text(original, encoding="utf-8")
+            with (
+                patch.object(setup_environment, "org_who", return_value={"url": "https://new.example.test/", "env_id": "new-env", "user": "admin@example.com"}),
+                patch.object(setup_environment, "resolve_tenant", return_value=""),
+                patch.object(setup_environment, "trigger_auth") as trigger_auth,
+            ):
+                self.assertEqual(setup_environment.command_profile(args, repo_root), 1)
+            self.assertEqual(env_path.read_text(encoding="utf-8"), original)
+            trigger_auth.assert_not_called()
+
+    def test_auth_only_explicitly_renews_when_interaction_required(self):
+        with (
+            patch.object(auth_helper, "api_get", side_effect=[AuthenticationRequiredError(message="sign in required", scopes=["test.scope"]), {"UserId": "user"}]) as whoami,
+            patch.object(auth_helper, "authenticate") as authenticate,
+            patch.dict("os.environ", {}, clear=False),
+        ):
+            self.assertEqual(setup_environment.trigger_auth({"DATAVERSE_URL": "https://example.test"}), 0)
+        authenticate.assert_called_once_with()
+        self.assertEqual(whoami.call_count, 2)
+
+    def test_auth_only_does_not_retry_unrelated_authentication_failure(self):
+        with (
+            patch.object(auth_helper, "api_get", side_effect=ClientAuthenticationError(message="permission denied")),
+            patch.object(auth_helper, "authenticate") as authenticate,
+        ):
+            with self.assertRaises(ClientAuthenticationError):
+                setup_environment.trigger_auth({})
+        authenticate.assert_not_called()
+
+
+class WorkspaceInstallTests(unittest.TestCase):
+    def test_dry_run_and_apply_preserve_existing_files(self):
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / "source"
+            target = Path(directory) / "target"
+            (source / ".github/agents").mkdir(parents=True)
+            (source / ".github/skills/standard/references").mkdir(parents=True)
+            (target / ".github/agents").mkdir(parents=True)
+            (source / ".github/agents/new.md").write_text("standard", encoding="utf-8")
+            (source / ".github/agents/__pycache__").mkdir()
+            (source / ".github/agents/__pycache__/generated.pyc").write_bytes(b"generated")
+            (target / ".github/agents/new.md").write_text("project", encoding="utf-8")
+            (source / ".github/skills/standard/references/gitignore-template").write_text(".env\nnode_modules/\n", encoding="utf-8")
+            (source / ".github/copilot-instructions.md").write_text("standard", encoding="utf-8")
+            (source / ".env.example").write_text("EXAMPLE=1", encoding="utf-8")
+            (target / ".gitignore").write_text("# project\n.env\n", encoding="utf-8")
+
+            added, conflicts = initialize_workspace.install(source, target)
+            self.assertIn(Path(".github/agents/new.md"), conflicts)
+            self.assertIn(Path(".gitignore"), added)
+            self.assertFalse((target / ".github/copilot-instructions.md").exists())
+            self.assertNotIn(Path(".github/agents/__pycache__/generated.pyc"), added)
+            self.assertEqual((target / ".gitignore").read_text(encoding="utf-8"), "# project\n.env\n")
+
+            initialize_workspace.install(source, target, apply=True)
+            self.assertEqual((target / ".github/agents/new.md").read_text(encoding="utf-8"), "project")
+            self.assertEqual((target / ".github/copilot-instructions.md").read_text(encoding="utf-8"), "standard")
+            self.assertEqual((target / ".gitignore").read_text(encoding="utf-8"), "# project\n.env\nnode_modules/\n")
+            added, conflicts = initialize_workspace.install(source, target, apply=True)
+            self.assertEqual(added, [])
+            self.assertEqual(conflicts, [Path(".github/agents/new.md")])
 
 
 if __name__ == "__main__":

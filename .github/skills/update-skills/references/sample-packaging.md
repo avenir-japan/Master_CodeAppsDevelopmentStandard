@@ -76,7 +76,7 @@ grep -rn '"[a-z]\+_[a-z]\+s"' --include="*.ts" --include="*.tsx" src/services/
 
 ## フェーズ 2: コード再利用性チェック・修正
 
-[sample-authoring-guide.md](../code-apps/references/sample-authoring-guide.md) のルールに従い、以下を確認・修正する。
+以下のチェック項目に従い、再利用性を確認・修正する。
 
 ### 2-1. `VITE_PUBLISHER_PREFIX` の使用確認
 
@@ -172,7 +172,7 @@ VITE_FEATURE_{機能名}=false    # {機能の説明}
 
 ### 必須構成
 
-````markdown
+`````markdown
 # {サンプル名} — {業務テーマ}
 
 {サンプルの一行説明}
@@ -227,6 +227,8 @@ npm run dev
 |---|---|---|
 | `VITE_FEATURE_{機能名}` | `false` | {説明} |
 ````
+`````
+
 ````
 
 ---
@@ -277,3 +279,4 @@ npm run dev
 ```
 
 完了後に変更内容のサマリーを報告する。修正なし・生成済みの項目は ✅、修正・生成した項目は ✨ で示す。
+````

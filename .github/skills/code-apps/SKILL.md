@@ -142,7 +142,7 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 
 共通の `.env`、認証、ソリューション運用の正本は [standard スキル](../standard/SKILL.md) とする。
 
-- Code Apps は `npx power-apps push` で対象ソリューションにデプロイする
+- Code Apps は対象環境・ソリューションを確認してデプロイする。コマンド選択は下記の「デプロイコマンドの選択」に従う
 - Dataverse データソース追加時は同じソリューション内のテーブルを参照する
 - 環境間移行はソリューションのエクスポート / インポートで扱う
 
@@ -157,6 +157,11 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 2. PAC CLI 認証プロファイルが対象環境用に作成済み
    pac auth create --name {profile-name} --environment {ENVIRONMENT_ID}
    pac auth list  # * が付いているのがアクティブ
+
+  Python の auth_helper、PAC CLI、npx power-apps の認証状態は別々に確認する。
+  Python 側の認証レコードが有効でも、PAC / npm CLI 側のサインイン成功とは見なさない。
+  ブラウザーを開く可能性があるログイン操作は standard のブラウザ自動化方針に従い、
+  使用する Edge プロファイルを事前に確認する。
 
 3. power.config.json は npx power-apps init で生成する
    → テンプレートから手動コピーしない
@@ -251,6 +256,8 @@ npm run build && pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}
 > **注**: Microsoft は `npx power-apps` を推奨ツールとしているが、テナント解決の不具合が
 > 2026-05 時点で未修正のため、本開発標準では `pac code push` を標準採用する。
 > `npx power-apps push` が正常動作する環境ではそちらを使っても良い。
+
+デプロイ前には `.env` の環境 ID / Dataverse URL と `pac auth list` のアクティブプロファイル、`power.config.json` の対象環境を照合する。`npx power-apps` 側で認証を要求された場合は PAC / Python のキャッシュがそのまま使えると想定せず、利用者に対象アカウントと環境を確認してから別途サインインする。操作の成功メッセージだけで接続完了とせず、対象環境のソリューション内でアプリ・データソースと接続状態を確認し、主要画面で実データを読み書きできるか権限のあるテストアカウントで検証する。対象環境が異なる、または認証エラーが出た場合は再 push を繰り返さず環境と認証主体を確認する。
 
 ### データソース追加の判断フロー
 

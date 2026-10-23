@@ -52,9 +52,29 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 
 ## クイックスタート
 
+新規案件は空ディレクトリへ clone します。既存案件にはマスターを別ディレクトリへ clone し、次の dry-run で追加対象と競合を確認します。`--apply` は競合ファイルを上書きせず、`.gitignore` の不足行だけ追記します。競合があれば案件固有の設定を優先して内容を個別に確認してください。標準の配置だけでは環境認証・デプロイは行いません。
+
 ```bash
 git clone https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard . && npm install
 ```
+
+新規案件では、この clone に残る `origin` はマスターを指します。案件用のリモートリポジトリを用意した後、**案件側の作業ディレクトリで**送信先を確認・変更してから push してください。マスターへの還元は別作業として扱います。
+
+```powershell
+git remote -v
+git remote set-url origin "<案件用リポジトリのURL>"
+git remote -v
+```
+
+```powershell
+# 既存案件で使う場合: ここまではマスター側のディレクトリで実行（案件パスは実際の値に変更）
+python .github/skills/standard/scripts/initialize_workspace.py "C:\path\to\existing-project"
+python .github/skills/standard/scripts/initialize_workspace.py "C:\path\to\existing-project" --apply
+# 競合を確認し、必要な標準ファイルが案件側にあることを確かめてから移動する
+Set-Location "C:\path\to\existing-project"
+```
+
+以下の `.env` 作成・環境セットアップは**案件側のディレクトリ**で実行します。マスター側の `.env` は作成・更新しません。
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
@@ -76,7 +96,7 @@ python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileN
 python .github/skills/standard/scripts/setup_environment.py --auth-only
 ```
 
-同じ開発端末・テナントの認証レコードと MSAL キャッシュが有効なら再サインインせず利用できます。顧客環境への引き渡しはソリューションの手動インポートで行い、開発者の `.env` や認証キャッシュは渡しません。詳細は [インタラクティブ環境セットアップ手順](./.github/skills/standard/references/interactive-setup.md) を参照してください。
+同じ開発端末・テナントの認証レコードと暗号化された MSAL キャッシュが有効なら再サインインせず利用できます。認証が必要になった場合はブラウザープロファイルを確認し、`--auth-only` で明示的に再認証します。顧客環境への引き渡しはソリューションの手動インポートで行い、開発者の `.env` や認証キャッシュは渡しません。詳細は [インタラクティブ環境セットアップ手順](./.github/skills/standard/references/interactive-setup.md) を参照してください。
 
 > [!NOTE]
 > `.` へ clone するため、空ディレクトリで実行してください。既存ファイルがある場所で実行すると上書きリスクがあります。
@@ -88,7 +108,7 @@ python .github/skills/standard/scripts/setup_environment.py --auth-only
 
 Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の作成と `requirements.txt` の導入まで自動で試行します。未導入ツールがある場合は、次に実行すべきコマンドを表示します。
 
-セットアップ後は、GitHub Copilot のカスタムエージェントに「実現したいこと」をそのまま伝えて開発を進めます。
+セットアップ後は、既存資料を保持したまま [仕様書変換](./.github/skills/spec-to-markdown/SKILL.md) で根拠と未確認事項を整理し、[要件ディスカバリー](./.github/skills/standard/references/requirements-discovery.md)で案件固有の SPEC など必要な開発入力を合意します。[architecture](./.github/skills/architecture/SKILL.md) で Teams / Microsoft 365 Copilot を起点に構成案と代替案、技術・ライセンス・Credits の実現可能性を確認し、**設計提示とユーザー承認後**に実装します。Code Apps や Dataverse を導入の既定前提にはしません。
 
 ---
 
@@ -187,9 +207,9 @@ npm run setup
 このリポジトリは、**弊社環境で Power Platform ソリューションを開発・検証するためのマスター**として使います。
 案件ごとはこの標準を複製して進め、顧客要件に応じて `src/`、`scripts/`、`work/`、環境設定を追加します。
 
-案件で得た汎用的に再利用できる知見は、案件リポジトリからこのマスターへスキル・ナレッジとして戻し、案件を重ねるごとにマスターを育てます。戻す対象・戻さない対象・戻し先の判断は [マスターリポジトリへの知見還元](./.github/skills/standard/references/master-repo-feedback-loop.md) を参照してください。
+案件で得た汎用的に再利用できる知見は、案件リポジトリや GitHub Copilot との会話からこのマスターへスキル・ナレッジとして戻し、案件を重ねるごとにマスターを育てます。戻す対象・戻さない対象・戻し先の判断は [マスターリポジトリへの知見還元](./.github/skills/standard/references/master-repo-feedback-loop.md) を参照してください。
 
-案件終了時の VS Code 上での具体手順と、GitHub Copilot へそのまま渡せる依頼テンプレートも同じ文書にまとめています。還元候補の洗い出し自体は Copilot が担い、利用者は案件フォルダ指定と最終判断に集中する前提です。運用に迷った場合は、まずこのリファレンスを起点にしてください。
+知見還元時の VS Code 上での具体手順と、GitHub Copilot へそのまま渡せる依頼テンプレートも同じ文書にまとめています。還元候補の洗い出し自体は Copilot が担い、利用者は対象の案件フォルダまたは会話の指定と最終判断に集中する前提です。運用に迷った場合は、まずこのリファレンスを起点にしてください。
 
 納品時は、案件ごとに **マネージド** または **アンマネージド** のいずれかを選定し、ソリューションとして提供します。
 

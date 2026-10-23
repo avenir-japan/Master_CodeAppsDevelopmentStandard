@@ -76,22 +76,35 @@ work/spec-to-markdown/input/
 # {タイトル} factsheet
 
 ## 1. Source
+
 - File:
 - Relative path:
 - Converted at:
 
 ## 2. Power Platform requirement summary
+
 ### Source facts and source locations
+
 ### Open questions and proposal hypotheses (not confirmed facts)
+
 ### Business objective
+
 ### Users / roles
+
 ### Dataverse tables
+
 ### Main columns / master data
+
 ### UI / app requirements
+
 ### Automations
+
 ### Agent / AI opportunities
+
 ### External integrations
+
 ### Security / compliance
+
 ### Open questions
 
 ## 3. Extracted markdown
@@ -107,14 +120,23 @@ work/spec-to-markdown/input/
 ## 2. Source documents
 
 ## 3. Cross-document requirements summary
+
 ### Source facts, open questions, and proposal hypotheses
+
 ### Business scope
+
 ### Users / roles
+
 ### Dataverse design candidates
+
 ### App design candidates
+
 ### Automation candidates
+
 ### Agent / AI candidates
+
 ### Integration candidates
+
 ### Risks / open questions
 
 ## 4. Factsheet index

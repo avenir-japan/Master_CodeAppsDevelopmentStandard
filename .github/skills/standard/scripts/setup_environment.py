@@ -151,12 +151,17 @@ def trigger_auth(values: dict[str, str]) -> int:
 
     sys.path.insert(0, str(HERE))
     try:
-        from auth_helper import api_get  # type: ignore
+        from azure.identity import AuthenticationRequiredError
+        from auth_helper import api_get, authenticate  # type: ignore
     except Exception as exc:
         print(f"[setup_environment] auth_helper の読み込みに失敗: {exc}", file=sys.stderr)
         return 1
 
-    whoami = api_get("WhoAmI")
+    try:
+        whoami = api_get("WhoAmI")
+    except AuthenticationRequiredError:
+        authenticate()
+        whoami = api_get("WhoAmI")
     print("[setup_environment] 認証成功（WhoAmI）:", whoami.get("UserId", ""))
     print("[setup_environment] 認証レコードを保存しました。以降はキャッシュから認証します。")
     return 0
@@ -206,6 +211,9 @@ def command_profile(args: argparse.Namespace, repo_root: Path) -> int:
         return 1
 
     tenant = resolve_tenant(info["user"]) if info["user"] else ""
+    if not tenant:
+        print("[setup_environment] TENANT_ID を解決できませんでした。.env は変更していません。ユーザー情報を確認して再実行してください。", file=sys.stderr)
+        return 1
     mapping = {
         "DATAVERSE_URL": info["url"] if info["url"].endswith("/") else info["url"] + "/",
         "TENANT_ID": tenant,
@@ -226,8 +234,6 @@ def command_profile(args: argparse.Namespace, repo_root: Path) -> int:
     for key in ("DATAVERSE_URL", "TENANT_ID", "ENV_ID", "PAC_AUTH_PROFILE"):
         print(f"   {key}={mapping.get(key, '')}")
 
-    if not tenant:
-        print("[setup_environment] 警告: TENANT_ID を解決できませんでした。.env を手動設定してください。", file=sys.stderr)
     if args.no_auth:
         return 0
     return trigger_auth(mapping)
