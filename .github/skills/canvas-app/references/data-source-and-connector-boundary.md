@@ -41,8 +41,10 @@ AI は、その後に見えるようになった data source や API を前提�
 
 1. 必要な data source / connector を洗い出す
 2. 人が Studio で追加する
-3. AI が一覧と schema を確認する
-4. その前提で画面や formula を実装する
+3. 追加完了を確認してから、AI が data source なら `list_data_sources`、API / connector なら `list_apis` を再取得する。種別が不明なら両方を確認する
+4. 一覧に表示された正確な名前を控え、data source は `get_data_source_schema` で列名と型、API / connector は `describe_api` で操作と引数を確認する
+5. 対象が見つからない場合は Studio の Data パネルで追加が完了しているか、対象 App と coauthoring セッションが有効かを確認し、一覧を再取得する。見えないまま名前や schema を推測して実装しない
+6. 確認できた名前・schema / 操作を前提に画面や formula を実装する
 
 ## 7. この文書を参照すべきケース
 

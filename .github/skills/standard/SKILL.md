@@ -43,26 +43,20 @@ triggers:
 このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
 
 - 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
-- **Canvas App** は画面 UI が本当に必要な場合の基本案とし、利用するデータソース・コネクタのライセンスを確認する
-- Canvas App では仕様・技術要件を満たすのが難しい場合、**Code Apps / Model-Driven Apps** も代替候補として提案する。実現性・ライセンス・費用を明示し、ユーザー承認後に採否を確定する
-- Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、既定提案ではなく **案件ごとの追加ライセンス評価項目** として扱う
-- 利用者と実行主体のライセンス適合を確認し、原則は既定ベースライセンス内、Copilot Credits 消費ゼロとする。消費・追加ライセンスが避けられない場合は代替案を先に検討し、例外案は条件と費用影響を示してユーザーの明示承認を得る
+- **Canvas App（標準コネクタ）** は画面 UI が必要な場合の基本案とし、データソース・コネクタのライセンス条件と工数を確認する
+- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず既定提案から外し、案件ごとにライセンスと Credits を評価する
+- Canvas App で要件を満たせない場合の Code Apps / モデル駆動型アプリ等は、実現性・ライセンス・費用を示した代替案としてユーザー承認後に採否を決める
 - 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
-- このマスターの既定サービスは **PoC / MVP** とし、本番開発相当の完成度や運用保証を既定の前提にしない。構成・機能・検証範囲・作り込み度は、PoC / MVP の目的と確認すべき仮説に必要な範囲に合わせる
-- 本番向けの機能・複雑さ・運用対策を自動的に追加しない。PoC / MVP の目的を超える範囲が必要な場合は、その理由と影響を示して案件ごとに判断する
 
-## 開発着手前の実現可能性ゲート（必須）
-
-すべての Power Platform 案件で、採用する構成・機能・アクションとそれらの接続経路について、設計承認・本実装より前に最新の Microsoft 公式情報で対応可否と制限を確認する。案件固有の入力規模・チャネル・権限・ライセンス条件と照合し、利用者と実行主体の双方について原則ベースライセンス内で適合すること、Copilot Credits を消費しないことを別々に判定する。Credits の非消費はチャネル、認証利用者、トリガー、実行主体、機能の適用条件に基づいて確認し、未確認を非消費と扱わない。公式情報だけでは重要経路の可否を判断できない場合は、当該経路を最小構成で実機検証する。確認結果、公式 URL、確認日、検証結果、未解決事項、代替案を設計に記録する。
-
-**重要経路に技術・ライセンス・Credits の未確認または不適合が残る場合、通常案として通過させず本実装を開始しない。** ベースライセンス内かつCredits非消費の代替案を先に検討し、実現が難しい場合は追加条件と費用影響を添えた例外案を提示して、ユーザーの明示承認を得る。技術的不確実性を解消する最小限の実機検証のみ許可し、解消できなければ代替構成を再設計する。詳細な判定・チェックリストは [Power Platform 開発標準の Phase 0](references/power-platform-development-standard.md) を参照。
+開発段階の既定提案は PoC / MVP とし、本番品質・本番運用の保証を前提にしない。案件の確定要件を優先し、機能・検証範囲は目的に必要な範囲に絞る。
+採用する重要経路は PoC / MVP でも [Phase 0 の実現可能性ゲート](references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で技術・利用者／実行主体のライセンス・Copilot Credits を別々に判定する。未確認・不適合の経路は通常案として本実装に進めず、代替案を検討する。実機検証に Credits 消費や追加費用が生じ得る場合と、例外案を採用する場合は、条件・費用影響を示してユーザーの明示承認を得る。
 
 ## Copilot 向け優先判断基準
 
 - GitHub Copilot の既定モデルは GPT-5.4 とし、軽作業は軽量モデル、コード量が多い実装はコード特化モデルも候補にしつつ、アーキテクチャ設計、原因不明の障害調査、横断リファクタリング、納品前の高リスクレビューでは、まず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
 - 納品、ALM、環境移送の相談では、まず `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` に分類する
 - リポジトリを GitHub へ反映する場合、コミット後の変更点説明、更新箇所の要約、ユーザー向け報告は日本語で行う
-- 環境変数の採否は参照方式と顧客初期設定のしやすさで判断し、マネージド / アンマネージド選定、マネージドプロパティ、接続参照、顧客初期設定作業まで確認する（判断基準は [環境変数ガイド](references/environment-variables.md) を参照）
+- 環境変数だけで終わらせず、マネージド / アンマネージド選定、マネージドプロパティ、接続参照、顧客初期設定作業まで確認する
 - 顧客テナント固有の URL、実 ID、シークレット、接続資格情報、承認要否は Copilot が仮決めしない
 - ライセンス、認証、チャネル設定は固定値を断定せず、最新の公式情報確認と顧客承認を前提に案内する
 - マネージド案件では、顧客のアンマネージド層編集を既定にせず、再提供運用を優先して案内する
@@ -86,7 +80,7 @@ triggers:
 
 ## 大前提: 一つのソリューション内に開発
 
-採用した Dataverse テーブル・Canvas App・Power Automate フロー・Copilot Studio エージェントは **原則として同一のソリューション内** に含める。
+採用した Dataverse テーブル・Canvas App・Code Apps・モデル駆動型アプリ・Power Automate フロー・Copilot Studio エージェントは **原則として同一のソリューション内** に含める。
 `.env` の `SOLUTION_NAME` と `PUBLISHER_PREFIX` を全フェーズで統一して使用する。
 
 初期化では、採用した構成に必要な Publisher・Solution と、必要に応じて環境変数・接続参照を準備する。
@@ -134,16 +128,16 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 **ユーザーに何度も対話認証を求めない** 2 層キャッシュ構成。
 
 ```
-層1: AuthenticationRecord (ブラウザー認証では ~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json)
+層1: AuthenticationRecord (~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json)
   - アカウント情報（テナント・ユーザー ID）を保存
-  - 開発端末のホームディレクトリに保存。Device Code は auth_record_{TENANT_ID}_device.json
-  - 明示した client_id はブラウザーのファイル名末尾とメモリキャッシュを分離し、読み込み時は TENANT_ID の一致を確認
+  - ブラウザ認証の記録はホームディレクトリに保存。Device Code は auth_record_{TENANT_ID}_device.json
+  - 明示した client_id はブラウザのファイル名末尾を分離し、読み込み時は TENANT_ID の一致を確認
 
 層2: TokenCachePersistenceOptions (MSAL OS 資格情報ストア)
   - リフレッシュトークン・アクセストークンを永続化
   - サイレントリフレッシュで再認証を抑える
 
-初回（社内開発）: InteractiveBrowserCredential → ブラウザーで認証 → キャッシュ保存
+初回（社内開発）: InteractiveBrowserCredential → ブラウザで認証 → キャッシュ保存
 2回目以降: キャッシュから自動取得（認証プロンプトなし）
 ```
 
@@ -152,8 +146,11 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 弊社の標準開発テナントでは Device Code 認証が条件付きアクセスや利用制限で一律失敗する前提で扱う。
 そのため、Power Platform 開発ではブラウザ対話認証を既定とする。
 
-案件の `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を設定する（`setup_environment.py --profile` が自動設定）。
-顧客テナントへの納品時に社内の `.env` や認証キャッシュを含めず、顧客環境の認証設定は個別に確認する。
+```powershell
+$env:PP_USE_INTERACTIVE_BROWSER = "1"
+```
+
+案件の `.env` では `PP_USE_INTERACTIVE_BROWSER=true` を設定する。顧客テナントへの納品時に社内の `.env` や認証キャッシュを含めず、顧客環境の認証設定は個別に確認する。
 
 ```text
 使いどころ:
@@ -171,10 +168,21 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 
 認証パターンの詳細実装は [認証リファレンス](references/auth-patterns.md) を参照。
 
-### 事前検証: MCP クライアント状態チェック
+### 事前検証: MCP ツールの利用可能性
 
-MCP クライアント依存の作業に入る前は、`.github/skills/standard/scripts/check_mcp_client.py` で
-対象クライアントの有効状態を確認する。初期段階で不一致を検知し、後続作業の手戻りを防ぐ。
+MCP ツールを使う作業では、必要な範囲で次を順に確認する。
+
+1. 適用される VS Code のワークスペース・ユーザー設定に対象サーバーが登録されているか。
+2. 現在の VS Code セッションで対象ツールが利用可能として表示されるか。
+3. 対象機能の小さな実呼び出しが成功するか。
+
+設定の存在だけで接続成功と判断せず、登録を追加する前に既存設定も確認する。
+各段階の結果を区別し、未実施の確認を成功扱いしない。
+
+### 事前検証: Dataverse 側の MCP クライアント状態チェック
+
+Dataverse 側で MCP クライアントの許可が必要な作業では、`.github/skills/standard/scripts/check_mcp_client.py` で
+対象クライアントの有効状態を確認する。この検査は VS Code 側の登録・ツール表示・実呼び出しの確認とは別に行う。
 
 ### 定期点検: SDK / upstream skills 更新チェック
 
@@ -211,67 +219,68 @@ MCP クライアント依存の作業に入る前は、`.github/skills/standard/
 ## 関連スキル
 
 > **採用優先順位の扱い**: 下表は利用可能な実装スキルの一覧であり、既定提案の優先順位そのものではない。
-> 優先順位は「Teams / Microsoft 365 Copilot を先頭、画面 UI が本当に必要なら Canvas App を基本案とし、Canvas App では難しい場合に Code Apps / Model-Driven Apps も代替提案」を正本とする。代替案は実現性・ライセンス・費用を確認し、ユーザー承認後に採否を確定する。
+> 優先順位は「Teams / Microsoft 365 Copilot を先頭、Canvas App は必要時のみ、その他は案件判断」を正本とする。
 
-| フェーズ                          | スキル             | 内容                                                              |
-| --------------------------------- | ------------------ | ----------------------------------------------------------------- |
-| Phase 1: Dataverse 構築（採用時） | `dataverse`        | カスタムテーブル採用時の設計・作成・ローカライズ・デモデータ      |
-| Phase 1.5: Security Role          | `dataverse`        | カスタムセキュリティロール作成・権限設定                          |
-| Phase 2: Copilot Studio           | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験                     |
-| 代替候補: Code Apps               | `code-apps`        | Canvas App では要件実現が難しい場合に比較する技術資料             |
-| Phase 2: Canvas App               | `canvas-app`       | 必要な画面 UI、Git Integration、添付・SharePoint staging 運用     |
-| 代替候補: Model-Driven App        | `model-driven-app` | Canvas App では要件実現が難しい場合にライセンス条件と合わせて比較 |
-| Phase 2.5: Power Automate         | `power-automate`   | クラウドフロー作成・接続参照                                      |
-| Phase 3: Copilot Studio           | `copilot-studio`   | エージェント構築・生成オーケストレーション                        |
+| フェーズ                  | スキル             | 内容                                                                        |
+| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| Phase 1: Dataverse 構築   | `dataverse`        | テーブル設計・作成・ローカライズ・デモデータ                                |
+| Phase 1.5: Security Role  | `dataverse`        | カスタムセキュリティロール作成・権限設定                                    |
+| Phase 2: Copilot Studio   | `copilot-studio`   | Teams / M365 Copilot をチャネルとする対話体験                               |
+| Phase 2: Code Apps        | `code-apps`        | 初期化・デプロイ・Dataverse 接続                                            |
+| Phase 2: Code Apps UI     | `code-apps`        | CodeAppsStarter デザインシステム・コンポーネント                            |
+| Phase 2: Canvas App       | `canvas-app`       | MCP + coauthoring、Git Integration、限定移送、添付・SharePoint staging 運用 |
+| Phase 2: Model-Driven App | `model-driven-app` | モデル駆動型アプリ作成・SiteMap・公開                                       |
+| Phase 2.5: Power Automate | `power-automate`   | クラウドフロー作成・接続参照                                                |
+| Phase 3: Copilot Studio   | `copilot-studio`   | エージェント構築・生成オーケストレーション                                  |
 
 ## クイックリファレンス: 絶対遵守ルール
 
 > **Dataverse テーブル構築ルール**（スキーマ設計・Lookup・ローカライズ・デモデータ等）は [`dataverse`](../dataverse/SKILL.md) スキルに移管済み。
 
-| ルール                                                                                 | 理由                                                                                                                                                                                                                                        |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 先にデプロイしてから開発                                                               | Dataverse 接続確立が必要                                                                                                                                                                                                                    |
-| 生成オーケストレーションモード一択                                                     | トピックベース開発は非推奨                                                                                                                                                                                                                  |
-| Flow API は専用スコープで認証                                                          | Dataverse トークンの使い回し不可                                                                                                                                                                                                            |
-| 接続は環境内に事前作成                                                                 | API での接続自動作成は不可                                                                                                                                                                                                                  |
-| フローはべき等パターンでデプロイ                                                       | displayName で検索 → 更新 or 新規作成                                                                                                                                                                                                       |
-| Bot 作成は Copilot Studio UI                                                           | API（bots INSERT）ではプロビジョニングされない                                                                                                                                                                                              |
-| Bot 作成後はプロビジョニング完了を待つ                                                 | UI でロード完了前にスクリプト実行→トピック削除 0 件になる                                                                                                                                                                                   |
-| configuration はディープマージで PATCH                                                 | 丸ごと上書き→基盤モデル・gPTSettings が消える                                                                                                                                                                                               |
-| optInUseLatestModels は明示的に False                                                  | True だと基盤モデルが GPT に強制変更。既存 True も上書き                                                                                                                                                                                    |
-| 推奨プロンプトは conversationStarters で登録                                           | GPT コンポーネント (type=15) YAML の title/text                                                                                                                                                                                             |
-| 挨拶メッセージはエージェントに合わせて設定                                             | ConversationStart トピック (type=9) の SendActivity.text                                                                                                                                                                                    |
-| クイック返信は ConversationStart で登録                                                | ConversationStart トピック (type=9) の quickReplies                                                                                                                                                                                         |
-| トピック削除時はシステムトピックを保護                                                 | schemaname パターンで ConversationStart, Escalate 等を保護                                                                                                                                                                                  |
-| チャネル公開は applicationmanifestinformation                                          | teams オブジェクトに shortDescription/longDescription 等                                                                                                                                                                                    |
-| M365 Copilot は copilotChat.isEnabled                                                  | applicationmanifestinformation 内で true に設定                                                                                                                                                                                             |
-| 説明は publish 後に設定                                                                | data PATCH の非同期処理で上書きされる                                                                                                                                                                                                       |
-| appId は環境固有                                                                       | 別環境の appId → AppLeaseMissing (409)                                                                                                                                                                                                      |
-| Code Apps を環境で有効化                                                               | 未許可 → CodeAppOperationNotAllowedInEnvironment (403)                                                                                                                                                                                      |
-| dataSourcesInfo.ts は SDK コマンドで生成                                               | `npx power-apps add-data-source` で自動生成。手動作成禁止                                                                                                                                                                                   |
-| **init スキャフォールドファイルは手動作成禁止**                                        | `npx power-apps init` が `power.config.json`, `plugins/plugin-power-apps.ts`, `vite.config.ts` 等を自動生成。コピー禁止                                                                                                                     |
-| PAC CLI 認証プロファイルを作成                                                         | 新環境では pac auth create が必須                                                                                                                                                                                                           |
-| get_token() は scope のみ指定                                                          | auth_helper は .env から自動読み込み                                                                                                                                                                                                        |
-| **全コンポーネントをソリューションに含める**                                           | AddSolutionComponent で検証・補完。ヘッダーだけに依存しない                                                                                                                                                                                 |
-| **設計フェーズでユーザー承認必須**                                                     | テーブル設計を提示し承認を得てから構築に進む                                                                                                                                                                                                |
-| **nameUtils パッチは Node.js スクリプトで**                                            | PowerShell の $ エスケープで適用失敗する。`node patch-nameutils.cjs` を使う                                                                                                                                                                 |
-| **SDK Lookup 名は未ポピュレート（初回から対応必須）**                                  | `createdbyname` 等は返らない。**初回デプロイから** `_xxx_value` + `useMemo` クライアントサイド名前解決を実装                                                                                                                                |
-| **フロー接続 ID はハードコードしない**                                                 | 環境が変わると接続 ID も変わる。毎回 PowerApps API で自動検索                                                                                                                                                                               |
-| **PowerApps API 接続検索はタイムアウトする**                                           | 504 GatewayTimeout 頻発。3回リトライ＋フォールバック接続 ID パターンで対策                                                                                                                                                                  |
-| **AI Builder アクションは API でフロー定義に含めない**                                 | PerformBoundAction → InvalidOpenApiFlow で有効化失敗。Power Automate UI で手動追加                                                                                                                                                          |
-| **api_get() は dict を返す**                                                           | `.json()` を呼ぶとエラー。戻り値の dict をそのまま使う                                                                                                                                                                                      |
-| **api_get() はパス文字列のみ受付**                                                     | `api_get("url", {"$filter": ...})` は不可。クエリパラメータは URL に直接埋め込む: `api_get("url?$filter=...")`                                                                                                                              |
-| **PowerShell インラインで `$select` 等を使わない**                                     | PowerShell が `$select` を変数展開しパラメータ名が消失（`?=3&=...` になる）。Python スクリプトファイルで実行すること                                                                                                                        |
-| **Dataverse API 429 レート制限にはリトライ＋再実行**                                   | `PublishAllXml` や `EntityDefinitions` PUT で 429 が頻発。時間を置いてスクリプト再実行で回復。べき等設計が必須                                                                                                                              |
-| **ConversationStart/GPT YAML は手動構築**                                              | `yaml.dump()` は PVA パーサーと非互換。会話の開始・クイック返信・推奨プロンプトが消える                                                                                                                                                     |
-| **bots PATCH には name フィールド必須**                                                | 省略すると `Empty or null bot name` エラー (0x80040265)。既存名を GET して再送                                                                                                                                                              |
-| **アイコンは [アイコン作成リファレンス](references/icon-creation.md) に従い API 登録** | エージェント=PNG 3サイズ、テーブル=SVG WebResource。詳細は `references/icon-creation.md`                                                                                                                                                    |
-| **基盤モデルは API で設定できない**                                                    | `aISettings` PATCH で `optInUseLatestModels: False` にしても基盤モデルが GPT に戻るケースあり。UI で手動選択                                                                                                                                |
-| **`npx power-apps push` テナント不一致問題**                                           | 環境 ID からテナント解決に失敗し `ServiceToServiceEnvironmentNotFound` (404) を返す場合がある。**`pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}` を使う**                                                                          |
-| **`npx power-apps add-data-source` テナント不一致**                                    | 同様にテナント不一致で org-url プロンプトが出る。**`--org-url {DATAVERSE_URL}` を明示指定**するか、対話プロンプトで入力する                                                                                                                 |
-| **メール返信は Work IQ Mail MCP を使う**                                               | 「メールに返信する (V3)」コネクタは Attachments 属性でスタックする。Work IQ Mail MCP（`mcp_MailTools`）を使うこと                                                                                                                           |
-| **メールトリガー時は質問禁止**                                                         | メールから起動時にユーザーに質問するとチャット返信できずスタック。Instructions に判定ロジックと即処理ルールが必須                                                                                                                           |
-| **ExecuteCopilot プロンプトは構造化**                                                  | `triggerBody()` の丸投げは不十分。メッセージID・差出人・件名・本文を個別に渡し、ツール名を明示する                                                                                                                                          |
-| **セキュリティロールは Basic User コピーから開始**                                     | ゼロから作成すると約480の標準権限が欠落しアプリが動かない。RetrieveRolePrivilegesRole で取得して土台にする                                                                                                                                  |
-| **マスタテーブルの読み取り専用ロールにも AppendTo**                                    | Lookup 先テーブルに AppendTo がないとレコード作成時にエラー。Read + AppendTo: Global が最低限必要                                                                                                                                           |
-| **ライセンス回答は固定値を断定しない**                                                 | 本パッケージの既定提案はベースライセンス範囲内だが、Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは都度最新の Microsoft Learn または公式ガイドを確認する |
+| ルール                                                                                 | 理由                                                                                                                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 先にデプロイしてから開発                                                               | Dataverse 接続確立が必要                                                                                                                                                                                                                                                         |
+| 生成オーケストレーションモード一択                                                     | トピックベース開発は非推奨                                                                                                                                                                                                                                                       |
+| Flow API は専用スコープで認証                                                          | Dataverse トークンの使い回し不可                                                                                                                                                                                                                                                 |
+| 接続は環境内に事前作成                                                                 | API での接続自動作成は不可                                                                                                                                                                                                                                                       |
+| フローはべき等パターンでデプロイ                                                       | displayName で検索 → 更新 or 新規作成                                                                                                                                                                                                                                            |
+| Bot 作成は Copilot Studio UI                                                           | API（bots INSERT）ではプロビジョニングされない                                                                                                                                                                                                                                   |
+| Bot 作成後はプロビジョニング完了を待つ                                                 | UI でロード完了前にスクリプト実行→トピック削除 0 件になる                                                                                                                                                                                                                        |
+| configuration はディープマージで PATCH                                                 | 丸ごと上書き→基盤モデル・gPTSettings が消える                                                                                                                                                                                                                                    |
+| optInUseLatestModels は明示的に False                                                  | True だと基盤モデルが GPT に強制変更。既存 True も上書き                                                                                                                                                                                                                         |
+| 推奨プロンプトは conversationStarters で登録                                           | GPT コンポーネント (type=15) YAML の title/text                                                                                                                                                                                                                                  |
+| 挨拶メッセージはエージェントに合わせて設定                                             | ConversationStart トピック (type=9) の SendActivity.text                                                                                                                                                                                                                         |
+| クイック返信は ConversationStart で登録                                                | ConversationStart トピック (type=9) の quickReplies                                                                                                                                                                                                                              |
+| トピック削除時はシステムトピックを保護                                                 | schemaname パターンで ConversationStart, Escalate 等を保護                                                                                                                                                                                                                       |
+| チャネル公開は applicationmanifestinformation                                          | teams オブジェクトに shortDescription/longDescription 等                                                                                                                                                                                                                         |
+| M365 Copilot は copilotChat.isEnabled                                                  | applicationmanifestinformation 内で true に設定                                                                                                                                                                                                                                  |
+| 説明は publish 後に設定                                                                | data PATCH の非同期処理で上書きされる                                                                                                                                                                                                                                            |
+| appId は環境固有                                                                       | 別環境の appId → AppLeaseMissing (409)                                                                                                                                                                                                                                           |
+| Code Apps を環境で有効化                                                               | 未許可 → CodeAppOperationNotAllowedInEnvironment (403)                                                                                                                                                                                                                           |
+| dataSourcesInfo.ts は SDK コマンドで生成                                               | `npx power-apps add-data-source` で自動生成。手動作成禁止                                                                                                                                                                                                                        |
+| **init スキャフォールドファイルは手動作成禁止**                                        | `npx power-apps init` が `power.config.json`, `plugins/plugin-power-apps.ts`, `vite.config.ts` 等を自動生成。コピー禁止                                                                                                                                                          |
+| PAC CLI 認証プロファイルを作成                                                         | 新環境では pac auth create が必須                                                                                                                                                                                                                                                |
+| get_token() は scope のみ指定                                                          | auth_helper は .env から自動読み込み                                                                                                                                                                                                                                             |
+| **全コンポーネントをソリューションに含める**                                           | AddSolutionComponent で検証・補完。ヘッダーだけに依存しない                                                                                                                                                                                                                      |
+| **設計フェーズでユーザー承認必須**                                                     | テーブル設計を提示し承認を得てから構築に進む                                                                                                                                                                                                                                     |
+| **nameUtils パッチは Node.js スクリプトで**                                            | PowerShell の $ エスケープで適用失敗する。`node patch-nameutils.cjs` を使う                                                                                                                                                                                                      |
+| **SDK Lookup 名は未ポピュレート（初回から対応必須）**                                  | `createdbyname` 等は返らない。**初回デプロイから** `_xxx_value` + `useMemo` クライアントサイド名前解決を実装                                                                                                                                                                     |
+| **フロー接続 ID はハードコードしない**                                                 | 環境が変わると接続 ID も変わる。毎回 PowerApps API で自動検索                                                                                                                                                                                                                    |
+| **PowerApps API 接続検索はタイムアウトする**                                           | 504 GatewayTimeout 頻発。3回リトライ＋フォールバック接続 ID パターンで対策                                                                                                                                                                                                       |
+| **AI Builder アクションは API でフロー定義に含めない**                                 | PerformBoundAction → InvalidOpenApiFlow で有効化失敗。Power Automate UI で手動追加                                                                                                                                                                                               |
+| **api_get() は dict を返す**                                                           | `.json()` を呼ぶとエラー。戻り値の dict をそのまま使う                                                                                                                                                                                                                           |
+| **api_get() はパス文字列のみ受付**                                                     | `api_get("url", {"$filter": ...})` は不可。クエリパラメータは URL に直接埋め込む: `api_get("url?$filter=...")`                                                                                                                                                                   |
+| **PowerShell インラインで `$select` 等を使わない**                                     | PowerShell が `$select` を変数展開しパラメータ名が消失（`?=3&=...` になる）。Python スクリプトファイルで実行すること                                                                                                                                                             |
+| **Dataverse API 429 レート制限にはリトライ＋再実行**                                   | `PublishAllXml` や `EntityDefinitions` PUT で 429 が頻発。時間を置いてスクリプト再実行で回復。べき等設計が必須                                                                                                                                                                   |
+| **ConversationStart/GPT YAML は手動構築**                                              | `yaml.dump()` は PVA パーサーと非互換。会話の開始・クイック返信・推奨プロンプトが消える                                                                                                                                                                                          |
+| **bots PATCH には name フィールド必須**                                                | 省略すると `Empty or null bot name` エラー (0x80040265)。既存名を GET して再送                                                                                                                                                                                                   |
+| **アイコンは [アイコン作成リファレンス](references/icon-creation.md) に従い API 登録** | エージェント=PNG 3サイズ、テーブル=SVG WebResource。詳細は `references/icon-creation.md`                                                                                                                                                                                         |
+| **基盤モデルは API で設定できない**                                                    | `aISettings` PATCH で `optInUseLatestModels: False` にしても基盤モデルが GPT に戻るケースあり。UI で手動選択                                                                                                                                                                     |
+| **`npx power-apps push` テナント不一致問題**                                           | 環境 ID からテナント解決に失敗し `ServiceToServiceEnvironmentNotFound` (404) を返す場合がある。**`pac code push -env {ENVIRONMENT_ID} -s {SOLUTION_NAME}` を使う**                                                                                                               |
+| **`npx power-apps add-data-source` テナント不一致**                                    | 同様にテナント不一致で org-url プロンプトが出る。**`--org-url {DATAVERSE_URL}` を明示指定**するか、対話プロンプトで入力する                                                                                                                                                      |
+| **メール返信は Work IQ Mail MCP を使う**                                               | 「メールに返信する (V3)」コネクタは Attachments 属性でスタックする。Work IQ Mail MCP（`mcp_MailTools`）を使うこと                                                                                                                                                                |
+| **メールトリガー時は質問禁止**                                                         | メールから起動時にユーザーに質問するとチャット返信できずスタック。Instructions に判定ロジックと即処理ルールが必須                                                                                                                                                                |
+| **ExecuteCopilot プロンプトは構造化**                                                  | `triggerBody()` の丸投げは不十分。メッセージID・差出人・件名・本文を個別に渡し、ツール名を明示する                                                                                                                                                                               |
+| **セキュリティロールは Basic User コピーから開始**                                     | ゼロから作成すると約480の標準権限が欠落しアプリが動かない。RetrieveRolePrivilegesRole で取得して土台にする                                                                                                                                                                       |
+| **マスタテーブルの読み取り専用ロールにも AppendTo**                                    | Lookup 先テーブルに AppendTo がないとレコード作成時にエラー。Read + AppendTo: Global が最低限必要                                                                                                                                                                                |
+| **ライセンス回答は固定値を断定しない**                                                 | 既定提案は利用者・実行主体のベースライセンス内かつ Credits 非消費とし、Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量によらず都度最新の Microsoft Learn または公式ガイドで判定する |

@@ -163,20 +163,6 @@ pac / clone / export で取得した定義を正本として拡張する。
 
 詳細は [コードファースト実装ガイド](references/code-first-flow-authoring.md) を参照。
 
-### デプロイ前の機械的チェック
-
-定義を送信する前に、[事前検証手順](references/pre-deploy-checks.md) に従い、最終的に送信する JSON を検査する。
-`scripts/validate_flow_definition.py` は Dataverse を使わないフローにも適用できる
-`contentBase64` の形式だけを検査する。Dataverse 固有の列や Lookup は対象案件で別途確認する。
-静的検査に通っても、接続の解決、デザイナーでの保存、公開、実行成功は別に確認する。
-
-### FlowAgent MCP の利用
-
-FlowAgent MCP を使うことが承認され、[利用条件と診断手順](references/flow-agent-mcp.md) の前提を満たす場合、
-既存フローの編集や失敗実行の診断に使える。対象フローと変更内容を先に確定し、適用前後の定義と実行結果を照合する。
-利用不可の環境では、本スキルの UI で成立した定義と既存 API 手順を継続する。
-MCP の認証を共通 `auth_helper.py` のブラウザー認証と同一視しない。
-
 ### 接続参照は「論理名がある」だけでは不十分
 
 ```text

@@ -117,12 +117,12 @@ def _interactive_browser_credential_kwargs(client_id: str | None = None) -> dict
     kwargs: dict = {
         "tenant_id": TENANT_ID or None,
         "client_id": client_id,
+        "disable_automatic_authentication": True,
     }
 
     if use_persistent_cache:
         kwargs["cache_persistence_options"] = TokenCachePersistenceOptions(
             name="power_platform_token_cache_v3",
-            allow_unencrypted_storage=True,
         )
 
     return {k: v for k, v in kwargs.items() if v is not None}
@@ -167,7 +167,7 @@ def _get_interactive_browser_token(scope: str, client_id: str | None = None) -> 
     credential = _ensure_browser_credential(client_id)
     path = _browser_record_path(client_id)
 
-    # まず authenticate() でサイレント or 対話認証を試み、AuthenticationRecord を保存
+    # レコードがなければ明示的に対話認証し、既存レコードのエラーは呼び出し元へ返す
     if _load_auth_record(path) is None:
         print(
             "[auth_helper] ブラウザー対話認証（初回）を開始します。",
@@ -177,21 +177,7 @@ def _get_interactive_browser_token(scope: str, client_id: str | None = None) -> 
         _save_browser_auth_record(record, client_id)
         token = credential.get_token(scope)
     else:
-        try:
-            token = credential.get_token(scope)
-        except ClientAuthenticationError:
-            # AuthenticationRecord が古い場合は再認証
-            print(
-                "[auth_helper] キャッシュ期限切れ — ブラウザー再認証します。",
-                file=sys.stderr,
-            )
-            _browser_credentials.pop(client_id or "", None)
-            # 古いレコードを削除して再構築
-            path.unlink(missing_ok=True)
-            credential = _ensure_browser_credential(client_id)
-            record = credential.authenticate(scopes=[scope])
-            _save_browser_auth_record(record, client_id)
-            token = credential.get_token(scope)
+        token = credential.get_token(scope)
 
     _inmemory_tokens[(scope, client_id or "")] = (token.token, token.expires_on)
     return token.token
@@ -233,7 +219,6 @@ def _build_credential() -> DeviceCodeCredential:
     if use_persistent_cache:
         cache_options = TokenCachePersistenceOptions(
             name="power_platform_token_cache_v3",
-            allow_unencrypted_storage=True,
         )
         kwargs["cache_persistence_options"] = cache_options
 

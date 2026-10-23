@@ -40,7 +40,7 @@ PP_USE_INTERACTIVE_BROWSER=true
 1. 初回: ブラウザーが開き Azure AD ログイン → MFA 完了 → トークン取得
 2. `AuthenticationRecord` をホームディレクトリの `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json` に保存
 3. 2回目以降: ファイルからレコードをロード → サイレントリフレッシュ（ブラウザー不要）
-4. キャッシュ期限切れ時: 自動的にブラウザーで再認証
+4. 再認証が必要な場合: レコードを保持したままエラーを返す。対象アカウントと利用する Edge プロファイルを確認してから明示的に再認証する
 
 ### 注意点
 
@@ -115,12 +115,13 @@ $env:PP_NO_PERSISTENT_CACHE="1"; Remove-Item (Join-Path $HOME ".power-platform-c
 - 動作:
   1. 初回: `authenticate()` でブラウザー認証 → `AuthenticationRecord` をファイルに保存
   2. 2回目以降: `AuthenticationRecord` をロード → 永続キャッシュからサイレントリフレッシュ
-  3. キャッシュ期限切れ: 自動的にレコードを削除して再認証
+  3. 再認証が必要: レコードは削除せずエラーを返す。Edge プロファイル確認後、`setup_environment.py --auth-only` または `authenticate(scope)` で明示的に認証する
 
 - **異なるスコープ** (`Dataverse` / `Flow API` / `PowerApps API`) でも同一 credential + 同一キャッシュからサイレント取得
-- ブラウザーが何度も開く場合はレコードファイルを削除して再認証:
+- ブラウザーが何度も開く場合は接続先・テナントとアカウントを確認する。レコードの削除は自動実行しない:
 
 ```powershell
-$tenantId = "<.env の TENANT_ID>"
-Remove-Item (Join-Path $HOME ".power-platform-cli/auth_record_${tenantId}_browser.json") -ErrorAction SilentlyContinue; python ./scripts/deploy_save_flow.py
+python .github/skills/standard/scripts/setup_environment.py --auth-only
 ```
+
+永続トークンキャッシュは OS による暗号化を必須とし、暗号化できない場合に平文へフォールバックしない。`PP_NO_PERSISTENT_CACHE=1` を設定すると永続キャッシュを使用せず、再認証が必要になる可能性がある。

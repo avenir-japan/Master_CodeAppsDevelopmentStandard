@@ -36,6 +36,7 @@ triggers:
 # Copilot Studio エージェント構築スキル
 
 Copilot Studio エージェントを **生成オーケストレーション（Generative Orchestration）モード一択** で構築する。
+ただし Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できない。この方針を適用する前に、[ライセンス確認ガイド](../standard/references/license-requirements.md)に従って採用機能と作成者・利用者の利用権を確認し、不適合なら構築に進まず構成・追加ライセンスを相談する。
 外部トリガー・ニュース配信エージェント等の応用パターンまでカバーする統合スキル。
 
 ## サブリファレンス（必要に応じて参照）
@@ -48,7 +49,6 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
 | [トラブルシューティング](references/troubleshooting.md)                        | トリガー以外を含む障害切り分け・復旧手順                             |
 | [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
-| [外部入力と公開前チェック](references/external-input-release-check.md)         | knowledge・MCP・トリガー入力の信頼境界と公開前の試験                 |
 | [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
 | [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
 | [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
@@ -69,14 +69,10 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | ナレッジ                 | データソース（Dataverse テーブル / SharePoint / ファイル等）                  |
 | ツール                   | MCP Server の接続先・用途                                                     |
 | チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                |
-| 外部入力と操作権限       | ナレッジ・MCP・トリガーの入力元、接続主体、許可操作と公開前テスト             |
 
 ```
 フロー: 設計提示 → ユーザー承認 → アイコン画像提案 → ユーザー選択 → UI で Bot 作成 → スクリプトで設定適用
 ```
-
-公開前には[外部入力と公開前チェック](references/external-input-release-check.md)を適用する。
-設定の機械的検証と、想定利用者での操作・応答確認を別の合格条件として記録する。
 
 ## アイコン画像提案（設計承認後・構築前）
 
@@ -282,8 +278,6 @@ Instructions テンプレート・既存エージェント改善パターンは 
 - 内容品質と処理成功は別の観点として評価し、基準と結果を分けて記録する。処理が完了したことだけで内容品質を合格としない
 - エージェントの目的に合う固定の回帰ケースを用意し、複数回実行してケース別の結果と実行間の変動を記録する
 - モデルを比較するときは、入力、Instructions、出力契約、利用するナレッジ・ツール、評価基準などの条件をそろえる。モデル・設定・実行条件と、結果および変動を記録し、特定モデルや一律の合格点を標準として固定しない
-- Instructions はモデルの判断を誘導するもので、出力の意味的な正しさや一貫性を保証しない。JSON 契約への適合確認だけで、内容の事実性を合格としない
-- 担当者、決定、期限、完了状態など業務上重要な事実は、利用者または評価者が元の入力と照合する。根拠が曖昧な場合は、Instructions だけで確定させず未確認として扱う
 
 ## .env 必須項目
 

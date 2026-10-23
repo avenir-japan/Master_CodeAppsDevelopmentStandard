@@ -34,10 +34,17 @@ python .github/skills/standard/scripts/setup_environment.py --auth-only
 ## Step 1: マスター標準ファイルの配置確認
 
 ```powershell
-cp .github/skills/standard/references/gitignore-template .gitignore
+# 既存案件はマスター側から dry-run → 競合を確認 → 明示適用
+python .github/skills/standard/scripts/initialize_workspace.py "C:\path\to\existing-project"
+python .github/skills/standard/scripts/initialize_workspace.py "C:\path\to\existing-project" --apply
+# 競合を解消し、案件側の .env.example と setup_environment.py を確認してから移動
+Set-Location "C:\path\to\existing-project"
 ```
 
+以降の PAC 確認、`.env` 作成、`setup_environment.py` の実行は案件側のディレクトリで行う。マスター側で実行すると、セットアップスクリプトはカレントディレクトリのリポジトリを対象にしてしまう。
+
 - このマスターリポジトリを正本として扱う。upstream の `.github` を上書き取得しない。
+- 既存の `.github` や `.env.example` は上書きせず、差異は競合として報告する。`.gitignore` は既存行を保持して不足分だけ追記する。dry-run と適用後の競合を案件ごとに確認する。
 - `setup_environment.py` と `gitignore-template` が `standard` 配下に、正本の `.env.example` がリポジトリ直下に存在することを確認する。
 
 > ブラウザ操作（ポータルのフォーム入力等）は **VS Code 統合ブラウザツール**を使う。
@@ -103,6 +110,8 @@ python .github/skills/standard/scripts/setup_environment.py --list
 `pac org who --json`（URL / 環境 ID）とユーザードメインの OIDC ディスカバリ（テナント GUID）から
 自動で `.env` を upsert する。
 
+テナント ID を解決できない場合はエラーで停止し、既存の `.env` を変更せず認証もしない。PAC プロファイルのユーザー情報とテナントの取得先を確認してから再実行する。手動設定する場合も環境 URL とテナント ID の組み合わせを確認する。
+
 ```powershell
 python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileName>" `
   --solution "<SolutionName>" --prefix "<prefix>" --display "<表示名>"
@@ -150,7 +159,7 @@ pip install -r requirements.txt
 1. **AuthenticationRecord**（`~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`、明示したクライアント ID は末尾に `_{client_id}` を付加）— アカウント情報
 2. **MSAL 永続トークンキャッシュ** — リフレッシュトークン（OS 資格情報ストア）
 
-レコードの読み込み時には `.env` の `TENANT_ID` との一致を確認する。旧スクリプトフォルダのレコードはテナント一致を確認できた場合のみ移行する。これにより 2 回目以降はサイレントリフレッシュできる。認証が期限切れになった場合はブラウザーで再認証する。
+レコードの読み込み時には `.env` の `TENANT_ID` との一致を確認する。旧スクリプトフォルダのレコードはテナント一致を確認できた場合のみ移行する。これにより 2 回目以降はサイレントリフレッシュできる。永続トークンキャッシュは OS の暗号化が使えない場合に平文へフォールバックしない。既存レコードで認証が必要になった場合はレコードを自動削除せずエラーを返す。利用する Edge プロファイルを確認してから `--auth-only` などの明示的な認証を実行し、アカウント・接続先を確認する。
 
 > **PAC プロファイルでの Python トークン取得について**: 一部の PAC CLI バージョンには
 > `pac auth token` サブコマンドが無く、PAC プロファイルから Dataverse トークンを直接取得できない。

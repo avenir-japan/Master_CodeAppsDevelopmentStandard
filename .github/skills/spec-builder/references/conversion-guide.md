@@ -156,6 +156,8 @@ python convert_documents.py \
 - 既存ファイルでも `source_sha256` が変わったら再処理対象
 - 全件完了時は `spec/output/docs/` を参照して開発を進める
 
+元資料を再解析して staging を更新した後は、実ファイルのパスとハッシュを基準に、checklist の `source_path`・`source_sha256` と、存在する場合は pending manifest の `source_path`・`sha256` が一致するか確認する。`is_completed` は実際の抽出状態に合わせ、staging の更新だけで完了扱いにしない。複数の記録を手で更新する場合は、ハッシュの転記ミスにも注意する。
+
 ## 8. 処理ルール
 
 - 画像は必ず agent-ocr

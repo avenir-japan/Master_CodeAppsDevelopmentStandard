@@ -399,7 +399,7 @@ Q: どのように起動しますか？
 
 ## 手動認証（SSO）関連
 
-> 手順は [webchat-sdk-manual-auth.md](webchat-sdk-manual-auth.md) を参照。
+以下に、手動認証で起こりやすい問題と確認事項をまとめる。
 
 ### アプリ登録 PATCH が `400 Permission Id ... cannot be found`
 
@@ -453,4 +453,3 @@ Q: どのように起動しますか？
 ✅ SSO のエンドツーエンド検証はユーザー本人の実ブラウザで行う
    （認証情報の代理入力はしない）
 ```
-
