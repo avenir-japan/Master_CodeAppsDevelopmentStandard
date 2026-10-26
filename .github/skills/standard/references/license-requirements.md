@@ -19,6 +19,8 @@
 - ベースライセンス外または Credits 消費ありの構成が避けられない場合は、代替案を先に検討する。実現が難しい場合は追加ライセンス・消費条件・費用影響を示して例外案を提示し、ユーザーの明示承認前に採用しない
 - 提案、見積、納品前チェックの各タイミングで最新 docs を再確認する
 
+- Power Automate のクラウドフローから Copilot Studio のエージェントを呼び出す自律型について、Microsoft サポートの回答（2026-10）では、エージェントが Standard ハーネスで作成され、フローで使う Copilot Studio コネクタの接続所有者に Microsoft 365 Copilot ライセンスが割り当てられ、社内の従業員向けでフェアユースの範囲内なら、エージェント側の処理はトリガーの種類によらず Copilot Credits を消費しないとされている。**この接続所有者・クラウドフロー起点の条件を裏付ける公開文書は未確認**。標準の提案には含めない代替手段とし、案件に応じて当社から提示してよい。採用時は実現可能性ゲートの判定表に各条件の適合と根拠を記録し、公開文書や実測で確認できない限りゼロ消費を確定扱いしない。フロー側のライセンス・費用は別途判定する（[Copilot Studio の課金と脚注](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates)、[制限と Power Platform 要求](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)）。
+
 ## 2. このパッケージで先に確認すること
 
 最低限、次を確認します。

@@ -2,7 +2,6 @@
 name: PowerCode
 description: "Power Platform コードファースト開発。Use when: Power Platform, Dataverse, Code Apps, Canvas App, Power Automate, Copilot Studio, テーブル作成, エージェント, ソリューション"
 tools: [read, edit, search, execute, web, agent]
-model: "GPT-5.4"
 ---
 
 Power Platform コードファースト開発エキスパート。
@@ -11,10 +10,10 @@ Power Platform コードファースト開発エキスパート。
 
 1. 作業開始前に .github/skills/standard/SKILL.md を読む
 2. 該当スキルを読む（下表）
-3. 設計提示 → ユーザー承認 → 実装
+3. 着手時は実装の前に、目的と MVP 範囲の理解、採用する構成案、各コンポーネントの入出力と接続関係、人が Power Platform 側で行う作業、実装前に決める必要がある未決事項、最初に作る最小単位を提示し、ユーザーの承認後に実装する。
 4. Canvas App は必ず .github/skills/canvas-app/SKILL.md を先に読む
 5. 仕様書や要件資料がある場合は .github/skills/spec-to-markdown/SKILL.md を先に読む
-6. 既定は GPT-5.4 で進める。高難度タスクで上位 reasoning model へ切り替える基準は .github/skills/standard/SKILL.md の「Copilot 向け優先判断基準」を正本とする
+6. モデルは、利用者がモデル選択で選んだ Azure 上の指定モデルを使う。モデル運用の正本は .github/copilot-instructions.md と .github/skills/standard/SKILL.md の「Copilot 向け優先判断基準」とする。
 
 | 作業               | スキル                                   |
 | ------------------ | ---------------------------------------- |

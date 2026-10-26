@@ -26,7 +26,7 @@ Dataverse テーブルの作成は **VS Code + GitHub Copilot（PowerCode エー
 
 1. VS Code に **GitHub Copilot** 拡張機能がインストール済みであること
 2. `PowerCode` エージェントと開発スキル（`.github/skills/`）がリポジトリに含まれていること
-3. GitHub Copilot が有効化されていること（既定: **GPT-5.4**。設計判断や難解な障害調査では、まず GPT 系の上位 reasoning model を候補にし、比較検討では Opus 系も候補にする）
+3. GitHub Copilot が有効化されていること（開発は原則 Azure 上の指定モデルを利用する社内方針。具体名は固定せず、高難度の作業や比較レビューも指定モデルの中から選ぶ）
 4. Power Platform 環境に認証済みであること
 
 ### テーブル作成手順

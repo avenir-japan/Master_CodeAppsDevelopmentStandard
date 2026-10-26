@@ -53,7 +53,7 @@ triggers:
 
 ## Copilot 向け優先判断基準
 
-- GitHub Copilot の既定モデルは GPT-5.4 とし、軽作業は軽量モデル、コード量が多い実装はコード特化モデルも候補にしつつ、アーキテクチャ設計、原因不明の障害調査、横断リファクタリング、納品前の高リスクレビューでは、まず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
+- GitHub Copilot のモデルには利用上限がある。社内の費用比較に基づき、開発では原則 Azure 上に用意した指定モデルを使う（社内方針）。具体名は固定せず社内の案内に従い、高難度の作業や比較レビューも指定モデルの中から選ぶ
 - 納品、ALM、環境移送の相談では、まず `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` に分類する
 - リポジトリを GitHub へ反映する場合、コミット後の変更点説明、更新箇所の要約、ユーザー向け報告は日本語で行う
 - 環境変数だけで終わらせず、マネージド / アンマネージド選定、マネージドプロパティ、接続参照、顧客初期設定作業まで確認する
@@ -73,6 +73,7 @@ triggers:
 | [認証リファレンス](references/auth-patterns.md)                              | auth_helper.py の詳細実装・認証パターン                      |
 | [ブラウザ自動化方針](references/browser-automation.md)                       | VS Code 統合ブラウザを使った検証手順の標準化                 |
 | [対話型セットアップ](references/interactive-setup.md)                        | 初期確認を AskUserQuestion で整理する導入導線                |
+| [VS Code・Copilot 環境構築](references/vscode-copilot-setup.md)                 | 開発者端末の初回セットアップ                                  |
 | sdk-update-check.md                                                          | npm SDK と upstream skills の追従確認手順                    |
 | [アイコン作成](references/icon-creation.md)                                  | Pillow による PNG/SVG アイコン生成・API 登録パターン         |
 | [HTML メールテンプレート](references/html-email-template.md)                 | HTML メールのデザインシステム・カラーパレット・基本原則      |

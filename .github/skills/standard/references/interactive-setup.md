@@ -1,5 +1,7 @@
 # インタラクティブ環境セットアップ手順
 
+VS Code・GitHub Copilot 側の準備は [VS Code・Copilot 環境構築](vscode-copilot-setup.md) を参照する。
+
 プロジェクト新規開始時に **PAC CLI** と **Dataverse API** を使って `.env` を対話的に構成する。
 手動でセッション詳細を開く必要がなく、エージェントがユーザーに選択肢を提示して進める。
 
