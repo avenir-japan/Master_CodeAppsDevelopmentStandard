@@ -40,7 +40,7 @@ PP_USE_INTERACTIVE_BROWSER=true
 1. 初回: ブラウザーが開き Azure AD ログイン → MFA 完了 → トークン取得
 2. `AuthenticationRecord` を**実行環境のユーザーの**ホームディレクトリの `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json` に保存
 3. 2回目以降: 同じ実行環境・ユーザープロファイルでレコードをロードし、利用可能な永続トークンキャッシュからサイレント取得を試みる（再認証が必要な場合もある）
-4. 再認証が必要な場合: レコードを保持したままエラーを返す。対象アカウントと利用する Edge プロファイルを確認してから明示的に再認証する
+4. 再認証が必要な場合: レコードを保持したままエラーを返す。期限切れ・ポリシー変更時などは対象アカウントと利用する Edge プロファイルを確認してから明示的に再認証する
 
 ### 注意点
 
@@ -83,7 +83,7 @@ flow_api_call("GET", f"/providers/Microsoft.ProcessSimple/environments/{env_id}/
 #### 認証テスト
 
 ```bash
-# 社内開発では初回のみブラウザー対話認証。以降はサイレント。
+# 社内開発では初回にブラウザー対話認証。以降はキャッシュが利用可能ならサイレント。
 python -c "import sys; sys.path.insert(0, '.github/skills/standard/scripts'); from auth_helper import get_token; print(get_token()[:20] + '...')"
 ```
 
@@ -110,7 +110,7 @@ $env:PP_NO_PERSISTENT_CACHE = "1"
 
 #### ブラウザー対話認証 (`PP_USE_INTERACTIVE_BROWSER=true`) のサイレントリフレッシュ
 
-`PP_USE_INTERACTIVE_BROWSER=true` 設定時、`InteractiveBrowserCredential` はシングルトン + `AuthenticationRecord` 永続化により **初回のみ** ブラウザーが開く。
+`PP_USE_INTERACTIVE_BROWSER=true` 設定時、`InteractiveBrowserCredential` はシングルトン + `AuthenticationRecord` と OS 保護の永続トークンキャッシュを使い、**初回以降はサイレント取得を優先**する。認証が失効した場合などは再認証が必要になる。
 
 - 認証レコードファイル: `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`（明示した `client_id` には `_{client_id}` を付けて分離）
 - 旧スクリプトフォルダのレコードは `TENANT_ID` が一致した場合のみ移行し、読み込み時もテナント不一致のレコードは再認証する
@@ -120,7 +120,7 @@ $env:PP_NO_PERSISTENT_CACHE = "1"
   3. 再認証が必要: レコードは削除せずエラーを返す。Edge プロファイル確認後、`setup_environment.py --auth-only` または `authenticate(scope)` で明示的に認証する
 
 - **異なるスコープ** (`Dataverse` / `Flow API` / `PowerApps API`) でも同一 credential + 同一キャッシュからサイレント取得
-- ブラウザーが何度も開く場合は接続先・テナントとアカウントを確認する。レコードの削除は自動実行しない:
+- ブラウザーが何度も開く場合は接続先・テナントとアカウント、`PP_NO_PERSISTENT_CACHE` の設定を確認する。レコードの削除は自動実行しない。`setup_environment.py --auth-only` はキャッシュが使える場合は API 確認だけで終わる:
 
 ```powershell
 python .github/skills/standard/scripts/setup_environment.py --auth-only

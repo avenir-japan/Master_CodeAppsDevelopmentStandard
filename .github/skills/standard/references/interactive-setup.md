@@ -1,5 +1,7 @@
 # インタラクティブ環境セットアップ手順
 
+VS Code・GitHub Copilot 側の準備は [VS Code・Copilot 環境構築](vscode-copilot-setup.md) を参照する。
+
 プロジェクト新規開始時に **PAC CLI** と **Dataverse API** を使って `.env` を対話的に構成する。
 手動でセッション詳細を開く必要がなく、エージェントがユーザーに選択肢を提示して進める。
 
@@ -27,7 +29,7 @@ python .github/skills/standard/scripts/setup_environment.py --profile "<ProfileN
 python .github/skills/standard/scripts/setup_environment.py --auth-only
 ```
 
-初回は `pac auth create --name <ProfileName>` で開発テナントの PAC プロファイルを用意し、`--profile` 実行時にブラウザーでサインインする。既存の PAC プロファイルと案件用 `.env` がある場合はそのまま利用し、必要なら `--auth-only` で Python 認証を確認する。端末上の認証レコードと MSAL キャッシュが有効ならサイレントに再利用される。`.env` は案件ごとに保持し、マスターや顧客への納品物には含めない。
+初回は `pac auth create --name <ProfileName>` で開発テナントの PAC プロファイルを用意し、`--profile` 実行時に必要ならブラウザーでサインインする。既存の PAC プロファイルと案件用 `.env` がある場合はそのまま利用し、必要なら `--auth-only` で Python 認証を確認する。Python 側は同じ実行環境・ユーザーの認証レコードと MSAL キャッシュが有効ならサイレント取得を試み、再認証が必要な場合のみブラウザーを開く。PAC CLI のプロファイルと Python のキャッシュは共有される前提にせず、どちらも既存の認証を優先して確認する。`.env` は案件ごとに保持し、マスターや顧客への納品物には含めない。
 
 > 以降の Step 1〜8 は、この自動フローの各段階の詳細・手動フォールバックである。
 
@@ -142,7 +144,7 @@ pip install -r requirements.txt
 
 `.env` に `DATAVERSE_URL` と `TENANT_ID` が設定済みなので、auth_helper.py が利用可能になる。
 
-### 社内開発の Dataverse 認証はブラウザー対話認証（初回のみ）
+### 社内開発の Dataverse 認証はブラウザー対話認証（初回と再認証が必要な場合）
 
 `setup_environment.py --profile` は `.env` に `PP_USE_INTERACTIVE_BROWSER=true` を保存して認証する。
 `--auth-only` では既存の `.env` に同設定が必要。ブラウザーを開く前に利用する Edge プロファイルを確認し、社内アカウントでサインインする。

@@ -31,6 +31,12 @@ GitHub Copilot は、開発・レビュー・修正の際に次の方針で動�
 8. 会話ログ分析では取得件数を制限し、書き込み・更新・削除を実行しない。
 9. 個人情報・顧客固有情報・実環境 URL・環境 ID をリポジトリへ残さない。
 
+## 開発で使うモデル
+
+GitHub Copilot で提供されるモデルには利用上限がある。社内の費用比較では Azure 上のモデルの方が安いため、開発では原則として Azure 上に用意した指定モデルを使う（社内方針）。
+どのモデルを使うかは社内の案内に従い、特定のモデル名をこのリポジトリに固定しない。高難度の作業や比較レビューも指定モデルの中から選ぶ。
+モデルの追加手順は [VS Code・Copilot 環境構築](skills/standard/references/vscode-copilot-setup.md) を参照する。
+
 ## 技術情報の確認原則
 
 Copilot Studio、Power Platform、Dataverse、Microsoft Graph に関する仕様、API、
@@ -43,8 +49,12 @@ Dynamics CRM / Power Platform に関する補足的な二次情報源として�
 公式情報と二次情報が矛盾する場合は公式情報を優先し、なお解決しない場合は
 確認できた事実と残る不確実性を明示する。
 
+このリポジトリは `.vscode/mcp.json` で Microsoft Learn MCP Server を標準登録する。
+スキルの手順で詰まった時や、仕様・設定・エラーの調査が必要な時は Learn MCP の
+`microsoft_docs_search`／`microsoft_docs_fetch`／`microsoft_code_sample_search` で最新の公式ドキュメントを確認する。
+Learn MCP が使えない環境では Web 上の Microsoft 公式ドキュメントを参照し、出典 URL を残す。
 公式情報の確認は不確実な技術判断があるときに行い、単純な作業のたびに再検索を
-義務付けない。この参照方針は MCP サーバーの登録を必須としない。
+義務付けない。
 
 ただし、Power Platform 案件の設計・本実装開始前には、採用する構成・機能・
 アクションと重要な入出力経路について、`.github/skills/standard/SKILL.md` の
@@ -72,3 +82,5 @@ Dynamics CRM / Power Platform に関する補足的な二次情報源として�
   作業対象を特定する。
 - 事実（開発入力ファイル由来）と、マスター標準からの補完と、提案を、
   必要に応じて区別して報告する。
+- `.vscode/` 配下などの設定ファイルに API キー・認証情報を書かない。既存の MCP サーバー設定を削除・上書きしない。
+- VS Code 内のブラウザが組織のポリシーで使えない場合は [ブラウザ自動化方針](skills/standard/references/browser-automation.md) の代替手順に従う。

@@ -6,7 +6,7 @@ from pathlib import Path
 
 SOURCE_ROOT = Path(__file__).resolve().parents[4]
 DIRECTORIES = (Path(".github/agents"), Path(".github/skills"))
-FILES = (Path(".github/copilot-instructions.md"), Path(".env.example"))
+FILES = (Path(".github/copilot-instructions.md"), Path(".env.example"), Path(".vscode/mcp.json"))
 GITIGNORE_TEMPLATE = Path(".github/skills/standard/references/gitignore-template")
 
 

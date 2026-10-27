@@ -256,6 +256,8 @@ if ai_idx >= 0:
 
 高レベルの手順:
 
+- Copilot Studio のエージェントは作成時に標準ハーネスを選ぶ（理由は [license-requirements.md §1](../standard/references/license-requirements.md#1-基本方針)）。
+
 1. **Step 0**: Copilot Studio UI で Bot 作成（ユーザー手動）
 2. **Step 1-1.5**: Bot 検索 + プロビジョニング完了待ち
 3. **Step 2**: カスタムトピック削除（システムトピック保護）
