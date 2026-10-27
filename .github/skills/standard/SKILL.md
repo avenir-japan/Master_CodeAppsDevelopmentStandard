@@ -77,7 +77,7 @@ triggers:
 | [認証リファレンス](references/auth-patterns.md)                              | auth_helper.py の詳細実装・認証パターン                      |
 | [ブラウザ自動化方針](references/browser-automation.md)                       | VS Code 統合ブラウザを使った検証手順の標準化                 |
 | [対話型セットアップ](references/interactive-setup.md)                        | 初期確認を AskUserQuestion で整理する導入導線                |
-| [VS Code・Copilot 環境構築](references/vscode-copilot-setup.md)                 | 開発者端末の初回セットアップ                                  |
+| [VS Code・Copilot 環境構築](references/vscode-copilot-setup.md)              | 開発者端末の初回セットアップ                                 |
 | sdk-update-check.md                                                          | npm SDK と upstream skills の追従確認手順                    |
 | [アイコン作成](references/icon-creation.md)                                  | Pillow による PNG/SVG アイコン生成・API 登録パターン         |
 | [HTML メールテンプレート](references/html-email-template.md)                 | HTML メールのデザインシステム・カラーパレット・基本原則      |
