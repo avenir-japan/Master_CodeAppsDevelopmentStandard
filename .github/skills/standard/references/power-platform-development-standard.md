@@ -40,9 +40,9 @@ GitHub Copilot は使用量ベース課金を前提に、**既定を GPT-5.4** �
 
 ## この標準の既定スコープ
 
-このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+このマスターリポジトリでは、検証導入パッケージの**技術選定時の条件付き初期提案**を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。顧客の契約・利用者／実行主体の利用権、利用可能なチャネル、既存資産と案件要件を確認し、未確認なら採用を確定しない。案件の確定要件を初期提案で上書きせず、[Phase 0 の実現可能性ゲート](#開発着手前の実現可能性ゲート全案件必須)を通す。
 
-- 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
+- 既定の UI / チャネル候補は **Teams / Microsoft 365 Copilot** とし、利用可能性と要件適合を確認する
 - **Canvas App** は画面 UI が本当に必要な場合の基本案とし、データソース・コネクタの利用条件を確認する
 - Canvas App では仕様・技術要件を満たすのが難しい場合、**Code Apps / Model-Driven Apps** も代替候補として提案し、実現性・ライセンス・費用を確認してユーザー承認後に採否を決める
 - Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず既定提案から外し、ライセンスと Credits の両面で評価する
@@ -347,8 +347,8 @@ Dataverse テーブル作成・フロー・Copilot Studio 等の **Python デプ
 
 | 層                           | 保存先                                                                        | 保存内容                               | 役割                                      |
 | ---------------------------- | ----------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------- |
-| AuthenticationRecord         | `auth_helper.py` と同じディレクトリの `.auth_record_browser.json`（社内開発） | アカウント情報（テナント・ユーザー）   | MSAL キャッシュからトークンを検索するキー |
-| TokenCachePersistenceOptions | OS 資格情報ストア                                                             | リフレッシュトークン・アクセストークン | 実際のトークン永続化                      |
+| AuthenticationRecord         | 実行ユーザーの `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`（Device Code は `_device.json`、明示した `client_id` はブラウザー用ファイル名末尾に追加） | アカウント情報（テナント・ユーザー）。トークンは含まない | キャッシュから対象アカウントを選ぶ |
+| TokenCachePersistenceOptions | 実行環境の OS ユーザーデータ保護 API を用いる永続キャッシュ（物理的な保存先は環境依存） | 認証シークレット | トークンの永続化（利用可能な場合） |
 
 > **教訓**: `AuthenticationRecord` だけではトークンは保存されない。`TokenCachePersistenceOptions` と組み合わせて認証キャッシュを再利用する。
 
@@ -356,7 +356,7 @@ Dataverse テーブル作成・フロー・Copilot Studio 等の **Python デプ
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | 初回実行         | 社内開発では `InteractiveBrowserCredential` で認証 → `AuthenticationRecord` を保存 + MSAL キャッシュにトークンを永続化 |
 | 2回目以降        | AuthenticationRecord をロード → MSAL キャッシュからサイレントリフレッシュ（期限切れ時は再認証）                        |
-| エラー時の再実行 | 両方のキャッシュを再利用するため再認証は不要                                                                           |
+| エラー時の再実行 | 同じ実行環境・ユーザーのキャッシュを再利用できる場合はサイレント取得を試みる。必要に応じて再認証する                 |
 
 ```python
 # 基本的な使い方
@@ -391,7 +391,7 @@ envs = flow_api_call("GET", "/providers/Microsoft.ProcessSimple/environments")
 python .github/skills/standard/scripts/auth_helper.py
 ```
 
-> **ルール**: 認証レコード（`.auth_record_browser.json` と `.auth_record.json`）は `.gitignore` に含まれ、リポジトリにコミットされない。必ず `auth_helper` 経由で認証し、キャッシュを再利用すること。
+> **ルール**: 現行の認証レコードは実行ユーザーのホームディレクトリに保存される。旧版の `.auth_record_browser.json` と `.auth_record.json` がスクリプトディレクトリに残る場合もあり、これらは `.gitignore` 対象でもコミット・納品しない。`PP_NO_PERSISTENT_CACHE=1` は永続トークンキャッシュの使用だけを停止し、認証レコードは保存・再利用される。環境ごとの保存先と整理方法は [認証リファレンス](auth-patterns.md#実行環境とキャッシュの管理) を参照。
 
 ### 2.4 Dataverse MCP サーバー設定
 
@@ -541,7 +541,7 @@ api_post("/PublishAllXml", {})
 - Code Apps を代替候補として提案する場合: `code-apps` スキルを使う
 - Model-Driven Apps を代替候補として提案する場合: `model-driven-app` スキルを使う
 
-以下の Code Apps の具体手順は、Canvas App では要件実現が難しい場合に代替候補として評価するための技術資料である。
+以下の Code Apps の具体手順は、**技術選定時には代替候補の評価資料**であり、**Code Apps を方式として承認・採用した後は実装標準**となる。技術選定時の Canvas App 初期候補と、選定後の Code Apps 開発手順を混同しない。
 
 ### 4.1 参考: Code Apps の初期セットアップ手順
 

@@ -4,7 +4,7 @@
 
 ## 1. 基本方針
 
-- このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く
+- このマスターリポジトリでは、検証導入パッケージの**条件付き初期提案**を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。顧客契約・利用者／実行主体の利用権、利用可能なチャネル、既存資産と案件の確定要件を確認し、未確認なら採用を確定しない。既定提案で案件要件を上書きしない
 - Microsoft 365 サブスクリプションに含まれる **Copilot Studio for Teams プラン**と、別途利用権を持つ構成を混同しない。Teams プランでは生成オーケストレーションなど一部機能を利用できないため、案件の利用者・作成者のライセンスと採用機能を照合し、既定案が実現できるか確認する（[Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing-subscriptions)、[Microsoft Copilot Studio Licensing Guide](https://go.microsoft.com/fwlink/?linkid=2320995)）。ベースライセンス内という方針だけで機能の利用権を断定しない
 - 既定の UI / チャネル優先順位は **Teams / Microsoft 365 Copilot → 画面 UI が本当に必要なら Canvas App を基本案** とする。Canvas App のデータソース・コネクタのライセンスは案件ごとに確認する
 - Canvas App では仕様・技術要件を満たすのが難しい場合は **Code Apps / Model-Driven Apps** も代替候補として提案し、実現性・ライセンス・費用を確認してユーザー承認後に採否を決める
@@ -23,7 +23,7 @@
 
 最低限、次を確認します。
 
-- Teams / Microsoft 365 Copilot を標準チャネルとして成立させられるか
+- 顧客契約・チャネルの提供条件と案件要件・既存資産を照合し、Teams / Microsoft 365 Copilot を初期候補として成立させられるか
 - 画面 UI が本当に必要か
 - 画面 UI が必要な場合、Canvas App を基本案として利用データ・コネクタのライセンスを確認したか。Canvas App では難しい場合に Code Apps / Model-Driven Apps の実現性・ライセンス・費用を評価し、ユーザー承認を得たか
 - ベースライセンス範囲を超える要素が入っていないか

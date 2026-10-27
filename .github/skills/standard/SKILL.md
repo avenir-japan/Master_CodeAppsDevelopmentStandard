@@ -40,13 +40,15 @@ triggers:
 
 ## この標準の既定スコープ
 
-このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+このマスターリポジトリでは、検証導入パッケージの**技術選定時の条件付き初期提案**を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。提案前に顧客の契約・利用者／実行主体の利用権、利用可能なチャネル、既存資産（アプリ・データソース・コネクタ等）と案件要件を確認する。未確認なら採用を確定せず、案件の確定要件をこの初期提案で上書きしない。
 
-- 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
-- **Canvas App（標準コネクタ）** は画面 UI が必要な場合の基本案とし、データソース・コネクタのライセンス条件と工数を確認する
+- 既定の UI / チャネル候補は **Teams / Microsoft 365 Copilot** とし、利用可能性と要件適合を確認する
+- **Canvas App（標準コネクタ）** は画面 UI が必要な場合の初期候補とし、既存資産、データソース・コネクタのライセンス条件と工数を確認する
 - Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず既定提案から外し、案件ごとにライセンスと Credits を評価する
 - Canvas App で要件を満たせない場合の Code Apps / モデル駆動型アプリ等は、実現性・ライセンス・費用を示した代替案としてユーザー承認後に採否を決める
 - 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
+
+**技術選定と実装標準は別**: 上記の優先順位は方式を選ぶまでの初期提案であり、Code Apps を承認済みの方式として採用した案件では `code-apps` スキルと [開発標準の Code Apps 手順](references/power-platform-development-standard.md#4-ui-開発) を実装標準として適用する。Code Apps の実装手順が存在することを理由に、技術選定で Code Apps を既定採用しない。
 
 開発段階の既定提案は PoC / MVP とし、本番品質・本番運用の保証を前提にしない。案件の確定要件を優先し、機能・検証範囲は目的に必要な範囲に絞る。
 採用する重要経路は PoC / MVP でも [Phase 0 の実現可能性ゲート](references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で技術・利用者／実行主体のライセンス・Copilot Credits を別々に判定する。未確認・不適合の経路は通常案として本実装に進めず、代替案を検討する。実機検証に Credits 消費や追加費用が生じ得る場合と、例外案を採用する場合は、条件・費用影響を示してユーザーの明示承認を得る。
@@ -125,21 +127,23 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
 ### 共通認証: auth_helper.py
 
 共通実装は `.github/skills/standard/scripts/auth_helper.py` にあり、案件スクリプトでは必要に応じてプロジェクト直下へコピーして利用する。
-**ユーザーに何度も対話認証を求めない** 2 層キャッシュ構成。
+**同じ実行環境・同じユーザープロファイルで再利用する** 2 層キャッシュ構成。別の OS / WSL / SSH / コンテナー / 実行ユーザーへレコードだけを移しても認証は引き継げない。
 
-```
-層1: AuthenticationRecord (~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json)
-  - アカウント情報（テナント・ユーザー ID）を保存
-  - ブラウザ認証の記録はホームディレクトリに保存。Device Code は auth_record_{TENANT_ID}_device.json
+```text
+層1: AuthenticationRecord (実行ユーザーの ~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json)
+  - アカウント情報（テナント・ユーザー ID）を保存。トークンは保存しない
+  - Device Code は auth_record_{TENANT_ID}_device.json
   - 明示した client_id はブラウザのファイル名末尾を分離し、読み込み時は TENANT_ID の一致を確認
 
-層2: TokenCachePersistenceOptions (MSAL OS 資格情報ストア)
-  - リフレッシュトークン・アクセストークンを永続化
-  - サイレントリフレッシュで再認証を抑える
+層2: TokenCachePersistenceOptions (OS のユーザーデータ保護 API で暗号化される永続キャッシュ)
+  - 認証シークレットを保持。実ファイルや保存先は OS・実行環境の実装に依存する
+  - 利用可能な場合にサイレント取得を試みる。再認証が不要とは保証しない
 
-初回（社内開発）: InteractiveBrowserCredential → ブラウザで認証 → キャッシュ保存
-2回目以降: キャッシュから自動取得（認証プロンプトなし）
+初回（社内開発）: InteractiveBrowserCredential → ブラウザで認証 → レコードとキャッシュ保存
+2回目以降: 同一実行環境でキャッシュから取得を試み、必要なら再認証
 ```
+
+`PP_NO_PERSISTENT_CACHE=1` は層2の永続化**のみ**無効化し、層1の読み込み・書き込みは継続する。既存の永続キャッシュを削除する設定ではない。レコード・トークンキャッシュは実行ユーザーの認証情報として扱い、共有・納品・コミットしない。対象別の安全な整理手順は [認証リファレンス](references/auth-patterns.md#実行環境とキャッシュの管理) を参照。
 
 #### 認証既定: 弊社標準テナントではブラウザ対話認証を使う
 
@@ -219,7 +223,7 @@ Dataverse 側で MCP クライアントの許可が必要な作業では、`.git
 ## 関連スキル
 
 > **採用優先順位の扱い**: 下表は利用可能な実装スキルの一覧であり、既定提案の優先順位そのものではない。
-> 優先順位は「Teams / Microsoft 365 Copilot を先頭、Canvas App は必要時のみ、その他は案件判断」を正本とする。
+> 契約・チャネル・既存資産・案件要件を確認したうえでの初期候補は「Teams / Microsoft 365 Copilot を先頭、Canvas App は画面 UI が必要な場合、その他は案件判断」とする。選定後は採用方式のスキルを実装標準とする。
 
 | フェーズ                  | スキル             | 内容                                                                        |
 | ------------------------- | ------------------ | --------------------------------------------------------------------------- |
