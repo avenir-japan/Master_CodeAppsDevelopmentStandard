@@ -309,7 +309,7 @@ pip install -r .github/skills/standard/scripts/requirements.txt
 
 ```bash
 # clone 直後の標準フロー（preflight は postinstall で自動実行）
-git clone https://github.com/geekfujiwara/CodeAppsDevelopmentStandard . && npm install
+git clone https://github.com/avenir-japan/Master_CodeAppsDevelopmentStandard . && npm install
 
 # 明示的に再チェック
 npm run check:env
@@ -1552,7 +1552,7 @@ flowchart TD
 設計フェーズでは、**ユーザーの要件をもとに採用構成と重要経路を設計し、承認を得てから構築に進む**。
 カスタムテーブルを採用する場合は、設計なしに作成してはならない。
 
-顧客環境への移送がある場合は、本実装前に環境ごとに変わる値や参照先を洗い出し、アクションごとに環境変数を使うか、顧客がインポート後に UI で設定するかを決める。接続参照の割当とファイル・フォルダー・リスト等の対象選択は別に設計し、顧客の設定作業、編集権限、ソリューション全体の納品形態と併せて承認を得る。GUI ピッカーで顧客環境のファイルやフォルダーを選び直すフローがある場合は、原則アンマネージド納品とする。判断基準は [ソリューション運用と納品](./managed-solution-delivery.md) に従う。
+顧客環境への移送がある場合は、本実装前に環境ごとに変わる値や参照先を洗い出し、アクションごとに環境変数を使うか、顧客がインポート後に UI で設定するかを決める。接続参照の割当とファイル・フォルダー・リスト等の対象選択は別に設計し、顧客の設定作業、編集権限、ソリューション全体の納品形態と併せて承認を得る。GUI ピッカーで顧客環境のファイルやフォルダーを選び直すフローがある場合は、原則アンマネージド納品とする。判断基準は [ソリューション運用と納品](./managed-solution-delivery.md) に従い、画面で対象を選び直す構成における環境変数の採否も案件ごとに決める。
 
 #### 開発着手前の実現可能性ゲート（全案件必須）
 

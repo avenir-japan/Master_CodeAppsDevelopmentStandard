@@ -62,7 +62,14 @@ VS Code を導入し、リポジトリの [推奨拡張機能](../../../../.vsco
 
 社内の開発環境・開発用リポジトリでは、承認の確認を減らすため Allow all または Autopilot を推奨する。確認なしでファイル編集・コマンド実行が進むため、対象を限定し、変更内容と実行結果を必ず確認する。選択肢が表示されない場合は組織のポリシーを確認し、制限を回避しない。
 
-公式情報: [Copilot 設定（`chat.permissions.default`）](https://code.visualstudio.com/docs/copilot/copilot-settings)。Allow all／Autopilot は環境・セッションにより選択肢が異なるため、実際の画面で確認する。
+公式情報: [Manage approvals and permissions](https://code.visualstudio.com/docs/agents/run/approvals)、確認日: 2026-10-27。確認環境の VS Code: 1.102.0 (x64)。
+
+### できること
+
+- **Allow all**: ファイル編集・ターミナルのコマンド・外部ツールの呼び出しを、確認なしで実行する。
+- **Autopilot**: Allow all と同じくすべてのツールを自動承認したうえで、エラー時に再試行し、作業を止める質問にも自動で応答し、タスクが完了したと判断するまで作業を続ける。例: SPEC.md に沿った実装→テスト→エラー修正を、途中で承認せずに進める。
+- **選び方**: Autopilot は Copilot harness セッションではチャット入力欄のモード選択で選ぶ（Local harness セッションでは権限の選択で選ぶ）。初めて Allow all または Autopilot を選ぶと警告が出る。
+- **注意**: 信頼できるワークスペースでだけ使う。サンドボックスを有効にしていれば、ターミナルのファイル・ネットワークの制限は残る。組織の設定で選択肢が表示されない場合がある。
 
 ## 6. 通常ブラウザでの認証・操作
 
@@ -72,7 +79,7 @@ VS Code を導入し、リポジトリの [推奨拡張機能](../../../../.vsco
 
 ## 7. Copilot Chat・Copilot Cowork と GitHub の接続
 
-管理者が展開済みの githubmcp プラグインを有効にし、初回に各自の GitHub アカウントでサインインする。「マスターリポジトリの README を読んで」と依頼して参照できることを確認する。Copilot Chat・Copilot Cowork からは GitHub を**読むだけ**にし、変更は VS Code の GitHub Copilot で行う。プラグインの展開状態と名称は管理者に確認する。
+管理者が展開済みの githubmcp プラグインを有効にし、初回に各自の GitHub アカウントでサインインする。「マスターリポジトリの README を読んで」と依頼して参照できることを確認する。Copilot Chat・Copilot Cowork からは GitHub を**読むだけ**にし、変更は VS Code の GitHub Copilot で行う。プラグインの展開状態と名称は管理者に確認する。最終パッケージ（ZIP）の中身の検査は VS Code の GitHub Copilot で行い、結果をテキストで残す。Copilot Chat・Copilot Cowork の GitHub 接続では、ZIP の中身を直接検査できない場合がある（2026 年 10 月時点の社内での確認。ツールの更新で変わり得る）。
 
 公式情報: [Microsoft 365 Copilot のエージェントとプラグイン](https://learn.microsoft.com/microsoft-365-copilot/extensibility/overview)、[Microsoft 365 Copilot の GitHub コネクタ](https://learn.microsoft.com/microsoftsearch/github-connector)（githubmcp の管理者展開・初回サインイン操作の公開手順は未確認）
 

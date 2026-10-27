@@ -18,7 +18,9 @@
 - 未確認事項を実機検証する場合でも、検証自体に Credits 消費や追加費用が生じ得るなら、検証範囲と費用影響についてユーザーの事前の明示承認を得る
 - ベースライセンス外または Credits 消費ありの構成が避けられない場合は、代替案を先に検討する。実現が難しい場合は追加ライセンス・消費条件・費用影響を示して例外案を提示し、ユーザーの明示承認前に採用しない
 - 提案、見積、納品前チェックの各タイミングで最新 docs を再確認する
+- このパッケージでは、Copilot Studio のエージェントを標準ハーネスで作成する。GitHub Copilot ハーネスは利用量課金の対象で、作成・テスト・評価・実行で Copilot Credits を消費する場合があり、その利用は Microsoft 365 Copilot ライセンスに含まれない。ハーネスは作成時に選び、作成後に相互に移せない（[概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/overview)、[利用料](https://learn.microsoft.com/en-us/power-platform/admin/manage-usage-github-copilot-harness)、確認日: 2026-10-27）
 
+- Copilot Studio に紐づく自律トリガー（エージェント側のイベント等のトリガーで動くフロー）は Copilot Credits を消費する。エージェントから呼ばれるトリガー以外のエージェントフローも課金対象になる（[Billing rates and management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)、確認日: 2026-10-27）。
 - Power Automate のクラウドフローから Copilot Studio のエージェントを呼び出す自律型について、Microsoft サポートへの問い合わせ（SR、2026-10）で、エージェントが Standard ハーネスで作成され、フローで使う Copilot Studio コネクタの接続所有者に Microsoft 365 Copilot ライセンスが割り当てられ、社内の従業員向けでフェアユースの範囲内なら、エージェント側の処理はトリガーの種類によらず Copilot Credits を消費しないと確認済み。**この接続所有者・クラウドフロー起点の条件を裏付ける公開文書は未確認**だが、SR 回答を根拠として扱う。自律型の構成・実装はこのパッケージの標準スコープや既定提案に含めず、標準案で要件を満たせない場合に検討する例外的な代替手段とする。採用時は実現可能性ゲートの判定表に SR 回答を根拠として各条件の適合を記録し、条件を満たす場合に限ってエージェント側の Credits 非消費を判定する。条件外や適合を確認できない場合は非消費と推定しない。フロー側のライセンス・費用は別途判定する（[Copilot Studio の課金と脚注](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates)、[制限と Power Platform 要求](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)）。
 
 ## 2. このパッケージで先に確認すること
