@@ -45,6 +45,7 @@ triggers:
 - 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
 - **Canvas App（標準コネクタ）** は画面 UI が必要な場合の基本案とし、データソース・コネクタのライセンス条件と工数を確認する
 - Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず既定提案から外し、案件ごとにライセンスと Credits を評価する
+- Power Automate クラウドフローからエージェントを呼び出す自律型の構成・実装は、Credits 非消費の条件を満たす場合でも標準スコープに含めず、必要時のみ例外的な代替案として検討する（[条件と根拠](references/license-requirements.md#1-基本方針)）
 - Canvas App で要件を満たせない場合の Code Apps / モデル駆動型アプリ等は、実現性・ライセンス・費用を示した代替案としてユーザー承認後に採否を決める
 - 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
 
@@ -139,7 +140,7 @@ BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Copilot Studio Bot ID（URL で�
   - サイレントリフレッシュで再認証を抑える
 
 初回（社内開発）: InteractiveBrowserCredential → ブラウザで認証 → キャッシュ保存
-2回目以降: キャッシュから自動取得（認証プロンプトなし）
+2回目以降: 同じ実行環境・ユーザーのキャッシュからサイレント取得を優先（失効・ポリシー変更時は再認証が必要な場合あり）
 ```
 
 #### 認証既定: 弊社標準テナントではブラウザ対話認証を使う

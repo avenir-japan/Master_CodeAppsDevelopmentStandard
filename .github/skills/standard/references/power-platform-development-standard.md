@@ -345,16 +345,16 @@ Dataverse テーブル作成・フロー・Copilot Studio 等の **Python デプ
 
 | 層                           | 保存先                                                                        | 保存内容                               | 役割                                      |
 | ---------------------------- | ----------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------- |
-| AuthenticationRecord         | `auth_helper.py` と同じディレクトリの `.auth_record_browser.json`（社内開発） | アカウント情報（テナント・ユーザー）   | MSAL キャッシュからトークンを検索するキー |
-| TokenCachePersistenceOptions | OS 資格情報ストア                                                             | リフレッシュトークン・アクセストークン | 実際のトークン永続化                      |
+| AuthenticationRecord         | 実行ユーザーの `~/.power-platform-cli/auth_record_{TENANT_ID}_browser.json`（社内開発） | アカウント情報（テナント・ユーザー）。トークンは含まない | キャッシュから対象アカウントを選ぶ |
+| TokenCachePersistenceOptions | 実行環境の OS 保護付き永続キャッシュ（保存先は環境依存） | 認証シークレット | トークンの永続化 |
 
 > **教訓**: `AuthenticationRecord` だけではトークンは保存されない。`TokenCachePersistenceOptions` と組み合わせて認証キャッシュを再利用する。
 
 | 動作             | 説明                                                                                                                   |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | 初回実行         | 社内開発では `InteractiveBrowserCredential` で認証 → `AuthenticationRecord` を保存 + MSAL キャッシュにトークンを永続化 |
-| 2回目以降        | AuthenticationRecord をロード → MSAL キャッシュからサイレントリフレッシュ（期限切れ時は再認証）                        |
-| エラー時の再実行 | 両方のキャッシュを再利用するため再認証は不要                                                                           |
+| 2回目以降        | 同じ実行環境・ユーザーで AuthenticationRecord と永続キャッシュを再利用し、サイレント取得を試みる                       |
+| エラー時の再実行 | キャッシュが有効なら再利用する。期限切れやポリシーによって再認証が必要になる場合もある                                 |
 
 ```python
 # 基本的な使い方
@@ -385,11 +385,11 @@ envs = flow_api_call("GET", "/providers/Microsoft.ProcessSimple/environments")
 ```
 
 ```bash
-# 認証テスト（社内開発では初回のみブラウザー対話認証）
+# 認証テスト（社内開発では初回と再認証が必要な場合にブラウザー対話認証）
 python .github/skills/standard/scripts/auth_helper.py
 ```
 
-> **ルール**: 認証レコード（`.auth_record_browser.json` と `.auth_record.json`）は `.gitignore` に含まれ、リポジトリにコミットされない。必ず `auth_helper` 経由で認証し、キャッシュを再利用すること。
+> **ルール**: 現行の認証レコードは実行ユーザーのホームディレクトリに保存される。旧版の `.auth_record_browser.json` と `.auth_record.json` がスクリプトディレクトリに残る場合もあるため、いずれもコミット・納品しない。Python デプロイスクリプトは `auth_helper` 経由で認証し、利用可能なキャッシュを再利用すること。PAC CLI のプロファイルと Python の認証キャッシュは同一視しない。
 
 ### 2.4 Dataverse MCP サーバー設定
 
