@@ -5,12 +5,13 @@ GitHub Copilot の段階的読込と Progressive Disclosure を前提に構成�
 
 ## このカタログの既定スコープ
 
-このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
+このマスターリポジトリでは、検証導入パッケージの**条件付き初期提案**を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。採用前に案件要件、契約、利用者・実行主体の利用権を確認する。
 
-- 既定の UI / チャネル優先順位は **Teams / Microsoft 365 Copilot** を先頭に置く
-- **Canvas App（標準コネクタ）** は既定スコープに含むが、工数を踏まえて **必要時のみ** 提案する
-- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、クレジット消費が大きい Copilot Studio パターンは、**案件ごとの追加ライセンス評価項目** として扱う
-- 個別スキルの技術手順は残し、採用可否や優先順位は上位の `standard` / `architecture` / ライセンス確認ルールを正本とする
+- UI / チャネルの初期候補は **Teams / Microsoft 365 Copilot**。利用条件と要件適合を確認する
+- **Canvas App（標準コネクタ）** は画面 UI が必要な場合の候補とし、既存資産、接続の利用条件と工数を確認する。PDF・添付を扱わないアプリに SharePoint staging を追加しない
+- Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小によらず既定提案から外し、案件ごとにライセンスと Credits を評価する
+- クラウドフローからエージェントを呼ぶ自律型構成は既定提案に含めない。必要時は例外案として、フロー側とエージェント側の費用・実行条件を別々に判定する。エージェント側トリガーやエージェントフローにクラウドフロー起点の Credits 条件を流用しない
+- 個別スキルの技術手順は残し、採用可否や優先順位は [standard](standard/SKILL.md) / [architecture](architecture/SKILL.md) / [ライセンス確認ルール](standard/references/license-requirements.md) を正本とする
 
 ## スキル構成規約
 
@@ -104,7 +105,7 @@ triggers: # スキル発動条件キーワード（必須）
 
 | スキル                                          | 説明                                                                                                      |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [copilot-studio](copilot-studio/SKILL.md)       | Copilot Studio エージェントを生成オーケストレーション前提で構築・運用する。                               |
+| [copilot-studio](copilot-studio/SKILL.md)       | 既存アーキテクチャ（v1）のエージェントを構築・運用する。生成オーケストレーションは利用権を確認して適用する。 |
 | [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。単独利用時の判断基準。 |
 | [power-automate](power-automate/SKILL.md)       | Power Automate クラウドフローをソリューション対応で作成・デプロイする。                                   |
 
@@ -128,8 +129,8 @@ triggers: # スキル発動条件キーワード（必須）
 | SDK や upstream skills の更新追従を確認したい | [standard](standard/SKILL.md)                                                                                                                                                                                                                                       |
 | Dataverse のテーブル・列・権限から固めたい    | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                                                                                                                          |
 | 画面 UI が本当に必要                          | [architecture](architecture/SKILL.md) で要否・利用条件を確認し、[canvas-app](canvas-app/SKILL.md) を基本案に検討。難しい場合のみ [code-apps](code-apps/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) を実現性・ライセンス・費用と承認を確認して代替検討 |
-| 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md)                                                                                                                                                                                                                           |
-| エージェントや AI ツールを作りたい            | [copilot-studio](copilot-studio/SKILL.md) / [copilot-studio-v2](copilot-studio-v2/SKILL.md) / [ai-builder](ai-builder/SKILL.md)                                                                                                                                     |
+| 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md) でフロー種別を確認。エージェント連携時は [architecture](architecture/SKILL.md) で方式・例外条件を判断する |
+| エージェントや AI ツールを作りたい            | [architecture](architecture/SKILL.md) で連携利用か単独利用かを判断し、[copilot-studio](copilot-studio/SKILL.md)（v1）または [copilot-studio-v2](copilot-studio-v2/SKILL.md)（v2）を選ぶ。AI Builder は要件・ライセンス確認後の候補 |
 
 ---
 
@@ -140,12 +141,12 @@ triggers: # スキル発動条件キーワード（必須）
 1. architecture       → 全体設計・コンポーネント選定（Teams / M365 Copilot 優先。画面 UI が必要なら Canvas App を基本案とし、要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案。実現性・ライセンス・費用と承認を確認）
 2. standard           → 共通基盤の確認（.env・認証）
 3. dataverse          → カスタムテーブルが必要な場合、設計承認後にテーブル構築・セキュリティロール設定（依存するアプリ・フローより先）
-4. copilot-studio     → 連携利用や既存トリガー資産を使う Copilot Studio 構成
-  OR copilot-studio-v2 → Teams / M365 Copilot 単独利用向けの新アーキ構成
+4. copilot-studio     → エージェントが必要な場合のみ。連携利用や既存トリガー資産を使う構成
+  OR copilot-studio-v2 → エージェントが必要な場合のみ。Teams / M365 Copilot 単独利用向けの新アーキ構成
 5. canvas-app         → 画面 UI が必要な場合のみ Canvas App（MCP + coauthoring / Git Integration / single app・package の使い分けと、添付・staging・Flow 中継）を検討
   OR code-apps        → Canvas App では難しい場合、実現性・ライセンス・費用を確認し明示承認後に代替採用
   OR model-driven-app → Canvas App では難しい場合、実現性・ライセンス・費用を確認し明示承認後に代替採用
-6. power-automate     → フロー作成
+6. power-automate     → フローが必要な場合のみ。フロー種別・実行主体・接続条件を確認して作成
 7. ai-builder         → AI プロンプト追加（必要時。最新ライセンス条件を確認）
 8. update-skills      → スキル更新・PR 連携・検証の標準化（標準運用へ反映する場合）
 ```

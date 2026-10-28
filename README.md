@@ -4,13 +4,13 @@ Power Platform の業務アプリやエージェントを **VS Code + GitHub Cop
 UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱いますが、このリポジトリの実装標準は **TypeScript + React + Tailwind CSS + shadcn/ui による Code Apps** を基本とします。
 
 > [!TIP]
-> このリポジトリを GitHub Copilot と使う場合は、まず **`@PowerCode` + GPT-5.4** を入口として使う運用を推奨します。
+> このリポジトリを GitHub Copilot と使う場合は、まず **`@PowerCode` + Azure 上の指定モデル** を入口として使う運用を推奨します（社内方針。具体名は社内の案内に従います）。
 > Power Platform 案件に必要なスキル選択、設計確認、実装フローをこの前提で揃えています。
 
 > [!IMPORTANT]
 > UI 方式は AI が独断で確定せず、要件・顧客要望・保守体制・既存資産を踏まえて **architecture スキルで比較し、ユーザー確認のうえ決定** します。
 
-[![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/geekfujiwara/Master_CodeAppsDevelopmentStandard)
+[![VS Code で開く](https://img.shields.io/badge/VS%20Code%E3%81%A7%E9%96%8B%E3%81%8F-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://vscode.dev/github/avenir-japan/Master_CodeAppsDevelopmentStandard)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-対応-blueviolet?style=for-the-badge&logo=github)](https://github.com/features/copilot)
 
 ## 使い方動画
@@ -55,7 +55,7 @@ UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱�
 新規案件は空ディレクトリへ clone します。既存案件にはマスターを別ディレクトリへ clone し、次の dry-run で追加対象と競合を確認します。`--apply` は競合ファイルを上書きせず、`.gitignore` の不足行だけ追記します。競合があれば案件固有の設定を優先して内容を個別に確認してください。標準の配置だけでは環境認証・デプロイは行いません。
 
 ```bash
-git clone https://github.com/geekfujiwara/Master_CodeAppsDevelopmentStandard . && npm install
+git clone https://github.com/avenir-japan/Master_CodeAppsDevelopmentStandard . && npm install
 ```
 
 新規案件では、この clone に残る `origin` はマスターを指します。案件用のリモートリポジトリを用意した後、**案件側の作業ディレクトリで**送信先を確認・変更してから push してください。マスターへの還元は別作業として扱います。
@@ -231,7 +231,7 @@ npm run setup
 README では全体像だけを示し、**Copilot の詳細ルールの正本は [standard スキル](./.github/skills/standard/SKILL.md)** に置きます。
 
 - 作業の切り分けは `Copilot で自動整理`、`スクリプトで半自動`、`顧客管理者または案件責任者が実施` の 3 区分で扱う
-- モデル運用は **既定を GPT-5.4** とし、軽作業は軽量モデル、コード中心の実装はコード特化モデルも候補にしつつ、高難度タスクではまず GPT 系の上位 reasoning model を候補にし、比較検討や別観点レビューが必要な場合は Opus 系も候補にする
+- モデルには利用上限があるため、社内の費用比較に基づき開発は原則 Azure 上の指定モデルを使う（社内方針）。具体名は固定せず社内の案内に従い、高難度の作業や比較レビューも指定モデルの中から選ぶ
 - 納品案件では、環境変数だけでなくマネージドプロパティ、接続参照、顧客環境での初期設定作業までまとめて確認する
 
 詳細は以下を参照:
@@ -249,6 +249,8 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 ### M365 Copilot／Copilot Cowork で要件整理を開始する
 
+前提: 管理者が展開した githubmcp に各自の GitHub アカウントで接続済みであること。Copilot Chat・Copilot Cowork からはリポジトリを読むだけにし、変更は VS Code の GitHub Copilot で行います。
+
 1. 本リポジトリを参照対象として指定する。
 2. 「要件ディスカバリーと生成物一式の作成」の実際のファイルパス
    [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
@@ -264,7 +266,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 - この開発標準の実装・運用ルールは、GitHub Copilot カスタムエージェントのスキル（`.github/skills/`）に定義されています。
 - 利用者は手順書を読み込んで操作するのではなく、カスタムエージェントに要件を伝えて進める前提です。
 - このリポジトリで Power Platform 案件を進める場合は、通常の汎用 Agent よりも **`@PowerCode` を第一選択** とします。
-- モデルは **既定で GPT-5.4 を推奨** し、高難度タスクで上位 reasoning model へ切り替える基準は [standard スキル](./.github/skills/standard/SKILL.md) の「Copilot 向け優先判断基準」を正本とします。
+- モデルは社内の案内に従い **Azure 上の指定モデル** を原則利用します（社内方針）。高難度の作業や比較レビューも指定モデルの中から選び、詳細は [standard スキル](./.github/skills/standard/SKILL.md) の「Copilot 向け優先判断基準」を正本とします。
 - チャット入力例 （バッククオート不要）: @PowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
 - 既存仕様書がある場合の入力例: @PowerCode spec-to-markdown
 - 既定以外の場所を使う場合の入力例: @PowerCode /home/.../input の仕様書を requirements markdown に変換して
@@ -281,6 +283,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 | やりたいこと                          | 最初に読む場所                                                                                                                                                                                                                        |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VS Code・Copilot を初回設定したい      | [VS Code・Copilot 環境構築](./.github/skills/standard/references/vscode-copilot-setup.md)                                                                                                                                             |
 | 何から始めるか決めたい                | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
 | 仕様書から要件を整理したい            | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
 | Dataverse のテーブル設計から始めたい  | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |
@@ -333,6 +336,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 ## 主要ドキュメント
 
+- [.github/skills/standard/references/vscode-copilot-setup.md](./.github/skills/standard/references/vscode-copilot-setup.md)
 - [.github/skills/standard/references/power-platform-development-standard.md](./.github/skills/standard/references/power-platform-development-standard.md)
 - [.github/skills/standard/references/managed-solution-delivery.md](./.github/skills/standard/references/managed-solution-delivery.md)
 - [.github/skills/standard/references/environment-variables.md](./.github/skills/standard/references/environment-variables.md)

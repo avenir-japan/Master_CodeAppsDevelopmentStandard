@@ -271,22 +271,44 @@ class WorkspaceInstallTests(unittest.TestCase):
             (source / ".github/skills/standard/references/gitignore-template").write_text(".env\nnode_modules/\n", encoding="utf-8")
             (source / ".github/copilot-instructions.md").write_text("standard", encoding="utf-8")
             (source / ".env.example").write_text("EXAMPLE=1", encoding="utf-8")
+            (source / ".vscode").mkdir()
+            (source / ".vscode/mcp.json").write_text('{"servers":{}}', encoding="utf-8")
             (target / ".gitignore").write_text("# project\n.env\n", encoding="utf-8")
 
             added, conflicts = initialize_workspace.install(source, target)
             self.assertIn(Path(".github/agents/new.md"), conflicts)
             self.assertIn(Path(".gitignore"), added)
             self.assertFalse((target / ".github/copilot-instructions.md").exists())
+            self.assertIn(Path(".vscode/mcp.json"), added)
+            self.assertFalse((target / ".vscode/mcp.json").exists())
             self.assertNotIn(Path(".github/agents/__pycache__/generated.pyc"), added)
             self.assertEqual((target / ".gitignore").read_text(encoding="utf-8"), "# project\n.env\n")
 
             initialize_workspace.install(source, target, apply=True)
             self.assertEqual((target / ".github/agents/new.md").read_text(encoding="utf-8"), "project")
             self.assertEqual((target / ".github/copilot-instructions.md").read_text(encoding="utf-8"), "standard")
+            self.assertEqual((target / ".vscode/mcp.json").read_text(encoding="utf-8"), '{"servers":{}}')
             self.assertEqual((target / ".gitignore").read_text(encoding="utf-8"), "# project\n.env\nnode_modules/\n")
             added, conflicts = initialize_workspace.install(source, target, apply=True)
             self.assertEqual(added, [])
             self.assertEqual(conflicts, [Path(".github/agents/new.md")])
+
+    def test_existing_mcp_configuration_is_reported_without_overwrite(self):
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / "source"
+            target = Path(directory) / "target"
+            (source / ".vscode").mkdir(parents=True)
+            (target / ".vscode").mkdir(parents=True)
+            (source / ".vscode/mcp.json").write_text('{"servers":{"microsoft-learn":{}}}', encoding="utf-8")
+            existing = '{"servers":{"other":{}}}'
+            (target / ".vscode/mcp.json").write_text(existing, encoding="utf-8")
+            (source / ".github/skills/standard/references").mkdir(parents=True)
+            (source / ".github/skills/standard/references/gitignore-template").write_text("", encoding="utf-8")
+            with patch.object(initialize_workspace, "FILES", (Path(".vscode/mcp.json"),)), patch.object(initialize_workspace, "DIRECTORIES", ()):
+                added, conflicts = initialize_workspace.install(source, target, apply=True)
+            self.assertEqual(added, [])
+            self.assertEqual(conflicts, [Path(".vscode/mcp.json")])
+            self.assertEqual((target / ".vscode/mcp.json").read_text(encoding="utf-8"), existing)
 
 
 if __name__ == "__main__":

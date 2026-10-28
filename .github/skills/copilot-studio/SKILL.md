@@ -1,6 +1,6 @@
 ---
 name: copilot-studio
-description: "Copilot Studio エージェントの構築・設定・外部トリガー追加・ニュース配信エージェント等のソリューション構築。生成オーケストレーション（Generative Orchestration）モード一択。"
+description: "Copilot Studio の既存アーキテクチャ（v1）でエージェントを構築・設定する。生成オーケストレーション、ナレッジ、ツール、外部トリガーを採用条件の確認後に扱う。"
 category: automation
 triggers:
   - "Copilot Studio"
@@ -23,21 +23,15 @@ triggers:
   - "Office 365 Outlook"
   - "OnNewEmailV3"
   - "メールトリガー"
-  - "自動リサーチ"
-  - "レポート自動生成"
-  - "RSS"
-  - "Web検索"
-  - "定期配信"
   - "スケジュールトリガー"
   - "Work IQ MCP"
-  - "ニュースエージェント"
 ---
 
 # Copilot Studio エージェント構築スキル
 
-Copilot Studio エージェントを **生成オーケストレーション（Generative Orchestration）モード一択** で構築する。
-ただし Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できない。この方針を適用する前に、[ライセンス確認ガイド](../standard/references/license-requirements.md)に従って採用機能と作成者・利用者の利用権を確認し、不適合なら構築に進まず構成・追加ライセンスを相談する。
-外部トリガー・ニュース配信エージェント等の応用パターンまでカバーする統合スキル。
+このスキルは **既存アーキテクチャ（v1）を採用したエージェント**の構築・設定を扱い、採用後の構成では生成オーケストレーション（Generative Orchestration）を使用する。Teams / Microsoft 365 Copilot 単独向けの新アーキテクチャ（cliagent）を採用する場合は [copilot-studio-v2](../copilot-studio-v2/SKILL.md) の制約と手順を優先し、v1 用の API・トピック操作を流用しない。
+Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できない。この方針を適用する前に、[ライセンス確認ガイド](../standard/references/license-requirements.md)に従って採用機能と作成者・利用者の利用権を確認し、不適合なら構築に進まず構成・追加ライセンスを相談する。
+外部トリガーやニュース配信は要件がある場合のみ検討する。外部トリガーからエージェントを呼ぶ構成は標準案ではなく、ライセンス・Credits・実現可能性を確認して承認された例外案として扱う。
 
 ## サブリファレンス（必要に応じて参照）
 
@@ -53,9 +47,11 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
 | [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
 
+> ニュース配信の上記 3 資料は用途別の実装例であり、一般的なエージェント構築の必須手順ではない。固有のエージェント名・ツール・配信形式・デプロイ手順を別案件に持ち込まず、再利用できる判断やパターンだけを採用する。
+
 ## 前提: 設計フェーズ完了後に構築に入る（必須）
 
-**エージェントを構築する前に、エージェント設計をユーザーに提示し承認を得ていること。**
+**エージェントを構築する前に、エージェント設計をユーザーに提示し承認を得ていること。** 既存エージェントの改修では、変更前にトピックの現状と依存関係を確認し、承認されていないトピックを削除しない（[改善時の確認手順](references/build-reference.md#既存エージェント改善パターン)）。
 
 設計提示時に含める内容:
 
@@ -66,6 +62,7 @@ Copilot Studio エージェントを **生成オーケストレーション（Ge
 | 推奨プロンプト           | 3〜5 個のタイトル＋プロンプト文（GPT コンポーネントの conversationStarters）  |
 | 会話の開始のメッセージ   | エージェントに合った挨拶テキスト（ConversationStart トピックの SendActivity） |
 | 会話の開始のクイック返信 | 3〜5 個のクイック返信テキスト（ConversationStart トピックの quickReplies）    |
+| 会話経路・既存トピック   | 新規では必要な会話経路を設計する。既存エージェントの改修ではトピックの用途・依存先・維持／変更／削除案を確認し、削除案は個別に承認を得る |
 | ナレッジ                 | データソース（Dataverse テーブル / SharePoint / ファイル等）                  |
 | ツール                   | MCP Server の接続先・用途                                                     |
 | チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                |
@@ -255,6 +252,8 @@ if ai_idx >= 0:
 詳細な構築手順・スクリプトコードは [構築リファレンス](references/build-reference.md) を参照。
 
 高レベルの手順:
+
+- Copilot Studio のエージェントは作成時に標準ハーネスを選ぶ（理由は [license-requirements.md §1](../standard/references/license-requirements.md#1-基本方針)）。
 
 1. **Step 0**: Copilot Studio UI で Bot 作成（ユーザー手動）
 2. **Step 1-1.5**: Bot 検索 + プロビジョニング完了待ち

@@ -1,6 +1,6 @@
 ---
 name: power-automate
-description: "Power Automate クラウドフローを Dataverse Web API（workflow テーブル）でソリューション対応で作成・デプロイする。接続参照パターンで API 有効化を100%成功させる。"
+description: "Power Automate クラウドフローをソリューション対応で作成・デプロイする。Dataverse workflows と Flow API の適用条件、接続参照、事前検証と有効化を扱う。"
 category: automation
 triggers:
   - "Power Automate"
@@ -18,7 +18,9 @@ triggers:
 
 # Power Automate クラウドフロー構築スキル
 
-Dataverse Web API（workflow テーブル）で **ソリューション対応のクラウドフロー** を作成・デプロイし、**API で確実に有効化する**。
+**ソリューション対応のクラウドフロー**を作成・デプロイする。既存スクリプトは Dataverse Web API（`workflows` テーブル）による作成・更新を主に使用し、Flow API を環境解決・起動および一部デプロイ経路に使用する。対象フローと接続参照の状態を確認して経路を選び、有効化後は実行結果まで検証する。
+
+**フロー種別を先に確認する**: 通常のイベント／スケジュール起点、Canvas App から呼び出すもの、Copilot Studio エージェントから呼び出すもの、クラウドフローからエージェントを呼び出すものは、トリガー・接続・課金条件が同一とは限らない。特に「エージェントフロー」と呼ぶ前に実際のトリガーと実行主体を確認し、クラウドフロー起点の Credits 判定を流用しない（[ライセンス確認ルール](../standard/references/license-requirements.md#1-基本方針)）。
 
 ## 核心原則: 接続参照（Connection Reference）が有効化成功の鍵
 
@@ -29,7 +31,7 @@ Dataverse Web API（workflow テーブル）で **ソリューション対応の
   → 接続参照なしで接続 ID を直接埋め込んだ場合、authenticatedUserObjectId が不足する
 
 解決策: 接続参照テーブルに正しい接続を紐づけてから、フロー定義で参照する
-  → 100% API 有効化に成功する
+  → 接続参照・接続の状態を確認し、API 有効化後に実行テストで成否を確認する
 
 ❌ 旧パターン（接続 ID 直接指定 → 有効化失敗のリスクあり）:
   "connectionReferences": {
@@ -40,7 +42,7 @@ Dataverse Web API（workflow テーブル）で **ソリューション対応の
       }
   }
 
-✅ 新パターン（接続参照経由 → 100% 有効化成功）:
+✅ 接続参照を使うパターン（接続・定義の事前確認と有効化後の実行検証が必要）:
   "connectionReferences": {
       "shared_commondataserviceforapps": {
           "runtimeSource": "embedded",
@@ -316,8 +318,8 @@ NG パターン:
   ✅ body/recipient にメールアドレス（文字列）を指定
   ✅ host.connection キーを使用（connectionName ではない）
   ❌ body/recipient/to は存在しない → ExtraParameter で InvalidOpenApiFlow
-  ❌ Dataverse workflows テーブルへの直接 INSERT → 接続認証不良で Runtime エラー
-  ✅ デプロイは Flow API 経由を推奨
+  ❌ Teams 1:1 Chat with Flow bot パターンで Dataverse workflows テーブルへ直接 INSERT → この構成では接続認証不良で Runtime エラーになった事例あり
+  ✅ この Teams 1:1 パターンでは Flow API 経由を検討（他のクラウドフロー全般のデプロイ規則ではない）
 
   詳細は trigger-action-patterns.md の
   「Teams 1:1 チャット投稿 — Chat with Flow bot」セクション参照
@@ -430,7 +432,7 @@ def resolve_environment_id() -> str:
 ❌ 環境 ID を .env にハードコード → 環境が変わると動かない
 ```
 
-## 構築手順（5ステップ — この順序で100%有効化成功）
+## 構築手順（5ステップ — 接続参照を確認し、有効化と実行を検証）
 
 ### Step 1: 環境 ID 解決 + 接続検索
 
@@ -561,7 +563,7 @@ wf_id = api_post("workflows", workflow_body, solution=SOLUTION_NAME)
 ### Step 5: 有効化 + Webhook 登録
 
 ```python
-# ★ Draft → Activated（接続参照が正しければ100%成功）
+# ★ Draft → Activated（接続参照・定義を検証し、失敗時は原因を確認）
 time.sleep(3)  # 作成直後は少し待つ
 api_patch(f"workflows({wf_id})", {"statecode": 1, "statuscode": 2})
 

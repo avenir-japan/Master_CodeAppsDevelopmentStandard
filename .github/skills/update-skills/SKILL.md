@@ -137,6 +137,7 @@ python .github/skills/update-skills/scripts/validate_skill.py --all
    Playwright MCP サーバー・Playwright 単体ブラウザのインストール・起動は行わない
    （→ [ブラウザ自動化方針](../standard/references/browser-automation.md)）。手動 UI 操作は最終手段とし、
    その場合も画面パスとセレクタの目印を明記する。
+   統合ブラウザが使えない環境では、同文書の「組織のポリシーで VS Code 統合ブラウザが使えない場合」に従う。
 3. **CLI 化**: 繰り返す操作は `scripts/` に追加し、本文からはスクリプト呼び出しで参照する。
 
 ### Step 5: PR 戦略を決める（更新 / 新規 + マージ順）
