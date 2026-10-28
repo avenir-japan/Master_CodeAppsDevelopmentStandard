@@ -45,7 +45,7 @@ AI Builder / 外部処理へ渡すための実装パターンまで扱う。
 > [!NOTE]
 > 本スキル内の例はインシデント管理サンプルなど **汎用題材** を題材としています。
 > リスト名・フロー名・列名は、あなたのプロジェクトのエンティティに読み替えてください。
-> パターン（Attachments + staging + Flow 中継 など）はそのまま適用できます。
+> Attachments + staging + Flow 中継は、PDF・添付ファイルを後続処理へ渡す必要があり、SharePoint を staging に採用できる場合の例です。添付のない画面や別のデータソースを採用した案件には一律に適用しません。
 
 ## サブリファレンス（必要に応じて参照）
 
@@ -133,12 +133,14 @@ Dataverse 依存、connection reference、flows を含む案件では **solution
 
 詳細は [ALM and import options](references/alm-and-import-options.md) を参照する。
 
-## 核心方針: 添付・AI 連携は Flow 中継に寄せる
+## PDF・添付ファイルを AI / 外部処理へ渡す場合: Flow 中継を検討する
+
+> **適用条件**: 添付の保存先として SharePoint を利用でき、フローを含めた接続・ライセンス・費用が承認された場合の構成例。添付ファイルを扱わないアプリや、既存の接続方式で要件を満たせる場合に追加する必須工程ではない。
 
 ```
-★ 最重要原則
+この条件での推奨パターン
 
-Canvas から AI Builder / Copilot Studio / 外部 API を「直接」叩かない。
+Canvas から AI Builder / Copilot Studio / 外部 API へ PDF・添付を直接渡す前に、入力形式・認証・サイズ上限を確認する。
   → 要求形式・認証差分で不安定になりやすい
 
 代わりに Power Automate を中継にする:
@@ -155,13 +157,13 @@ Canvas から AI Builder / Copilot Studio / 外部 API を「直接」叩かな�
 
 ## 前提: 設計フェーズ完了後に実装に入る（必須）
 
-**このスキルでアプリを組む前に、画面構成とデータフロー（Canvas → staging → Flow → 後続処理）を
-ユーザーに提示し、承認を得ていること。**
+**このスキルでアプリを組む前に、要件に合う画面構成・データフローをユーザーに提示し、承認を得ていること。**
+添付ファイルを扱わない場合は不要な staging や Flow を設計に含めず、添付・外部処理などの要件がある場合に限って該当パターンを検討する。
 
 ```
 ① architecture スキルで UI 方式候補を比較し、Canvas App 採用をユーザーに確認
-② [設計パターン](references/design-patterns.md) を読み、添付フロー・staging・Flow 中継を設計
-③ ユーザーに設計を提示し、「この設計で進めてよいですか？」と承認を得る
+② 要件に応じて [設計パターン](references/design-patterns.md) を参照し、必要なデータフローを設計
+③ 実際に採用する画面・データソース・連携だけをユーザーに提示し、承認を得る
 ④ 承認後、このスキルに従って実装・MCP + coauthoring・必要時のみ import / package・UI 調整を行う
 ```
 
@@ -209,18 +211,17 @@ Canvas App で進める前に、UI 実装方式を確認させてください。
   - `.NET 10 SDK` を確認
   - `/configure-canvas-mcp` で接続する
   - coauthoring を有効にした Designer タブを開いたまま維持する
-3. PDF / 添付要件がある場合は SharePoint staging リストを用意する
-4. Canvas に Edit Form + Attachments を配置し DataSource を staging にする
-  - Item は Defaults(<ListName>)
-  - 添付がある場合のみ SubmitForm
-  - OnSuccess で後続ロジック / Flow を呼ぶ
-5. Power Automate フロー（PowerApps V2 トリガー）を中継として作成する
-  - staging item ID を受け取り GetItemAttachments / GetAttachmentContent
-  - AI Builder（定義済みパラメータのみ）や外部処理へ渡す
+3. PDF / 添付を扱い、SharePoint staging が適合する場合に限り staging リストを用意する
+4. 添付 UI が要件に含まれる場合は Canvas に Edit Form + Attachments を配置する
+  - staging を使う場合は DataSource を staging にし、Item は Defaults(<ListName>) とする
+  - 添付を保存した後に限り SubmitForm / OnSuccess から後続処理を呼ぶ
+5. 要件上 Flow が必要な場合に作成する（PowerApps V2 トリガーは Canvas から呼び出す構成の候補）
+  - staging を使う場合は item ID を受け取り添付を取得する
+  - AI Builder や外部処理を使う場合は、対象の入力形式・認証・ライセンス条件を確認する
 6. `sync_canvas` / `compile_canvas` で反映し、Designer で Save / Publish する
 7. Git Integration を使う案件では publish 後の `pa.yaml` を履歴管理する
 8. single app / package は必要時のみ export / import する
-9. Attachments UI 崩れや coauthoring の制約を確認し、Designer で最終確認する
+9. Attachments control を使う場合は UI 崩れを確認し、coauthoring の制約とあわせて Designer で最終確認する
 ```
 
 ## ドキュメント化の指針

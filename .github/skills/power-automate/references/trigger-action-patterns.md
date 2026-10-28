@@ -639,8 +639,8 @@ Teams の 1:1 チャットで Flow bot からユーザーにメッセージを�
   ❌ body/recipient/groupId, body/recipient/channelId はチャネル用 → 1:1 チャットでは使わない
   ✅ host では connection キーを使用（connectionName ではない）
   ✅ authentication パラメータは不要（connection キー使用時）
-  ✅ デプロイは Flow API（https://api.flow.microsoft.com）経由を推奨
-  ❌ Dataverse workflows テーブルへの直接 INSERT では接続認証不良が起きやすい
+  ✅ Teams 1:1 Chat with Flow bot パターンでは Flow API 経由を検討
+  ❌ このパターンでは Dataverse workflows テーブルへの直接 INSERT で接続認証不良が起きた事例あり（他のクラウドフロー全般の規則ではない）
 ```
 
 ```python
@@ -697,7 +697,7 @@ connectionReferences での登録:
 ✅ デプロイ方法:
   Flow API（https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/{env_id}/flows?api-version=2016-11-01）
   のように、環境 ID + api-version を含むエンドポイントでフローを作成・更新する。
-  Dataverse workflows テーブルではなく Flow API を使うことで接続認証が正しく構成される。
+  この Teams 1:1 パターンでは、接続認証不良が起きた Dataverse workflows 直接 INSERT の代わりに Flow API 経路を検討し、接続と実行結果を検証する。
 ```
 
 ### 接続 ID はハードコード禁止（重要）

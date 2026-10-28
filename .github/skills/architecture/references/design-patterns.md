@@ -37,7 +37,7 @@
 
 **使うスキル**: `copilot-studio`
 
-### パターン C: イベント駆動 AI 処理（トリガー + エージェント）
+### パターン C: イベント駆動 AI 処理（例外候補・トリガー + エージェント）
 
 ```
 [メール受信 / スケジュール]
@@ -51,7 +51,7 @@
 
 **使うスキル**: `copilot-studio`（[trigger.md](../../copilot-studio/references/trigger.md) を参照）
 
-### パターン D: 定期レポート配信
+### パターン D: 定期レポート配信（例外候補）
 
 ```
 [Power Automate: Recurrence トリガー]
@@ -59,7 +59,9 @@
 [Copilot Studio] → RSS/Web 検索 → レポート生成 → メール送信
 ```
 
-**使うスキル**: `copilot-studio`（[market-research-report.md](../../copilot-studio/references/market-research-report.md) を参照）
+**使うスキル**: `copilot-studio`（[market-research-report.md](../../copilot-studio/references/market-research-report.md) はニュース配信案件の実装例）
+
+> **パターン C・D の採用条件**: このパッケージの標準案ではない。まずエージェントを呼び出さない構成を検討し、採用前にフロー・エージェントそれぞれのライセンスと Copilot Credits、実行主体、重要経路の実現可能性を [ライセンス確認ルール](../../standard/references/license-requirements.md#1-基本方針) で判定して、例外案としてユーザー承認を得る。クラウドフロー起点の条件をエージェントフローへ一般化しない。
 
 ### パターン E: 追加条件を要する拡張業務システム
 

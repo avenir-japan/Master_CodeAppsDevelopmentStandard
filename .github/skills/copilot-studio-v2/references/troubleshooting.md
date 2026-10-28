@@ -11,7 +11,7 @@
 | `undeclared property 'parentbotcomponentid'` | 親ナビ名が誤り | `ParentBotComponentId`（Pascalケース）を使う |
 | `bot $select` で 400 | 新アーキに存在しない列を指定 | 全列取得してから必要列をフィルタ |
 | `0x80040265`（bots 更新不可） | PATCH に `name` 列を含めていない | アイコン等の PATCH でも `name` を同送 |
-| **UI の Model が「廃止されたモデル」になる** | `agentSettings.model.series` に旧命名（`Sonnet46` / `Sonnet5` / `Opus5`）を指定した | ベンダーのモデル ID 形式（例 `claude-opus-5`）を指定する。既存エージェントは `python set_model.py claude-opus-5` → `publish_agent.py`（[model-series.md](model-series.md)） |
+| **UI の Model が「廃止されたモデル」になる** | `agentSettings.model.series` に旧命名（`Sonnet46` / `Sonnet5` / `Opus5`）を指定した | 現在利用可能なモデルと設定方法を Copilot Studio UI と公式情報で確認し、対象エージェントで変更後に再公開・動作確認する。未同梱のスクリプトや参照先を前提にしない |
 | `Teams channel must be enabled`（set_app_details.py が 404 / ErrorCode 7513） | Teams + Microsoft 365 チャネルが未有効 | Copilot Studio UI の「チャネル」で Teams + Microsoft 365 を有効化してから再実行する |
 | 公開時 `1 missing connection reference` | MCP サーバー追加後に接続参照が正しくバインドされていない | 対象 MCP サーバーを UI から削除→再追加→再公開（references/mcp-servers.md） |
 | 公開後も MCP がエラー | UI の「確認(Confirm)」未実施 | UI で MCP サーバーを **Confirm**（再公開だけでは消えないことがある） |

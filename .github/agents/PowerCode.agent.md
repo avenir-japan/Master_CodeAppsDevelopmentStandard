@@ -23,7 +23,7 @@ Power Platform コードファースト開発エキスパート。
 | 仕様書変換         | .github/skills/spec-to-markdown/SKILL.md |
 | 仕様統合           | .github/skills/spec-builder/SKILL.md     |
 | Power Automate     | .github/skills/power-automate/SKILL.md   |
-| Copilot Studio     | .github/skills/copilot-studio/SKILL.md   |
+| Copilot Studio     | .github/skills/architecture/SKILL.md で v1 / v2 を選択し、.github/skills/copilot-studio/SKILL.md または .github/skills/copilot-studio-v2/SKILL.md を読む |
 | AI Builder         | .github/skills/ai-builder/SKILL.md       |
 | Generative Page    | .github/skills/generative-page/SKILL.md  |
 | モデル駆動型アプリ | .github/skills/model-driven-app/SKILL.md |
