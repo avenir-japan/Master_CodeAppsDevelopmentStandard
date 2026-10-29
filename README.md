@@ -197,7 +197,7 @@ npm run setup
 
 - Python 未検出: Python 3.10+ を導入して `python --version` または `py -3 --version` を通す
 - pip 未検出: `python -m ensurepip --upgrade`（または `py -3 -m ensurepip --upgrade`）
-- `pac` 未検出: `npm install -g @microsoft/power-apps-cli` 後、`pac auth create --environment {ENVIRONMENT_ID}`
+- `pac` 未検出: VS Code の Power Platform Tools 拡張機能、または `dotnet tool install --global Microsoft.PowerApps.CLI.Tool` で PAC CLI を導入する。新しいターミナルで `pac help` を確認後、`pac auth create --environment {ENVIRONMENT_ID}` を実行する（npm の `@microsoft/power-apps-cli` は別のツール）
 - `npx power-apps` 未検出: `npm install` を再実行し `@microsoft/power-apps` 依存を確認
 
 ---

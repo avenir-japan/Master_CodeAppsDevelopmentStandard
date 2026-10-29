@@ -236,7 +236,7 @@ PUBLISHER_PREFIX=geek
 | Node.js (LTS)                 | Code Apps ビルド    | v18.x / v20.x                                |
 | Python 3.10+                  | 自動化スクリプト    | Dataverse SDK 利用                           |
 | pip                           | Python 依存導入     | `python -m ensurepip --upgrade`              |
-| PAC CLI                       | Power Platform CLI  | `npm install -g @microsoft/power-apps-cli`   |
+| PAC CLI                       | Power Platform CLI  | Power Platform Tools 拡張機能、または `dotnet tool install --global Microsoft.PowerApps.CLI.Tool` |
 
 ### 2.1.1 リポジトリ同梱物と別途インストール物の切り分け
 
