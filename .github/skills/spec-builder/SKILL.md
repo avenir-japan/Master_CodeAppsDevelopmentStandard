@@ -1,10 +1,13 @@
 ---
 name: spec-builder
-description: "office ドキュメント・画像などの一次情報から、anthropics/skills（markdown 化）と agent-ocr（画像OCR）を使って /spec/output/docs に統合された要件定義書一式（仕様書）を作成する。"
+description: "M365 Copilot・Copilot Cowork・VS Code GitHub Copilot から対話で要件を整理し、案件に必要な SPEC.md と開発入力ファイルを作成する。Office・画像資料がある場合は任意の変換工程も扱う。"
 category: ai
-argument-hint: "[省略可: /path/to/specs — 省略時は spec/input/ を使用]"
+argument-hint: "[省略可: 変換する資料のパス — 変換時の既定は spec/input/]"
 user-invocable: true
 triggers:
+  - "要件ディスカバリー"
+  - "要件整理"
+  - "SPEC.md 作成"
   - "anthropics/skills"
   - "仕様書作成"
   - "仕様書変換"
@@ -17,12 +20,21 @@ triggers:
   - "画像をOCR"
 ---
 
-# 仕様書作成スキル（一次情報 → 要件定義書）
+# 仕様書作成スキル
 
-office ドキュメント（PDF / PowerPoint / Excel / Word など）は **anthropics/skills** で読み取り、  
-画像ファイル（PNG/JPG 等）は **agent-ocr** で OCR する。
+## 共通の入口
 
-## フォルダ構造
+1. M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれから始めても、[要件ディスカバリー](references/requirements-discovery.md) に従い、目的・制約・未決事項と必要な開発入力を対話で決める。
+2. 合意した案件固有の `SPEC.md` を中心に作成し、詳細文書は必要な場合だけ分割する。単一文書の案件に索引や固定の文書セットを要求しない。
+3. M365 Copilot・Copilot Cowork で作成した完成済み Markdown は人が案件リポジトリへ配置する。VS Code GitHub Copilot は案件リポジトリへ直接作成できる。
+4. Office・画像などの元資料を変換する必要がある場合に限り、以下の変換フローを利用する。変換中の staging と `spec/output/docs/` は確定した案件の開発入力とは区別し、内容を確認して必要なファイルへ統合する。
+
+## 任意: 資料変換フロー
+
+Office ドキュメント（PDF / PowerPoint / Excel / Word など）は **anthropics/skills** で読み取り、
+画像ファイル（PNG/JPG 等）は **agent-ocr** で OCR する。このフローが作る 5 文書は変換用の出力であり、全案件に要求する開発入力ファイルの構成ではない。
+
+## 変換ルートのフォルダ構造
 
 ```
 spec/                          ← スキル専用ディレクトリ
@@ -76,7 +88,7 @@ spec/                          ← スキル専用ディレクトリ
                                          └── test-requirements.md
 ```
 
-## 基本フロー
+## 変換ルートの基本フロー
 
 1. `scripts/convert_documents.py` で input 配下を走査する
    - `spec/input/` に変換対象がなければ、ワークスペース・フォルダ全体をスキャンして変換候補ファイルの有無を確認し、見つかった場合は一覧を提示する
@@ -96,6 +108,8 @@ spec/                          ← スキル専用ディレクトリ
    - 全件完了時は既存 `spec/output/docs/` を参照して開発を継続
 
 `pending_skills.json` と仮の staging を作成した段階では、本文の抽出は未完了。ここで処理が終わる場合は、準備済みの成果物、未完了の抽出・統合工程、次に行う操作を分けて報告する。
+
+変換スクリプトは新しい資料を処理した場合や5文書が揃っていない場合、`spec/output/docs/` の同名ファイルを書き直す。手で確定した要件の正本をこの出力先に置かず、[要件ディスカバリー](references/requirements-discovery.md) で合意した案件の開発入力へ確認済みの内容だけを反映する。
 
 ## staging → docs 統合フロー
 
@@ -165,7 +179,7 @@ staging の変換完了後、以下の手順で docs を更新する。
 ### design-requirements.md
 
 > ★ 全体構成・コンポーネント選定・構築フェーズは [architecture スキル](../architecture/SKILL.md) を正とする。
-> 本ドキュメントには architecture スキルの判断フロー・[設計アウトプットテンプレート](../architecture/references/design-patterns.md#8-設計アウトプットテンプレート)で確定した結果を転記する。
+> 本ドキュメントには architecture スキルの判断フロー・[設計アウトプットテンプレート](../architecture/references/design-patterns.md)で確定した結果を転記する。
 
 - 事実と出典、未確認事項、To-Be 業務フローと役割・承認境界、KPI 仮説・測定方法、推奨案と代替案を区別して提示し、採用の承認結果を記録する
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）

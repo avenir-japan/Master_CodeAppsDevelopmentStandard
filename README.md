@@ -108,7 +108,7 @@ python .github/skills/standard/scripts/setup_environment.py --auth-only
 
 Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の作成と `requirements.txt` の導入まで自動で試行します。未導入ツールがある場合は、次に実行すべきコマンドを表示します。
 
-セットアップ後は、既存資料を保持したまま [仕様書変換](./.github/skills/spec-to-markdown/SKILL.md) で根拠と未確認事項を整理し、[要件ディスカバリー](./.github/skills/standard/references/requirements-discovery.md)で案件固有の SPEC など必要な開発入力を合意します。[architecture](./.github/skills/architecture/SKILL.md) で Teams / Microsoft 365 Copilot を起点に構成案と代替案、技術・ライセンス・Credits の実現可能性を確認し、**設計提示とユーザー承認後**に実装します。Code Apps や Dataverse を導入の既定前提にはしません。
+セットアップ後は、M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれからでも [要件ディスカバリー](./.github/skills/spec-builder/references/requirements-discovery.md)を開始し、案件固有の SPEC と必要な開発入力を合意します。既存の Office・PDF 等の変換が必要な場合は、原資料を保持したまま [仕様書変換](./.github/skills/spec-to-markdown/SKILL.md) を利用します。[architecture](./.github/skills/architecture/SKILL.md) で Teams / Microsoft 365 Copilot を起点に構成案と代替案、技術・ライセンス・Credits の実現可能性を確認し、**設計提示とユーザー承認後**に実装します。Code Apps や Dataverse を導入の既定前提にはしません。
 
 ---
 
@@ -244,20 +244,22 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 ## 案件開発の進め方（Copilot 運用）
 
 - GitHub Copilot の参照方針：[.github/copilot-instructions.md](./.github/copilot-instructions.md)
-- 要件ディスカバリーと生成物一式の作成（M365 Copilot／Copilot Cowork 用）：
-  [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
+- 要件ディスカバリーと開発入力ファイルの作成（M365 Copilot／Copilot Cowork／VS Code GitHub Copilot 共通）：
+  [.github/skills/spec-builder/references/requirements-discovery.md](./.github/skills/spec-builder/references/requirements-discovery.md)
 
 ### M365 Copilot／Copilot Cowork で要件整理を開始する
 
-前提: 管理者が展開した githubmcp に各自の GitHub アカウントで接続済みであること。Copilot Chat・Copilot Cowork からはリポジトリを読むだけにし、変更は VS Code の GitHub Copilot で行います。
+前提: 管理者が展開した githubmcp に各自の GitHub アカウントで接続済みであること。Copilot Chat・Copilot Cowork からはリポジトリを読むだけにし、完成した Markdown は人が VS Code またはローカルのファイル操作で案件リポジトリへ配置します。
 
 1. 本リポジトリを参照対象として指定する。
-2. 「要件ディスカバリーと生成物一式の作成」の実際のファイルパス
-   [.github/skills/standard/references/requirements-discovery.md](./.github/skills/standard/references/requirements-discovery.md)
+2. 「要件ディスカバリーと開発入力ファイルの作成」の実際のファイルパス
+   [.github/skills/spec-builder/references/requirements-discovery.md](./.github/skills/spec-builder/references/requirements-discovery.md)
    を指定し、その手順に従って要件整理を進めるよう依頼する。
 3. 目的・現状・制約・構成を 1 問ずつ確認する。
 4. 構成が確定した後、必要な開発入力ファイルの候補を提示させる。
-5. 作成対象について合意した後に、開発入力ファイル一式を作成する。
+5. 作成対象について合意した後に、完成した Markdown を出力し、人が案件リポジトリへ配置する。
+
+VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意した `SPEC.md` と必要な詳細文書を案件リポジトリへ直接作成します。単一文書なら索引や追加の文書セットは不要です。
 
 ---
 
@@ -283,7 +285,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 
 | やりたいこと                          | 最初に読む場所                                                                                                                                                                                                                        |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| VS Code・Copilot を初回設定したい      | [VS Code・Copilot 環境構築](./.github/skills/standard/references/vscode-copilot-setup.md)                                                                                                                                             |
+| VS Code・Copilot を初回設定したい     | [VS Code・Copilot 環境構築](./.github/skills/standard/references/vscode-copilot-setup.md)                                                                                                                                             |
 | 何から始めるか決めたい                | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
 | 仕様書から要件を整理したい            | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
 | Dataverse のテーブル設計から始めたい  | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |

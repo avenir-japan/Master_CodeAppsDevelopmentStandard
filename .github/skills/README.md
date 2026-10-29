@@ -103,11 +103,11 @@ triggers: # スキル発動条件キーワード（必須）
 
 ### automation — 自動化
 
-| スキル                                          | 説明                                                                                                      |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| スキル                                          | 説明                                                                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [copilot-studio](copilot-studio/SKILL.md)       | 既存アーキテクチャ（v1）のエージェントを構築・運用する。生成オーケストレーションは利用権を確認して適用する。 |
-| [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。単独利用時の判断基準。 |
-| [power-automate](power-automate/SKILL.md)       | Power Automate クラウドフローをソリューション対応で作成・デプロイする。                                   |
+| [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。単独利用時の判断基準。    |
+| [power-automate](power-automate/SKILL.md)       | Power Automate クラウドフローをソリューション対応で作成・デプロイする。                                      |
 
 ### ai — AI / プロンプト
 
@@ -115,7 +115,7 @@ triggers: # スキル発動条件キーワード（必須）
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | [ai-builder](ai-builder/SKILL.md)             | AI Builder の AI プロンプトを作成し、エージェントのツールとして組み込む。                                      |
 | [spec-to-markdown](spec-to-markdown/SKILL.md) | PDF・PowerPoint・Excel 等の仕様書を markdown 化し、Power Platform 開発向けの factsheet / document を整理する。 |
-| [spec-builder](spec-builder/SKILL.md)         | 仕様書・画像を staging 変換し、要件ドキュメント一式へ統合する。                                                |
+| [spec-builder](spec-builder/SKILL.md)         | 3 つの入口で要件を対話整理し、案件の開発入力を作成する。必要な場合は資料変換も扱う。                           |
 
 ---
 
@@ -125,12 +125,12 @@ triggers: # スキル発動条件キーワード（必須）
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 何から始めるか決めたい                        | [architecture](architecture/SKILL.md)                                                                                                                                                                                                                               |
 | 既存仕様書を整理して要件化したい              | [spec-to-markdown](spec-to-markdown/SKILL.md)                                                                                                                                                                                                                       |
-| 仕様入力を要件文書へ自動統合したい            | [spec-builder](spec-builder/SKILL.md)                                                                                                                                                                                                                               |
+| 対話で要件を整理し開発入力を作りたい          | [spec-builder](spec-builder/SKILL.md)                                                                                                                                                                                                                               |
 | SDK や upstream skills の更新追従を確認したい | [standard](standard/SKILL.md)                                                                                                                                                                                                                                       |
 | Dataverse のテーブル・列・権限から固めたい    | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                                                                                                                          |
 | 画面 UI が本当に必要                          | [architecture](architecture/SKILL.md) で要否・利用条件を確認し、[canvas-app](canvas-app/SKILL.md) を基本案に検討。難しい場合のみ [code-apps](code-apps/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) を実現性・ライセンス・費用と承認を確認して代替検討 |
-| 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md) でフロー種別を確認。エージェント連携時は [architecture](architecture/SKILL.md) で方式・例外条件を判断する |
-| エージェントや AI ツールを作りたい            | [architecture](architecture/SKILL.md) で連携利用か単独利用かを判断し、[copilot-studio](copilot-studio/SKILL.md)（v1）または [copilot-studio-v2](copilot-studio-v2/SKILL.md)（v2）を選ぶ。AI Builder は要件・ライセンス確認後の候補 |
+| 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md) でフロー種別を確認。エージェント連携時は [architecture](architecture/SKILL.md) で方式・例外条件を判断する                                                                                                                 |
+| エージェントや AI ツールを作りたい            | [architecture](architecture/SKILL.md) で連携利用か単独利用かを判断し、[copilot-studio](copilot-studio/SKILL.md)（v1）または [copilot-studio-v2](copilot-studio-v2/SKILL.md)（v2）を選ぶ。AI Builder は要件・ライセンス確認後の候補                                  |
 
 ---
 
