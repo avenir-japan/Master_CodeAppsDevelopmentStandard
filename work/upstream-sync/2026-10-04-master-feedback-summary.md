@@ -18,7 +18,7 @@
 - 開発段階、PoC / MVP の仮説・成功条件・対象外、重要経路の入力形式・最大規模・利用条件を確認する。欠けた依存資料や競合する正本候補は、判断への影響と確認先を未決事項にし、未確定内容を推測で補わない。
 - 資料の出所・確定状況・矛盾と変換結果を記録する。個別ファイルの Markdown 化や staging への配置だけを、統合された要件定義書一式の完成とは扱わない。PoC / MVP の検証範囲と未検証範囲を区別して引き渡す。
 
-正本: [要件確認](../../.github/skills/standard/references/requirements-discovery.md)、[仕様統合](../../.github/skills/spec-builder/SKILL.md)、[変換ガイド](../../.github/skills/spec-builder/references/conversion-guide.md)、[変換スクリプト](../../.github/skills/spec-builder/scripts/convert_documents.py)、[資料の Markdown 化](../../.github/skills/spec-to-markdown/SKILL.md)。
+正本: [要件確認](../../.github/skills/spec-builder/references/requirements-discovery.md)、[仕様統合](../../.github/skills/spec-builder/SKILL.md)、[変換ガイド](../../.github/skills/spec-builder/references/conversion-guide.md)、[変換スクリプト](../../.github/skills/spec-builder/scripts/convert_documents.py)、[資料の Markdown 化](../../.github/skills/spec-to-markdown/SKILL.md)。
 
 ## エージェントの評価・納品
 
