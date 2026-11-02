@@ -23,6 +23,28 @@
 - Copilot Studio に紐づく自律トリガー（エージェント側のイベント等のトリガーで動くフロー）は Copilot Credits を消費する。エージェントから呼ばれるトリガー以外のエージェントフローも課金対象になる（[Billing rates and management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)、確認日: 2026-10-27）。
 - Power Automate のクラウドフローから Copilot Studio のエージェントを呼び出す自律型について、Microsoft サポートへの問い合わせ（SR、2026-10）で、エージェントが Standard ハーネスで作成され、フローで使う Copilot Studio コネクタの接続所有者に Microsoft 365 Copilot ライセンスが割り当てられ、社内の従業員向けでフェアユースの範囲内なら、エージェント側の処理はトリガーの種類によらず Copilot Credits を消費しないと確認済み。**この接続所有者・クラウドフロー起点の条件を裏付ける公開文書は未確認**だが、SR 回答を根拠として扱う。自律型の構成・実装はこのパッケージの標準スコープや既定提案に含めず、標準案で要件を満たせない場合に検討する例外的な代替手段とする。採用時は実現可能性ゲートの判定表に SR 回答を根拠として各条件の適合を記録し、条件を満たす場合に限ってエージェント側の Credits 非消費を判定する。条件外や適合を確認できない場合は非消費と推定しない。フロー側のライセンス・費用は別途判定する（[Copilot Studio の課金と脚注](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates)、[制限と Power Platform 要求](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)）。
 
+### 顧客テナントでの公開後実行: 利用権・容量・請求を分ける
+
+公開後に利用者が実行できるかは、対象の **Standard ハーネス、Teams／Microsoft 365 Copilot での認証済み社内利用、Microsoft 365 Copilot ライセンス、対象の AI 機能と呼び出し経路** を案件ごとに照合して判定する。以下は Microsoft Learn（2026-10-30 確認）と依頼者から提供された 2026-10 のサポート回答要旨に基づく。SR の回答本文は確認していない。匿名・外部利用者、他チャネル、他ハーネス、一般のクラウドフローには SR の結論を拡張しない。
+
+| 判定する軸 | 納品前に確認すること |
+| --- | --- |
+| 1. 利用権・追加ライセンス | 作成者・認証利用者・接続所有者・実行主体と機能ごとの利用権。AI Builder クレジットや Power Automate Premium が不要という SR 結論は対象構成に限定する |
+| 2. 対象環境で利用可能な容量 | 購入済み Copilot Studio 容量の有無と、対象環境への割り当て、テナント未割り当てプールの利用設定、または環境に紐づけた従量課金プランを確認する。明示割り当てだけを唯一の方法としない |
+| 3. 使用量の計測・表示 | 管理センターで公開後の対象実行の使用量・表示条件を確認する。表示された利用量をそのまま請求・控除量とみなさない |
+| 4. 購入済み容量からの控除 | 認証済み M365 Copilot 利用者の対象実行が No charge となる表・脚注・前提と、該当しない経路を区別する。容量が必要でも控除ゼロとなる条件がある |
+| 5. 従量課金 | 対象実行が No charge か、環境の従量課金プランで請求され得るかを判定する。従量課金を使用するならプランと対象環境の紐付けを確認する |
+| 6. 容量不足時の実行可否 | テナントに容量なし／容量があっても当該環境で利用不可を分け、公開後に対象 AI ツール・プロンプト・モデルが実行可能か確認する。非課金と実行可能は別判定とする |
+
+[Copilot Studio の請求レートと脚注](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)は Standard ハーネスにおける認証済み Microsoft 365 Copilot 利用者の対象 B2E 実行を No charge とする一方、エージェントフローは **「エージェントがフローを呼び出したとき」トリガー**の条件を明記し、別トリガーへ一般化しない。[容量管理](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-copilot-credits-capacity)には未割り当てテナント容量、環境割り当て、従量課金、超過時の制御が別々に記載されている。No charge と容量不足時の実行可否は別々に判定し、案件の構成・環境で照合する。エージェントのテスト、フローのテスト、プロンプトの単体テストが成功しても、**顧客テナントでの公開後実行や非課金の根拠にはならない**。
+
+**サポート回答要旨（依頼者提供、回答時期: 2026-10、メール本文・実環境値は持ち込まない）:**
+
+- **SR 2610090060002798**: 前提を満たす対象の AI ツール／AI Builder 機能には対象環境で利用可能な Copilot Studio 容量が必要。対象実行は購入済み容量から控除されず従量課金も発生しないとの回答。エージェントフローは「エージェントがフローを呼び出したとき」トリガー、フェアユース内が対象。対象構成では AI Builder クレジット、Power Automate Premium は不要との回答。前払い容量の環境への明示割り当ては必須とは限らず、未割り当てテナント容量の利用設定を確認。従量課金利用時は環境へのプラン紐付けが必要。
+- **SR 2610140060001409**: テナントに容量がない場合と、容量が当該環境で利用できない場合について、対象前提ではエージェントの作成・公開、固定応答、生成回答、エージェントから呼ぶフローの通常アクションは動作する一方、トピック内／直接ツールとしてのプロンプトとフロー内の AI Builder 機能は使えないとの回答。設定・環境で挙動が異なり得るという留保があり、公開資料が全機能について同じ分岐を明記しているとは扱わない。
+
+上記二つの SR は **Standard ハーネス／M365 Copilot ライセンスを持つ社内利用者による Teams／Microsoft 365 Copilot での認証済み利用／回答で扱った対象機能・経路** に限り、他チャネルには適用しない。[公式料金表](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)の No charge 表記は対象条件の控除・課金判定を裏付けるが、「No charge でも対象環境に利用可能な容量が必要」「容量不足時にどの機能が止まるか」という細かな機能別の結論は SR に依存する。公式の[容量管理](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-copilot-credits-capacity)には超過時の一般的な停止条件やエージェントフローの例外もあるため、これと SR の『容量なし』の個別回答を同じ条件の規則として統合しない。対象環境で相違が出た場合は条件・確認日・実測結果を残し、未確認として管理者と再照会する。
+
 ## 2. このパッケージで先に確認すること
 
 最低限、次を確認します。

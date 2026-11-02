@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """
 News agent 追加開発 — 市場インサイト Dataverse テーブル作成 + エージェント Instructions 更新
 

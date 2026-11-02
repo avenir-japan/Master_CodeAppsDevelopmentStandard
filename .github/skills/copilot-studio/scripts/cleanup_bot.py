@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """一時スクリプト: 壊れた Bot を削除する"""
 import os, sys, requests
 _this_dir = os.path.dirname(os.path.abspath(__file__))

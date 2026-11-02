@@ -12,7 +12,7 @@ McpTool + 接続参照）で自動追加する手順を提供していたが、�
 - `.github/skills/standard/scripts/check_mcp_client.py studio` で、Copilot Studio 用 MCP クライアントが有効であることを事前確認すること。
 - 対象コネクタ（例: Microsoft Dataverse、Work IQ OneDrive）の **Connected な接続**が
   環境に存在していること。無ければ make.powerautomate.com で一度作成・承認する。
-- エージェント（cliagent）が `scripts/create_agent.py` 等で作成済みであること。
+- エージェント（cliagent）が [手動作成チェックリスト](manual-creation-checklist.md)に従って UI で作成済みであること。このマスターに自動作成スクリプトは同梱されていない。
 
 ## 手順（UI）
 
@@ -26,9 +26,8 @@ McpTool + 接続参照）で自動追加する手順を提供していたが、�
 4. 追加する MCP サーバー（例: Microsoft Dataverse MCP サーバー、Work IQ OneDrive）を選択する。
 5. 接続が未作成の場合は、画面の案内に従って接続を作成・サインインする。
 6. 追加後、対象サーバーを開き、接続が選択されていることを確認して **確認(Confirm)** を押す。
-   - これは Dataverse レコードを変更しない（Confirm 前後でレコード差分なし）。
-     オーサリング/ランタイム **セッション側で接続を再バインドする**動作。
-7. 再公開する（`scripts/publish_agent.py` または UI の「公開」）。
+   - 接続状態を UI で確認する。内部の更新内容を固定的に仮定せず、確認後に対象ツールの実行結果を検証する。
+7. 接続先・対象チャネル・公開範囲を確認してから、Copilot Studio UI の「公開」を実行する。公開後に対象チャネルで実際のツール呼び出しを確認する。
 
 > 自動化メモ: 上記のブラウザ操作は VS Code 統合ブラウザ（`open_browser_page` / `read_page` / `click_element` /
 > `type_in_page`）で自動化できる（Playwright MCP サーバー・Playwright 単体ブラウザのインストール・起動は行わない
@@ -45,20 +44,15 @@ McpTool + 接続参照）で自動追加する手順を提供していたが、�
 - スキル入れ替え時の削除は `name eq '<SKILL_NAME>' and componenttype eq 9` で**同名スキル限定**。
   `componenttype eq 9` だけで一括削除すると **MCP ツールも巻き添えで消える**。
 
-運用中エージェントの更新は [scripts/update_agent.py](../scripts/update_agent.py) を使う。
-更新の前後で MCP ツールの schemaname と接続参照をスナップショットして差分を表示し、
-消失を検知した場合は公開せずに異常終了する。
-
-実機検証: Instructions 更新 + スキル全ファイル再添付 + 再公開を行っても、
-Dataverse MCP の schemaname と `connectionReference` は同一のまま維持され、Confirm の再実行も不要だった。
+このマスターに `update_agent.py` は同梱されていない。運用中の変更は UI で対象エージェントを更新し、公開前に MCP ツールの接続参照と Confirm 状態が維持されているか確認する。API 更新を例外的に採る場合も、変更前後の MCP ツールと接続参照の差分を確認し、消失があれば公開しない。既存環境で維持された事例を、他の環境で Confirm が不要となる保証にはしない。
 
 ## 「確認(Confirm)」を押しても接続できない場合
 
 新しい Copilot Studio UI では、MCP サーバーの「確認(Confirm)」を押しても接続が完了しない
 （エラーが消えない）ケースがある。
 
-- 対象の MCP サーバーを一度 UI から**削除**し、再度手順どおりに**追加し直す**。
-- 再登録後は再公開が必要（`scripts/publish_agent.py` または UI の「公開」）。
+- 接続・権限を先に確認し、それでも解決しない場合は、既存の利用者への影響と復元方法を確認して承認を得たうえで対象の MCP サーバーだけを UI から削除・再追加する。
+- 再登録後は接続を確認し、Copilot Studio UI から再公開する。
 - 再登録後に Copilot Studio UI を開き直し、MCP サーバーが正常に表示されることを確認する。
   その後、UI で改めて「確認(Confirm)」を押すと接続が完了する。
 

@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """
 ニュースレポーター — スケジュールトリガーフローの検索・設定更新
 

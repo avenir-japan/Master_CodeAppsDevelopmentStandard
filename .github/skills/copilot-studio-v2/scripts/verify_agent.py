@@ -80,15 +80,21 @@ def main() -> None:
 
     print("\n--- filedata 読み取り検証 ---")
     ok = True
+    checked = 0
     for c in comps:
         if c["componenttype"] == 14:
+            checked += 1
             dl = sess.get(f"{API}/botcomponents({c['botcomponentid']})/filedata/$value")
             status = dl.status_code
             size = len(dl.content)
             print(f"  {c['name']:<24} status={status} size={size} bytes")
             if status != 200 or size == 0:
                 ok = False
-    print("\n" + ("✅ 検証 OK" if ok else "⚠️ 一部 filedata が読めません"))
+    if not checked:
+        print("  type=14 の filedata はありません（読み取り検証の対象外）")
+    print("\n" + ("✅ 設定の読み取り OK（公開・実行は未確認）" if ok else "❌ 一部 filedata が読めません"))
+    if not ok:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

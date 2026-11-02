@@ -299,19 +299,21 @@ conversationStarters:
 
 Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML メールテンプレートリファレンス](../../standard/references/html-email-template.md) を参照。
 
-## 構築手順
+## 構築手順（案件固有の履歴。現在は実行禁止）
+
+> `deploy_news_agent.py` と `deploy_news_flow.py` は起動時に停止する。下記は過去の設計記録であり、通常の構築・公開手順として実行しない。再利用には新案件の設計・影響確認・個別承認が必要。旧 `deploy_news_agent.py` は**中間公開を実行していた**ため「公開しない」は最終公開を指すにすぎない。
 
 ### Phase A: Copilot Studio エージェント構築
 
 **`copilot-studio` スキルに従う。** 以下はニュースエージェント固有の設定:
 
 1. Copilot Studio UI でエージェント作成（ソリューション内）
-2. `deploy_news_agent.py` でエージェント設定（公開はしない）:
+2. 【履歴のみ・実行禁止】旧 `deploy_news_agent.py` による設定（中間公開あり）:
    - GPT コンポーネント更新: Instructions + conversationStarters + **`gptCapabilities.webBrowsing: true`**
    - ConversationStart トピック: 挨拶メッセージ + quickReplies
    - アイコン設定（ PNG 3 サイズ）
    - チャネル構成（Teams / M365 Copilot）
-   - ★ エージェントの公開は行わない（中間公開のみ。最終公開はユーザーが手動で実施）
+   - ★ 中間公開は実行していた。最終公開のみユーザーが手動で実施する設計だった
 
 3. **ユーザーに UI で手動設定を依頼:**
 
@@ -322,7 +324,7 @@ Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML �
 - Recurrence トリガー追加（「トリガー」→「Recurrence」→ フローが自動作成される）
 - 接続の認証
 
-4. `deploy_news_flow.py` で自動作成されたフローを検索・更新:
+4. 【履歴のみ・実行禁止】旧 `deploy_news_flow.py` による自動作成フローの検索・更新:
    - ExecuteCopilot のプロンプト（業界・役割・関心事）を設定
    - スケジュール間隔を設定
 
@@ -330,7 +332,7 @@ Step5 で使用する HTML メールテンプレートの詳細仕様は [HTML �
    - Copilot Studio UI → 右上の「公開」ボタンをクリック
 
 ```
-★ 重要: 自動公開は行わない。
+★ 履歴上は中間公開を実行していた（公開操作なしではない）。
   ツール・トリガー・フロー設定を全て完了した後、ユーザーが手動で公開する。
   中途で公開すると、ツール未追加のまま Teams/Copilot に反映されるリスクがある。
 ```
@@ -466,11 +468,9 @@ def update_flow(flow, bot_schema):
 - 「トリガー」→「+ トリガーの追加」→「Recurrence」を選択
 - ★ フローが自動作成される
 
-#### Step 2: フローのプロンプト・スケジュール設定（スクリプト）
+#### Step 2: フローのプロンプト・スケジュール設定（旧スクリプト・実行禁止）
 
-```bash
-python ./deploy_news_flow.py <BOT_ID or URL>
-```
+旧 `deploy_news_flow.py` は無効化済み。以下は実行手順ではない。
 ````
 
 - 自動作成されたフローを検索
@@ -488,7 +488,7 @@ python ./deploy_news_flow.py <BOT_ID or URL>
    URL: `https://copilotstudio.microsoft.com/c2/tenants/{TENANT_ID}/environments/{ENV_ID}/bots/{BOT_SCHEMA}/channels/pva-studio/user-connections`
 2. 全ツール（RSS, Work IQ Mail MCP 等）の接続を作成・認証
 
-> **接続マネージャー URL は `deploy_news_agent.py` が自動生成して表示する。**
+> **履歴**: 旧 `deploy_news_agent.py` は接続マネージャー URL を表示していたが、現在は実行できない。
 > エージェントを実行する前に、ここで全接続を認証しておくこと。
 > 未認証の接続があるとエージェントがツールを呼び出せない。
 

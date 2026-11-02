@@ -1,5 +1,7 @@
 # Copilot Studio トリガーパターンリファレンス
 
+> 以下の API フロー定義は旧案件の構造を説明する履歴例で、通常の作成・デプロイ手順ではない。通常は [外部トリガーの UI 設定手順](trigger.md#基本方針-トリガーはすべて-copilot-studio-ui-で手動作成) を使う。
+
 ## トリガーパターン集
 
 ### パターン 1: メール受信 → エージェント起動
@@ -526,7 +528,7 @@ action = {
             },
             "parameters": {
                 "Copilot": bot_schema_name,
-                "body/message": "SharePoint に新しいファイルが作成されました。内容を確認してください。\n@{triggerBody()}",
+                "body/message": "SharePoint に新しいファイルが作成されました。プロパティ情報を確認してください。\n@{triggerBody()}",
             },
             "authentication": "@parameters('$authentication')",
         },
@@ -546,25 +548,16 @@ action = {
 | `dataset`  | SharePoint サイト URL              | `https://contoso.sharepoint.com/sites/demo` |
 | `table`    | ドキュメントライブラリの ID (GUID) | `{document-library-id}`      |
 
-#### SharePoint トリガーの 2 種類
+#### SharePoint の通常経路と旧例
 
-| 項目        | OnNewFile (Notification型)                                | GetOnNewFileItems (Polling型)                        |
-| ----------- | --------------------------------------------------------- | ---------------------------------------------------- |
-| operationId | `OnNewFile`                                               | `GetOnNewFileItems`                                  |
-| type        | `OpenApiConnectionNotification`                           | `OpenApiConnection`                                  |
-| recurrence  | **不要**                                                  | 必要（interval: 1, frequency: Minute）               |
-| 取得内容    | **ファイルコンテンツ（body）含む**                        | プロパティのみ（名前・パス・更新日等）               |
-| パラメータ  | `dataset` + `folderId`(フォルダパス) + `inferContentType` | `dataset` + `table`(ライブラリID)                    |
-| 用途        | AI 解析等でファイル内容が必要な場合                       | メタデータだけで十分な場合（Copilot トリガーで多い） |
-
-> **注意**: Copilot Studio トリガーではほとんどの場合 `GetOnNewFileItems`（Polling型）で十分。
-> ファイル内容を AI Builder 等で解析する場合のみ `OnNewFile`（Notification型）を使う。
+- **通常**: Copilot Studio UI で「ファイルが作成されたとき (プロパティのみ)」を選び、`GetOnNewFileItems` でファイル名などのメタデータを取得する。内容が必要な場合は、後続の SharePoint「ファイル コンテンツの取得」（`GetFileContent`）へトリガー出力の**ファイル識別子（Identifier）**を渡す。トリガー本文をファイル内容として扱わない。識別子の動的コンテンツと実ファイルの対応を UI と実行履歴で確認する。
+- **履歴のみ**: `OnNewFile`（旧 Notification 型）を使った旧フロー例は、この旧案件の記録として残す。Microsoft 公式コネクタ資料は廃止予定の操作が現存する一方、新しいソリューション／アプリでは使用しないよう強く推奨している。**廃止予定は全環境で利用不可という意味ではない**。現環境の使用可否を断定せず、通常経路に採用しない。[SharePoint コネクタ公式リファレンス](https://learn.microsoft.com/en-us/connectors/sharepointonline/) を参照。
 
 ユーザーからは以下をヒアリングする:
 
 - **SharePoint サイト URL**: ライブラリがあるサイトの URL
 - **ライブラリ名**: 監視対象のドキュメントライブラリ名（ライブラリ ID はフロー作成後に Power Automate UI で設定するか、SharePoint REST API で取得）
-- **ファイル内容が必要か**: AI 解析が必要 → OnNewFile、メタデータだけ → GetOnNewFileItems
+- **ファイル内容が必要か**: メタデータは `GetOnNewFileItems`、内容が必要なら続けて `GetFileContent` にトリガーの識別子を渡す。旧 `OnNewFile` を新規構築に選ばない
 
 ### パターン 6: OneDrive for Business ファイル作成 → エージェント起動
 

@@ -1,6 +1,6 @@
 """
-Power Automate フローデプロイスクリプト — SharePoint ドキュメント自動インシデント登録
-Dataverse workflows テーブル方式
+履歴用・実行不可: 旧 SharePoint OnNewFile に依存するインシデント登録例
+新規実装には GetOnNewFileItems（プロパティのみ）+ GetFileContent（Identifier）を使用する。
 
 SharePoint にファイルが追加されたら:
   1. ファイルコンテンツを取得
@@ -12,11 +12,7 @@ AI Builder は operationId: aibuilderpredict_customprompt を使用。
 （PerformBoundAction は InvalidOpenApiFlow でフロー有効化が失敗するため不可）
 connectionReferences は runtimeSource + connectionReferenceLogicalName 形式。
 
-使い方:
-  1. .env に DATAVERSE_URL, TENANT_ID を設定
-  2. 接続を事前作成: SharePoint, Dataverse
-     https://make.powerautomate.com/connections
-  3. python .github/skills/power-automate/scripts/deploy_flow_sp_incident_v2.py
+このファイルは検証済みの新規デプロイ経路ではない。直接実行は停止する。
 """
 
 import json
@@ -396,6 +392,10 @@ def build_clientdata(connections: dict, connref_dv: str, connref_sp: str) -> str
 # ── メイン ─────────────────────────────────────────────────
 
 def main():
+    raise SystemExit(
+        "Historical OnNewFile sample only; deployment disabled. "
+        "Rebuild from a UI-saved GetOnNewFileItems + GetFileContent definition."
+    )
     print("=" * 60)
     print("  Power Automate フローデプロイ（Dataverse workflows 方式）")
     print(f"  フロー名: {FLOW_DISPLAY_NAME}")

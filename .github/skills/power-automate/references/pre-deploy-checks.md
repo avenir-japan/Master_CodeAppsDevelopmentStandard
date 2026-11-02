@@ -14,6 +14,16 @@ python .github/skills/power-automate/scripts/validate_flow_definition.py path/to
 テーブル・列・Lookup は**検査対象外**であり、Dataverse を採用した案件でだけ別途確認する。
 静的検査は式の実行結果や、文字列リテラルが正しい Base64 かまでは判定しない。
 
+## 破壊的なサンプルデプロイ
+
+`deploy_flow.py`、`deploy_flow_create_notify.py`、`deploy_flow_sp_teams.py` は引数なしでは API に接続しない。
+新規作成の承認後に `--execute` を指定する。既存フローの置換は、既存定義の退避と
+呼び出し元・ワークフロー ID への依存の確認後に、出力で確認した ID を
+`--execute --replace-workflow-id <workflowid>` として指定する。同名複数件は実行を中止する。
+削除・再作成はべき等ではなく、削除後の失敗による欠損を自動回復しない。
+旧 `deploy_flow_sp_incident_v2.py` は履歴用で実行不可。新規 SharePoint 実装は
+プロパティトリガーと識別子によるコンテンツ取得を基に構築する。
+
 ## 次の確認ゲート
 
 1. 対象環境で接続参照が解決し、意図したソリューションに含まれるか確認する。

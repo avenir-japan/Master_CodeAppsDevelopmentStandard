@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """
 3つの問題を修正:
 1. フローを Flow API 経由で有効化

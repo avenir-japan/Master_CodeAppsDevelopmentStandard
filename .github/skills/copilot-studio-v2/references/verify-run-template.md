@@ -46,10 +46,13 @@ py -3 .github/skills/copilot-studio-v2/scripts/verify_agent.py --bot-id "0000000
 
 確認観点:
 
-- botcomponents の整合
-- type=14 filedata の読み取り可否
+- botcomponents の一覧と type=14 filedata の読み取り可否（実行・公開状態や接続の健全性までは判定しない）
 
-## 5. 失敗時の切り分け
+## 5. 採用経路の実行確認（対象環境での承認後）
+
+設計で選んだ Teams / Microsoft 365 Copilot チャネルから代表入力を送り、期待する応答と必要なツール・エージェントフローの入出力、接続・実行主体を確認する。公開後の利用権、容量、Credits の適用条件は [共通のライセンス確認ルール](../../standard/references/license-requirements.md)に沿って確認する。これらを実施できない場合は「設定の読み取り確認のみ、実行未確認」と記録し、公開後の動作を保証しない。
+
+## 6. 失敗時の切り分け
 
 - `AGENT_BOTID 未設定`:
   - 環境変数 `AGENT_BOTID` か `agent_botid.txt` を設定する

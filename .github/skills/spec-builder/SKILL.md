@@ -24,8 +24,8 @@ triggers:
 
 ## 共通の入口
 
-1. M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれから始めても、[要件ディスカバリー](references/requirements-discovery.md) に従い、目的・制約・未決事項と必要な開発入力を対話で決める。
-2. 合意した案件固有の `SPEC.md` を中心に作成し、詳細文書は必要な場合だけ分割する。単一文書の案件に索引や固定の文書セットを要求しない。
+1. M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれから始めても、[要件ディスカバリー](references/requirements-discovery.md) に従い、目的・制約・未決事項と必要な開発入力を対話で決める。代表入力・期待出力・制約から AI が技術的な論点を先回りして抽出し、顧客に決めてもらう事項と内部調査・設計・実機検証を分ける。
+2. 合意した案件固有の `SPEC.md` を中心に作成し、詳細文書は必要な場合だけ分割する。処理ロジック・起動／制御経路・製品機能の候補比較と判断状態は [architecture スキル](../architecture/SKILL.md) の構成判断へ引き継ぎ、単一文書の案件に索引や固定の文書セットを要求しない。
 3. M365 Copilot・Copilot Cowork で作成した完成済み Markdown は人が案件リポジトリへ配置する。VS Code GitHub Copilot は案件リポジトリへ直接作成できる。
 4. Office・画像などの元資料を変換する必要がある場合に限り、以下の変換フローを利用する。変換中の staging と `spec/output/docs/` は確定した案件の開発入力とは区別し、内容を確認して必要なファイルへ統合する。
 

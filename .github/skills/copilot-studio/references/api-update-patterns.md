@@ -1,6 +1,8 @@
 # Copilot Studio API 更新パターン
 
-## Agent Instructions の API 更新
+> **事例別の診断メモ**: 以下の `content` / `TopicV2` 更新例は特定の既存構成を調査するための履歴例であり、v1 の標準更新方式ではない。v1 では [SKILL.md の GPT コンポーネント／Instructions 手順](../SKILL.md#gpt-コンポーネントcomponenttype15の扱い)に従い、UI が作成した GPT コンポーネントの `data` / `GptComponentMetadata` を識別する。対象コンポーネントの種類と実際の保存フィールドを読み取り、両方式を混用しない。保存・読み戻し・公開・実行時反映は別々に確認する。以下のコードを未検証で実行しない。
+
+## Agent Instructions の API 更新（事例別）
 
 ### よくある問題
 

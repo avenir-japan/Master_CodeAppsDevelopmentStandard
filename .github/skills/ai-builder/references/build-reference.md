@@ -264,8 +264,9 @@ def _delete_model_and_configs(model_id):
 
 ### その他の制限
 
-- **Copilot Studio エージェントのツール**ではファイル入力は未対応 → Power Automate フロー経由
-- 非対応ファイル形式は OneDrive for Business `ConvertFile` で PDF 変換してから渡す
+- **エージェントへ直接追加したプロンプトツール**では画像・文書入力は未対応（[Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations)、2026-10-30 確認）。テキストのプロンプト利用全般にフローは不要
+- ファイル処理にはエージェントフロー／クラウドフロー経由等を比較し、入力とエージェント間の受け渡し・容量条件を経路別に確認する
+- 非対応ファイル形式は OneDrive for Business `ConvertFile` で PDF 変換する案等を検証する
 
 ## トラブルシューティング
 

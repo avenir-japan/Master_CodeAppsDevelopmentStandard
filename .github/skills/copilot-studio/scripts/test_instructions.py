@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """Bot configuration に instructions を直接設定してみるテスト"""
 import os, sys, json
 _this_dir = os.path.dirname(os.path.abspath(__file__))

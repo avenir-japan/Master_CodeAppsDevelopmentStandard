@@ -36,6 +36,7 @@ sys.path.insert(0, os.path.join(_this_dir, "..", "..", "standard", "scripts"))
 
 import requests
 from dotenv import load_dotenv
+from deployment_safety import check_existing_flows, deployment_args
 from auth_helper import (
     DATAVERSE_URL,
     get_session,
@@ -471,7 +472,11 @@ def build_clientdata(
 # ── メイン ─────────────────────────────────────────────────
 
 
-def main():
+def main(argv=None):
+    args = deployment_args(argv)
+    if not args.execute:
+        print("Dry-run: no API calls. --execute creates a flow; replacing one also requires --replace-workflow-id.")
+        return
     print("=" * 60)
     print("  Power Automate フローデプロイ（AI Builder 検証）")
     print(f"  フロー名: {FLOW_DISPLAY_NAME}")
@@ -480,6 +485,18 @@ def main():
 
     # Step 0: 環境 ID 解決
     env_id = resolve_environment_id()
+
+    # 接続参照の変更より前に既存フロー ID を確認する
+    print("\n=== 既存フロー事前確認 ===")
+    session = get_session()
+    r = session.get(
+        f"{API}/workflows?"
+        f"$filter=name eq '{FLOW_DISPLAY_NAME}' and category eq 5"
+        f"&$select=workflowid,name,statecode"
+    )
+    r.raise_for_status()
+    existing = r.json().get("value", [])
+    check_existing_flows(existing, args)
 
     # Step 1: 接続検索
     connections = find_connections(env_id)
@@ -511,30 +528,20 @@ def main():
         connection_id=connections["shared_onedriveforbusiness"],
     )
 
-    # Step 3: 既存フロー検索（べき等パターン）
-    print("\n=== Step 3: 既存フロー検索 ===")
-    session = get_session()
-    r = session.get(
-        f"{API}/workflows?"
-        f"$filter=name eq '{FLOW_DISPLAY_NAME}' and category eq 5"
-        f"&$select=workflowid,name,statecode"
-    )
-    r.raise_for_status()
-    existing = r.json().get("value", [])
+    # Step 3: 事前確認済みの既存フローを置換
+    check_existing_flows(existing, args)
 
     if existing:
         wf_id = existing[0]["workflowid"]
         print(f"  既存フロー発見: {wf_id}")
         print("  → 無効化 → 削除 → 再作成")
-        session.patch(
-            f"{API}/workflows({wf_id})",
-            json={"statecode": 0, "statuscode": 1},
-        )
-        rd = session.delete(f"{API}/workflows({wf_id})")
-        if rd.ok:
-            print(f"  削除完了: {wf_id}")
-        else:
-            print(f"  削除失敗 ({rd.status_code}): {rd.text[:300]}")
+        if existing[0]["statecode"] == 1:
+            session.patch(
+                f"{API}/workflows({wf_id})",
+                json={"statecode": 0, "statuscode": 1},
+            ).raise_for_status()
+        session.delete(f"{API}/workflows({wf_id})").raise_for_status()
+        print(f"  削除完了: {wf_id}")
 
     # Step 4: フロー作成
     print("\n=== Step 4: フロー作成 ===")

@@ -1,8 +1,8 @@
 """
 Copilot Studio エージェント設定スクリプト — サンプル実装（インシデント管理アシスタント）
 
-★ 本スクリプトはサンプル実装です。エージェント名・Instructions・推奨プロンプトをプロジェクトに合わせて書き換えてください。
-★ API ヘルパー、トピック削除、生成オーケストレーション有効化、PvaPublish のパターンは共通テンプレートとして再利用できます。
+★ 案件固有の履歴例。通常の構築手順として実行・流用しない。
+★ 実行する場合は対象 BOT_ID と公開・削除対象の明示承認が必須。既存 GPT コンポーネントは削除しない。
 
 Phase 3: UI で作成済みの Bot に対して設定を適用
   → カスタムトピック全削除 → 生成オーケストレーション有効化
@@ -11,7 +11,7 @@ Phase 3: UI で作成済みの Bot に対して設定を適用
 
 前提:
   - Copilot Studio UI でエージェントを事前に作成済み
-  - BOT_ID を .env または引数で指定
+  - BOT_ID を実行プロセスの環境変数に正確な GUID として指定
 
 注意:
   Dataverse bots テーブルに直接レコードを挿入しても PVA Bot Management Service に
@@ -20,8 +20,8 @@ Phase 3: UI で作成済みの Bot に対して設定を適用
 
 使い方:
   1. Copilot Studio UI でエージェントを作成
-  2. .env に BOT_ID=<作成した Bot のID> を追加
-  3. python .github/skills/copilot-studio/scripts/deploy_agent.py
+  2. 個別の Bot GUID、削除対象 GUID、公開を承認してから変更する
+  3. 実行プロセスに BOT_ID を指定。承認フラグなしの実行は認証前に停止する
 """
 
 import json
@@ -35,6 +35,11 @@ import re
 _this_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _this_dir)
 sys.path.insert(0, os.path.join(_this_dir, "..", "..", "standard", "scripts"))
+
+from execution_guard import require_approval
+
+# Stop before importing authentication helpers or opening a network connection.
+_APPROVED_TOPICS = require_approval(delete_topics=True, publish=True) if __name__ == "__main__" else set()
 
 import base64
 import requests
@@ -416,7 +421,7 @@ PROTECTED_TOPIC_PATTERNS = [
 ]
 
 
-def delete_custom_topics(bot_id: str):
+def delete_custom_topics(bot_id: str, approved_topic_ids: set[str]):
     print("\n=== Step 2: カスタムトピック削除 ===")
     # componenttype=1（カスタムトピック）と componenttype=9（システムトピック含む）の両方を取得
     topics = api_get("botcomponents",
@@ -424,28 +429,19 @@ def delete_custom_topics(bot_id: str):
                       "$select": "botcomponentid,name,schemaname,componenttype"})
     if not topics.get("value"):
         print("  ⚠️ トピックが 0 件です（プロビジョニング未完了の可能性）")
-    count = 0
-    for topic in topics.get("value", []):
-        name = topic.get("name", "")
-        schema = topic.get("schemaname", "")
-        # システムトピック名はスキップ
-        if name.startswith("system_"):
-            continue
-        # 保護対象のシステムトピックはスキップ（schemaname で判定）
-        if any(p in schema for p in PROTECTED_TOPIC_PATTERNS):
-            print(f"  保護: {name} ({schema})")
-            continue
-        # MCP Server / アクション（.action. を含む）はスキップ
-        if ".action." in schema:
-            print(f"  保護: {name} ({schema})")
-            continue
-        try:
-            api_delete(f"botcomponents({topic['botcomponentid']})")
-            print(f"  削除: {name} ({schema})")
-            count += 1
-        except Exception as e:
-            print(f"  スキップ: {name} ({e})")
-    print(f"  {count} 件のカスタムトピックを削除")
+    candidates = [topic for topic in topics.get("value", [])
+                  if topic.get("componenttype") == 1
+                  and not topic.get("name", "").startswith("system_")
+                  and not any(p in topic.get("schemaname", "") for p in PROTECTED_TOPIC_PATTERNS)
+                  and ".action." not in topic.get("schemaname", "")]
+    candidate_ids = {topic["botcomponentid"].lower() for topic in candidates}
+    if candidate_ids != approved_topic_ids:
+        raise RuntimeError("Topic inventory differs from approved IDs; no topics deleted. "
+                           f"Current candidates: {sorted(candidate_ids)}")
+    for topic in candidates:
+        api_delete(f"botcomponents({topic['botcomponentid']})")
+        print(f"  削除: {topic['name']} ({topic['schemaname']})")
+    print(f"  {len(candidates)} 件の承認済みカスタムトピックを削除")
 
 # ── Step 3: 生成オーケストレーション有効化 ────────────────
 
@@ -538,13 +534,9 @@ def set_gpt_instructions(bot_id: str, saved_config: dict):
         extra_comps = comps[1:]
         print(f"  フォールバック: {ui_comp.get('schemaname','')} ({ui_comp['botcomponentid']})")
 
-    # 余分なコンポーネントを削除
+    # 他のコンポーネントは参照元が不明なため保持し、個別の棚卸しと承認を待つ。
     for comp in extra_comps:
-        try:
-            api_delete(f"botcomponents({comp['botcomponentid']})")
-            print(f"  余分なコンポーネント削除: {comp.get('schemaname', comp['botcomponentid'])}")
-        except Exception as e:
-            print(f"  削除スキップ: {comp['botcomponentid']} ({e})")
+        print(f"  要確認（削除しない）: {comp.get('schemaname', comp['botcomponentid'])}")
 
     # 指示を更新 or 新規作成
     if ui_comp:
@@ -804,15 +796,17 @@ def publish_to_channels(bot_id: str):
 # ── メイン ────────────────────────────────────────────────
 
 def main():
+    approved_topics = _APPROVED_TOPICS
     print("=" * 60)
     print("  Copilot Studio エージェントデプロイ")
     print(f"  エージェント名: {BOT_NAME}")
     print("=" * 60)
 
     bot_id = find_bot()
-    _wait_for_provisioning(bot_id)
+    if not _wait_for_provisioning(bot_id):
+        raise RuntimeError("Bot provisioning incomplete; no changes applied")
+    delete_custom_topics(bot_id, approved_topics)
     set_icon(bot_id)
-    delete_custom_topics(bot_id)
     saved_config = enable_generative_orchestration(bot_id)
     comp_id = set_gpt_instructions(bot_id, saved_config)
     set_quick_replies(bot_id)

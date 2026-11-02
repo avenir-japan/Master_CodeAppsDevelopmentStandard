@@ -162,8 +162,8 @@ Canvas から AI Builder / Copilot Studio / 外部 API へ PDF・添付を直接
 
 ```
 ① architecture スキルで UI 方式候補を比較し、Canvas App 採用をユーザーに確認
-② 要件に応じて [設計パターン](references/design-patterns.md) を参照し、必要なデータフローを設計
-③ 実際に採用する画面・データソース・連携だけをユーザーに提示し、承認を得る
+② 要件に応じて [設計パターン](references/design-patterns.md) を参照し、必要なデータフローを設計。Canvas App からフローを呼ぶ場合は [power-automate](../power-automate/SKILL.md) の Power Apps V2 トリガーの手順へ、入力・出力、接続先、実行主体、エラー時の扱いを渡す。エージェントから呼ぶエージェントフローとは取り違えない
+③ 実際に採用する画面・データソース・連携だけをユーザーに提示し、承認を得る。重要経路の技術可否・ライセンス・Credits は [共通の実現可能性ゲート](../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で確認し、未確認・不適合なら本実装へ進まない
 ④ 承認後、このスキルに従って実装・MCP + coauthoring・必要時のみ import / package・UI 調整を行う
 ```
 

@@ -22,6 +22,12 @@ AI Builder の **AI プロンプト（GPT Dynamic Prompt）** を Dataverse API 
 Copilot Studio エージェントに **ツール（アクション）** として追加する。
 Power Automate フローから **aibuilderpredict_customprompt** で呼び出すパターンも含む。
 
+## 名称と利用経路を分けて確認する
+
+AI Builder はプロンプトや OCR・文書処理等の AI モデルを含む機能群であり、プロンプトビルダーはプロンプトを作成する画面、プロンプトツールはエージェントから再利用可能なプロンプトを呼ぶ手段を指す（[プロンプトの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview)、2026-10-30 確認）。[請求資料](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)の「AI ツール」は料金区分の文脈で読み、すべてのエージェントツールや Instructions・生成回答と同義にしない。旧称「AI Builder プロンプト」や現行 UI 名が異なっても、検証済み API・スキーマ識別子（例: `AIModelPublish`、`InvokeAIBuilderModelTaskAction`、`aibuilderpredict_customprompt`）を名称合わせのために変更しない。
+
+このスキルの API 実装は **Dataverse のプロンプトをエージェントへ直接追加したツール**または**クラウドフローのアクション**で利用する特定の経路を扱う。トピック内のプロンプト、エージェントフロー内のプロンプトも別経路として設計時に比較し、いずれも利用可能な入力型・出力契約、接続・容量条件をその経路で確認する。エージェントフロー（「エージェントがフローを呼び出したとき」トリガー）を、一般のクラウドフローと同一視しない。方式選定は [architecture](../architecture/SKILL.md)、容量と公開後実行は[ライセンス確認ルール](../standard/references/license-requirements.md)を正本とする。
+
 ## AI Builder 採用後の実装方式選択
 
 ```
@@ -54,7 +60,7 @@ AI Builder の採用が決まった場合、以下を用途・入力形式・精
 | プロンプトテキスト | リテラルテキスト＋入力変数の組み合わせ               |
 | 入力変数           | 名前・型（text / document / image）・説明・テスト値  |
 | 出力形式           | text or json（JSON の場合はスキーマ＋サンプル）      |
-| モデルパラメータ   | モデル種別（gpt-41-mini 等）・temperature            |
+| モデルパラメータ   | モデル種別（gpt-41-mini 等は例示であり採用方針ではない）・temperature |
 | 利用先             | Copilot Studio ツール or Power Automate フロー       |
 | shouldPromptUser   | 各入力変数をユーザーに自動的に尋ねるか（true/false） |
 
@@ -361,9 +367,9 @@ Copilot Studio ツールではなく、Dataverse トリガー等と組み合わ�
 
 ### その他の制限
 
-- **Copilot Studio エージェントのツールとしての AI プロンプト**では画像/ドキュメント入力は**未対応**
-  - ファイル処理が必要な場合は **Power Automate フロー経由**で AI プロンプトを呼び出す
-- 非対応ファイル形式の回避策: OneDrive for Business `ConvertFile` で PDF 変換してから渡す
+- [Microsoft Learn: プロンプト入力の制限](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations)（2026-10-30 確認）では、**エージェントへ直接追加したプロンプトツール**の画像・文書入力は未対応。これはテキストのプロンプト利用全般がフロー必須という意味ではない
+- 文書を扱う場合はエージェントフロー／クラウドフロー経由でプロンプトを呼ぶ方法等を候補とし、経路ごとの入力・出力、認証・容量・課金、エージェントとのファイル受け渡しを実際に検証する。トピック内のプロンプトも直接ツールと同じ制限だとは推定しない
+- 対応形式への変換が必要な場合は OneDrive for Business `ConvertFile` による PDF 変換等を候補として検証する
 
 ## .env 追加パラメータ
 

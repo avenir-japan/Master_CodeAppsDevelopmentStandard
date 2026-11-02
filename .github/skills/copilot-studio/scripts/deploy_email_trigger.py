@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """
 Word日報出力 - メール受信トリガーのデプロイスクリプト
 

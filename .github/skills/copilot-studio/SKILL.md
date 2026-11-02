@@ -38,16 +38,16 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 | リファレンス                                                                   | 内容                                                                 |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
 | [構築リファレンス](references/build-reference.md)                              | 構築手順の詳細・Instructions テンプレート・スクリプトコード          |
-| [外部トリガー](references/trigger.md)                                          | メール受信・Teams メッセージ・スケジュール等のトリガー追加           |
+| [外部トリガー](references/trigger.md)                                          | 承認済み例外案の UI 設定。後半の API フロー作成例は廃止・履歴用       |
 | [トリガーパターン](references/trigger-patterns.md)                             | トリガーの設定パターン集                                             |
 | [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
 | [トラブルシューティング](references/troubleshooting.md)                        | トリガー以外を含む障害切り分け・復旧手順                             |
 | [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
 | [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
-| [ニュース配信デプロイガイド](references/market-research-deployment-guide.md)   | ニュース配信エージェントのデプロイ手順                               |
+| [ニュース配信デプロイガイド（履歴）](references/market-research-deployment-guide.md) | 過去の案件固有構成の記録（実行禁止）                             |
 | [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
 
-> ニュース配信の上記 3 資料は用途別の実装例であり、一般的なエージェント構築の必須手順ではない。固有のエージェント名・ツール・配信形式・デプロイ手順を別案件に持ち込まず、再利用できる判断やパターンだけを採用する。
+> ニュース配信の上記 3 資料と `scripts/deploy_news_*`・`scripts/deploy_market_insight.py` は案件固有の履歴資料であり、通常の構築・実行手順ではない。`fix_email_*`・`setup_email_trigger.py`・`deploy_email_trigger.py` も事例別の復旧履歴で、一括適用しない。これらの実行は安全のため無効化している。削除せず記録として保持し、採用時は案件ごとの設計・検証・承認を経て新たに実装する。
 
 ## 前提: 設計フェーズ完了後に構築に入る（必須）
 
@@ -132,8 +132,8 @@ Copilot は次を既定動作とする。
    - `optInUseLatestModels` は明示的に `False` を設定 — `True` だと UI で選択した基盤モデルが別モデルへ強制変更される
    - `aISettings` も丸ごと上書きせずディープマージで既存のモデル選択を保持
 
-3. **余分な GPT コンポーネントは削除する**
-   - `componenttype eq 15` で全取得 → `defaultSchemaName` と一致するものを UI コンポーネントとして特定 → それ以外を削除
+3. **GPT コンポーネントを棚卸しし、既存のものは保持する**
+   - `componenttype eq 15` で全取得 → `defaultSchemaName` と一致する UI コンポーネントを特定。他のコンポーネントは参照・依存関係を調査し、削除する場合は ID ごとの明示承認と復旧計画を要する。スキーマ名だけで自動削除しない。
 
 ### 指示（Instructions）の YAML 形式 — PVA ダブル改行フォーマット
 
@@ -257,12 +257,14 @@ if ai_idx >= 0:
 
 1. **Step 0**: Copilot Studio UI で Bot 作成（ユーザー手動）
 2. **Step 1-1.5**: Bot 検索 + プロビジョニング完了待ち
-3. **Step 2**: カスタムトピック削除（システムトピック保護）
+3. **Step 2**: 既存トピック・GPT コンポーネントの棚卸し。通常は保持し、個別承認のない削除をしない
 4. **Step 3**: 生成オーケストレーション有効化
 5. **Step 4-4.5**: Instructions + 会話の開始設定
 6. **Step 5-6**: エージェント公開 + 説明設定
 7. **Step 7-8**: Teams / Copilot チャネル公開設定
 8. **Step 9**: ナレッジ・ツール・トリガーの手動追加案内
+
+**完了判定**: 保存・公開済み（構成を読み戻し、公開状態を確認）と、稼働中（承認済み接続・トリガーで実入力から目的の出力／副作用が確認できる）は別の状態。デプロイ成功のログや公開だけでは稼働完了としない。チャネル到達性、接続認証、少数の実ケースと失敗時動作を承認された方法で検証し、未検証項目を明記する。
 
 構造化 JSON を出力するエージェントは、実際の入力を使い、次のゲートを別々に確認する。
 
@@ -284,8 +286,8 @@ Instructions テンプレート・既存エージェント改善パターンは 
 DATAVERSE_URL=https://{org}.crm7.dynamics.com
 SOLUTION_NAME=SolutionName
 PUBLISHER_PREFIX=prefix
-BOT_ID=https://copilotstudio.../bots/xxxxxxxx-xxxx-.../overview
-# ↑ Copilot Studio URL をそのまま貼り付け可。GUID だけでも OK
+BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+# scripts/deploy_agent.py の明示承認ゲートは URL ではなく完全一致する GUID のみ受け付ける
 ```
 
 ## 関連スキル

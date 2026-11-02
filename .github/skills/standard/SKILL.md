@@ -46,7 +46,7 @@ triggers:
 - **Canvas App（標準コネクタ）** は画面 UI が必要な場合の初期候補とし、既存資産、データソース・コネクタのライセンス条件と工数を確認する
 - Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず既定提案から外し、案件ごとにライセンスと Credits を評価する
 - Power Automate クラウドフローからエージェントを呼び出す自律型の構成・実装は、Credits 非消費の条件を満たす場合でも標準スコープに含めず、必要時のみ例外的な代替案として検討する（[条件と根拠](references/license-requirements.md#1-基本方針)）
-- Copilot Studio のハーネス選定と Credits の適用条件は [ライセンス確認ルール §1](references/license-requirements.md#1-基本方針) を参照する。
+- Copilot Studio のハーネス選定、AI ツール／プロンプトの利用権と公開後の実行に必要な環境の容量、Credits の計測・控除・課金条件は [ライセンス確認ルール](references/license-requirements.md) を正本として確認する。非課金でも容量確認は省略しない
 - Canvas App で要件を満たせない場合の Code Apps / モデル駆動型アプリ等は、実現性・ライセンス・費用を示した代替案としてユーザー承認後に採否を決める
 - 個別スキルは技術手順の正本として残し、採用優先順位とスコープ判断は本スキル、`architecture`、`references/license-requirements.md` を正本とする
 

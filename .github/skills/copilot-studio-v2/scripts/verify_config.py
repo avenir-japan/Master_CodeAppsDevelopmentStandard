@@ -138,7 +138,7 @@ def main() -> int:
             print(f"- {issue}")
         return 1
 
-    print("\n✅ 検証 OK")
+    print("\n✅ 設定の読み取り OK（公開・実行は未確認）")
     return 0
 
 

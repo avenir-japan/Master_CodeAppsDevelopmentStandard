@@ -31,7 +31,7 @@ Dataverse 上の格納構造をまとめる。実機（live 環境）の解析�
   "recognizer": { "$kind": "CLICopilotRecognizer" },
   "agentSettings": {
     "$kind": "AgentSettings",
-    "model": { "$kind": "ModelConfig", "series": "Sonnet46" },
+    "model": { "$kind": "ModelConfig", "series": "<対象環境で確認したモデルシリーズ>" },
     "instructions": {
       "$kind": "Instructions",
       "segments": [
@@ -46,18 +46,18 @@ Dataverse 上の格納構造をまとめる。実機（live 環境）の解析�
 | パス | 意味 |
 |---|---|
 | `recognizer.$kind = CLICopilotRecognizer` | 新アーキの認識器 |
-| `agentSettings.model.series` | 基盤モデルシリーズ（例 `Sonnet46` = Claude Sonnet 4.x） |
+| `agentSettings.model.series` | 基盤モデルシリーズ。上記はプレースホルダーであり、対象環境の UI と公式資料で利用可能な値・利用条件を確認してから設定する |
 | `agentSettings.instructions.segments[].value` | 指示文。**v1 の PVA ダブル改行 YAML は不要、プレーン文字列** |
 | `agentSettings.enableMemory` | 会話メモリの有効化 |
 
 ### 改変時はディープマージ
 
-`configuration` を丸ごと上書きするとモデルやメモリ設定を失う。必ず GET → マージ → PATCH。
+このマスターの正常系は UI 編集。以下は API 更新を例外的に検討する場合の構造説明であり、そのまま実行するスクリプトではない。`configuration` を丸ごと上書きするとモデルやメモリ設定を失う。API 更新では GET → マージ → PATCH とし、対象・接続参照の事前確認と前後差分の検査を行う。
 
 ```python
 cfg = json.loads(bot["configuration"])
 cfg["agentSettings"]["instructions"]["segments"][0]["value"] = NEW_INSTRUCTIONS
-patch = {"configuration": json.dumps(cfg, ensure_ascii=False)}
+patch = {"name": bot["name"], "configuration": json.dumps(cfg, ensure_ascii=False)}
 sess.patch(f"{API}/bots({bot_id})", json=patch)
 ```
 

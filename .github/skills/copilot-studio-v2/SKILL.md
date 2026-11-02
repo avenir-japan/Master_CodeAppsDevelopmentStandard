@@ -47,8 +47,8 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 
 ## このマスターでの既定フロー
 
-1. `architecture` スキルで v1 / v2 を選ぶ
-2. ユーザーへ設計を提示し承認を得る
+1. [architecture](../architecture/SKILL.md) で v1 / v2 とフローの呼び出し元を選び、採用する重要経路の技術・ライセンス・Credits を [共通の実現可能性ゲート](../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で判定する。エージェントフローを使う場合は選んだハーネスでの利用可否を確認し、[power-automate](../power-automate/SKILL.md) に入出力・接続・実行主体を渡す
+2. ユーザーへ設計と未確認事項を提示し承認を得る。重要経路が未確認・不適合なら本実装を始めない
 3. Copilot Studio UI で v2 エージェントを手動作成する
 4. [手動作成チェックリスト](references/manual-creation-checklist.md) に沿って、作成直後の確認を行う
 5. 設定変更や調査では **BotConfiguration JSON** と **botcomponents 構造** を前提に扱う
@@ -63,7 +63,7 @@ v2 の変更作業前後では、次の検証スクリプトを実行して設�
 - `scripts/verify_config.py`: BotConfiguration 構造、主要キー、必須設定の整合確認
 - `scripts/verify_agent.py`: エージェント全体の運用観点チェック（公開前の最終確認）
 
-UI で設定変更した場合も、最終的な成否判定はスクリプトの結果で機械的に確認する。
+UI で設定変更した場合も、これらは**設定の静的整合を確認する読み取り検証**として用いる。正常終了だけではツール接続、エージェントフローの実行、チャネルでの応答、公開後の利用権・Credits は確認できない。採用した入出力経路ごとに、顧客環境での実行条件と公開後の動作を別途確認する（[実行・確認テンプレート](references/verify-run-template.md)）。
 
 ## 設計確認テンプレート
 
@@ -166,7 +166,7 @@ v2 では Instructions やモデル設定は GPT YAML ではなく、`bots.confi
   "recognizer": { "$kind": "CLICopilotRecognizer" },
   "agentSettings": {
     "$kind": "AgentSettings",
-    "model": { "$kind": "ModelConfig", "series": "Sonnet46" },
+    "model": { "$kind": "ModelConfig", "series": "<対象環境で確認したモデルシリーズ>" },
     "instructions": {
       "$kind": "Instructions",
       "segments": [
@@ -178,6 +178,7 @@ v2 では Instructions やモデル設定は GPT YAML ではなく、`bots.confi
 }
 ```
 
+- `series` はプレースホルダー。モデル名を固定せず、採用前に対象環境の Copilot Studio UI と Microsoft 公式資料で現在利用できる値・利用条件を確認する（[モデル名の障害例](references/troubleshooting.md)）
 - v1 の PVA ダブル改行 YAML は不要
 - 既存設定を変更するときは **GET → ディープマージ → PATCH** を前提にする
 - `configuration` の丸ごと上書きはモデルやメモリ設定を壊しやすい

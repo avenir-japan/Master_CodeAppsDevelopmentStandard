@@ -11,12 +11,13 @@ Phase 2.5 サンプル: Dataverse レコード変更トリガー → 作成者�
   2. Power Automate 接続ページで Dataverse / Office 365 Outlook 接続を事前作成
      https://make.powerautomate.com/connections
   3. pip install azure-identity requests python-dotenv
-  4. python .github/skills/power-automate/scripts/deploy_flow.py
+  4. 既定は API 呼び出しなし。--execute で新規作成を許可。既存フローを置換する場合は
+     バックアップ・参照先確認後に --execute --replace-workflow-id <既存 ID> を指定する。
 
 核心原則:
   接続参照（connectionreferences テーブル）に正しい接続を紐づけ、
   フロー定義で runtimeSource: "embedded" + connectionReferenceLogicalName で参照する。
-  このパターンなら API 有効化が100%成功する。
+  有効化は接続・対象環境・定義に依存するため実際に検証する。削除・再作成は安全なべき等更新ではない。
 """
 
 import json
@@ -31,6 +32,7 @@ sys.path.insert(0, os.path.join(_this_dir, "..", "..", "standard", "scripts"))
 
 import requests
 from dotenv import load_dotenv
+from deployment_safety import check_existing_flows, deployment_args
 from auth_helper import (
     api_get,
     api_patch,
@@ -344,19 +346,15 @@ def build_flow_definition() -> dict:
     return definition
 
 
-def deploy_flow_draft() -> str:
-    """既存フローを削除し、新規 Draft を作成"""
+def deploy_flow_draft(args, flows) -> str:
+    """明示承認した既存フローだけを削除し、新規 Draft を作成"""
     print("\n=== Step 4: フロー Draft 作成 ===")
 
     CONNECTOR_DV = "shared_commondataserviceforapps"
     CONNECTOR_OUTLOOK = "shared_office365"
 
-    # べき等: 既存フロー削除
-    existing = api_get(
-        f"workflows?$filter=name eq '{FLOW_DISPLAY_NAME}' and category eq 5"
-        "&$select=workflowid,statecode"
-    )
-    for f in existing.get("value", []):
+    check_existing_flows(flows, args)
+    for f in flows:
         wf_id = f["workflowid"]
         if f["statecode"] == 1:  # Active → Draft
             api_patch(f"workflows({wf_id})", {"statecode": 0, "statuscode": 1})
@@ -423,7 +421,7 @@ def activate_flow(wf_id: str, env_id: str):
 
     time.sleep(3)  # 作成直後は少し待つ
 
-    # ★ 有効化（接続参照が正しければ100%成功）
+    # 接続参照が整っていても有効化の結果を確認する
     try:
         api_patch(f"workflows({wf_id})", {"statecode": 1, "statuscode": 2})
         print("  ✓ フロー有効化成功")
@@ -454,7 +452,11 @@ def activate_flow(wf_id: str, env_id: str):
 # メイン
 # ══════════════════════════════════════════════════════════════
 
-def main():
+def main(argv=None):
+    args = deployment_args(argv)
+    if not args.execute:
+        print("Dry-run: no API calls. --execute creates a flow; replacing one also requires --replace-workflow-id.")
+        return
     print("=" * 60)
     print("  Power Automate フローデプロイ（接続参照パターン）")
     print(f"  フロー名: {FLOW_DISPLAY_NAME}")
@@ -463,6 +465,14 @@ def main():
     # Step 1: 環境 ID 解決
     env_id = resolve_environment_id()
 
+    # 接続参照の変更より前に既存フロー ID を確認する
+    existing = api_get(
+        f"workflows?$filter=name eq '{FLOW_DISPLAY_NAME}' and category eq 5"
+        "&$select=workflowid,statecode"
+    )
+    flows = existing.get("value", [])
+    check_existing_flows(flows, args)
+
     # Step 2: 接続検索
     connections = find_connections(env_id)
 
@@ -470,7 +480,7 @@ def main():
     create_connection_references(connections)
 
     # Step 4: フロー Draft 作成
-    wf_id = deploy_flow_draft()
+    wf_id = deploy_flow_draft(args, flows)
 
     # Step 5: 有効化 + Webhook 登録
     activate_flow(wf_id, env_id)

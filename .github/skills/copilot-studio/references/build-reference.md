@@ -11,7 +11,7 @@ Copilot Studio UI のドロップダウンには表示名が表示されるた�
 
 Bot を「作成」した直後は Dataverse に `bots` レコードが即座に作成されるが、
 **デフォルトトピック・GPT コンポーネント等は PVA Bot Management Service が非同期でプロビジョニング**する。
-Bot ID URL をコピーしてすぐにスクリプトを実行すると、カスタムトピック削除が 0 件になる。
+プロビジョニングが未完了なら変更を開始しない。既定トピックは自動削除せず保持する。`scripts/deploy_agent.py` は案件固有の旧例であり、通常手順から実行しない。実行には対象 GUID・公開・削除 ID の明示承認が必要。
 
 ユーザーには以下を案内する:
 
@@ -19,8 +19,8 @@ Bot ID URL をコピーしてすぐにスクリプトを実行すると、カス
 1. Copilot Studio UI でエージェントを作成
 2. ★ 作成後、Copilot Studio UI でエージェントが完全にロードされるまで待つ
    （トピック一覧・概要ページが表示されるまで）
-3. ブラウザ URL を .env に貼り付け
-4. python ./deploy_agent.py を実行
+3. UI で対象 Bot と既存トピック・GPT コンポーネントを確認
+4. 案件に必要な変更を個別に設計・承認し、通常は UI で設定する
 ```
 
 ```
@@ -34,17 +34,14 @@ Bot ID URL をコピーしてすぐにスクリプトを実行すると、カス
    - スキーマ名: {prefix}_agent_name
 5. 「作成」をクリック
 6. ★ エージェントが完全にロードされるまで待つ（トピック一覧が表示されるまで）
-7. ブラウザ URL を .env に貼り付け:
-   BOT_ID=https://copilotstudio.../bots/xxxxxxxx-xxxx-.../overview
+7. UI で Bot ID と既存構成を照合する（旧デプロイスクリプトへの入力には URL でなく正確な GUID が必要）
 ```
 
 > **教訓**: UI のドロップダウンにはソリューションの「表示名」が表示される。スキーマ名だけ伝えるとユーザーがどれを選ぶか迷う。必ず「表示名: ○○○（スキーマ名: △△△）」の形式で伝える。
 
 ### Step 1: Bot 検索
 
-- `.env` の `BOT_ID` から取得（URL でも GUID でも可）
-- URL の場合: `/bots/([0-9a-f-]{36})` で抽出
-- なければ `bots` テーブルを `name` で検索
+- UI で確認した正確な Bot GUID と現行設定を照合する。案件固有の旧スクリプトは GUID を要求し、名前検索や URL からの自動選択で承認を代替しない
 
 ### Step 1.5: プロビジョニング完了待ち（スクリプト内で自動）
 
@@ -79,44 +76,14 @@ def wait_for_provisioning(bot_id: str, timeout: int = 120) -> bool:
 ```
 ✅ 10 秒間隔でポーリング、最大 120 秒タイムアウト
 ✅ componenttype=1 (トピック) と componenttype=15 (GPT) の両方をチェック
-✅ タイムアウトしても警告のみ（致命的エラーにしない — UI でまだ作成中の可能性）
-❌ プロビジョニング完了前にトピック削除 → 0 件削除で既定トピックが残る
+✅ タイムアウト時は変更を停止し、UI で状態を確認する
+❌ プロビジョニング完了前に変更 → 一部の構成を見落とす
 ❌ time.sleep() で固定時間待機 → プロビジョニングが遅い環境で不足する
 ```
 
-### Step 2: カスタムトピック削除（システムトピック保護）
+### Step 2: 既存トピックの棚卸し（通常は保持）
 
-**削除対象**: ユーザー作成のカスタムトピック（あいさつ、ありがとう、お問い合わせありがとう、最初からやり直す等）
-**保護対象**: システムトピック（ConversationStart, Escalate, Fallback, OnError, Search, Signin 等）と MCP Server アクション
-
-```python
-# 保護対象の schemaname パターン
-PROTECTED_TOPIC_PATTERNS = [
-    "ConversationStart", "Escalate", "Fallback", "OnError",
-    "EndofConversation", "MultipleTopicsMatched", "Search",
-    "Signin", "ResetConversation", "StartOver",
-]
-
-# componenttype=1 と 9 の両方を取得
-topics = api_get("botcomponents",
-    {"$filter": f"_parentbotid_value eq '{bot_id}' and (componenttype eq 1 or componenttype eq 9)",
-     "$select": "botcomponentid,name,schemaname,componenttype"})
-for topic in topics["value"]:
-    schema = topic.get("schemaname", "")
-    # システムトピック・アクションは保護
-    if any(p in schema for p in PROTECTED_TOPIC_PATTERNS):
-        continue
-    if ".action." in schema:
-        continue
-    api_delete(f"botcomponents({topic['botcomponentid']})")
-```
-
-```
-❌ system_ プレフィックスだけで判定 → ConversationStart 等が削除されるリスク
-❌ componenttype=1 だけを対象 → プロビジョニング時のトピックタイプが変わる可能性
-✅ schemaname パターンでシステムトピックを明示的に保護
-✅ .action. を含む MCP Server アクションも保護
-```
+あいさつ・既定トピックも含め、ID・種類・依存先・維持／変更／削除案を確認する。`system_` や `schemaname` のパターンだけで削除対象を決めない。削除が必要な場合のみ各 ID と影響範囲・復旧方法の承認を受け、実行直前の一覧と照合する。`scripts/deploy_agent.py` の旧削除機能も、対象 GUID と承認済み ID の完全一致なしには実行できない。
 
 ### Step 3: 生成オーケストレーション有効化
 
@@ -166,8 +133,8 @@ existing = api_get("botcomponents",
     {"$filter": f"_parentbotid_value eq '{bot_id}' and componenttype eq 15",
      "$select": "botcomponentid,name,schemaname,data"})
 
-# defaultSchemaName と一致 → UI コンポーネント、それ以外 → 削除対象
-# フォールバック: defaultSchemaName がなければ最初のものを使う
+# defaultSchemaName と一致 → 更新候補。他は保持し、依存関係を個別調査する
+# 識別できなければ自動更新せず、UI 側で確認する
 # 更新: api_patch("botcomponents(comp_id)", {"data": GPT_YAML})
 ```
 
@@ -458,7 +425,7 @@ Power Apps MCP Server・Dataverse MCP Server はテーブルの論理名（単�
 
 ## 既存エージェント改善パターン
 
-新規作成だけでなく、**既存エージェントの改善**にも同じ Step 2〜8 を適用できる。
+既存エージェントへの Step 2〜8 の一括適用はしない。変更する項目のみ設計・承認し、既存トピックを保持する。
 `analyze_bot.py` で現状を分析し、改善点を特定してから設計→承認→実装の流れで進める。
 
 ### 改善時の典型的な作業

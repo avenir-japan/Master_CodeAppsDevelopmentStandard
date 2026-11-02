@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """
 メール返信をエージェント側の Outlook ツールで実行するよう修正:
 1. フローから Reply to email アクションを除去して再デプロイ

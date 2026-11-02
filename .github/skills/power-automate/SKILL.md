@@ -197,20 +197,15 @@ body = f"<td>@{{triggerOutputs()?['body/{PREFIX}_name']}}</td>"
 # ↑ 正しく動くが読みにくい。1箇所だけならOK、複数箇所は避ける
 ```
 
-### べき等デプロイパターン
+### 既存フローの削除・再作成は復旧用の破壊的操作
 
-```python
-# 既存フロー検索 → 無効化 → 削除 → 再作成
-existing = api_get(f"workflows?$filter=name eq '{FLOW_NAME}' and category eq 5&$select=workflowid,statecode")
-for f in existing.get("value", []):
-    wf_id = f["workflowid"]
-    if f["statecode"] == 1:  # Active → Draft
-        api_patch(f"workflows({wf_id})", {"statecode": 0, "statuscode": 1})
-        time.sleep(2)
-    api_delete(f"workflows({wf_id})")
-    time.sleep(3)
-# → 新規作成へ進む
-```
+`deploy_flow.py`、`deploy_flow_create_notify.py`、`deploy_flow_sp_teams.py` は既定で API を呼ばない。
+新規作成を実行するときだけ `--execute` を指定する。既存フローが見つかる場合は、
+既存定義の退避、接続参照・呼び出し元・ID 依存を確認してから
+`--execute --replace-workflow-id <確認した workflowid>` を明示する。
+同名フローが複数ある場合や ID が一致しない場合は、接続参照の作成・更新より前に停止する。
+削除・再作成は ID と参照先を維持せず、途中失敗時に元へ戻らないため、**べき等更新でも安全な上書きでもない**。
+[デプロイ前チェック](references/pre-deploy-checks.md)も参照。
 
 ### Modern Flow の import が詰まる場合は API 再作成へ切り替える
 
@@ -220,9 +215,9 @@ for f in existing.get("value", []):
 
 この場合の原則:
   - ソリューション import の再試行に固執しない
-  - 対象が単一または少数のクラウドフローなら、Dataverse `workflows` テーブル経由で
-    既存フローを削除し、ローカル定義から再作成・有効化する
-  - 反映前に可能なら既存ソリューションまたは対象フローの退避を取る
+  - 対象が単一または少数のクラウドフローなら、退避・参照先確認・明示承認の後に限り
+    Dataverse `workflows` テーブル経由の削除・再作成を復旧手段として検討する
+  - 反映前に既存ソリューションまたは対象フローを退避する
 
 使いどころ:
   - publish all 後も import が同じ workflow 行状態で失敗する
@@ -586,7 +581,7 @@ except Exception as e:
 ```
 ★ /start が必要なトリガー（Webhook 型）:
   - SubscribeWebhookTrigger（Dataverse レコード変更）
-  - OnNewFile（SharePoint Notification 型）
+  - OnNewFile（SharePoint Notification 型・非推奨の履歴例のみ。新規採用しない）
 
 ★ /start が不要なトリガー:
   - GetOnNewFileItems（SharePoint Polling 型）

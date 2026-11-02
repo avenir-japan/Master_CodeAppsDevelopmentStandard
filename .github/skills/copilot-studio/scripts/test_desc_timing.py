@@ -1,3 +1,5 @@
+raise SystemExit("Historical project-specific script: execution disabled; review and port approved changes into a project-specific implementation.")
+
 """description の設定タイミングを検証: data PATCH → description PATCH → publish → 再確認"""
 import os, sys
 _this_dir = os.path.dirname(os.path.abspath(__file__))

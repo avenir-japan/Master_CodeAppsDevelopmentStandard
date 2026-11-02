@@ -17,8 +17,10 @@
 
 ```
 ★ ベストプラクティス:
-  OnNewFile (Notification型) は情報が古く利用できないケースがある。
-  GetOnNewFileItems (Polling型) + GetFileContent の組み合わせを推奨。
+  Microsoft 公式 SharePoint コネクタ資料（2026-08-01 更新）では OnNewFile は非推奨。
+  非推奨は全環境で利用不能という意味ではないが、新規ソリューション／アプリでは使わないよう強く推奨される。
+  通常案は GetOnNewFileItems (Polling型、プロパティのみ) + Identifier を渡す GetFileContent。
+  https://learn.microsoft.com/en-us/connectors/sharepointonline/
 ```
 
 ```python
@@ -61,9 +63,9 @@
 ```
 
 ```
-❌ OnNewFile (Notification型) — 情報が古く利用できないケースあり
+❌ OnNewFile (Notification型) — 非推奨。既存環境で利用可能な場合もあるが新規採用しない
 ❌ GetFileContentByPath + triggerOutputs()?['body/{Path}'] — パスが取得できない場合あり
-✅ GetOnNewFileItems + GetFileContent + {Identifier} — 安定動作
+✅ GetOnNewFileItems + GetFileContent + {Identifier} — 通常案（対象環境で保存・実行を検証）
 ✅ ファイル名は triggerBody()?['{FilenameWithExtension}'] で直接参照（Compose 不要）
 ✅ table パラメータにはライブラリ ID（GUID）を指定
 ```
@@ -320,8 +322,8 @@ AI Builder AI プロンプト（aibuilderpredict_customprompt）が直接処理�
   ・大きなドキュメント（特にテーブル行）は抽出精度が低下する場合あり
 
 重要:
-  ・Copilot Studio エージェントのツールとしてのファイル入力は未対応
-  ・ファイル処理は Power Automate フロー経由で実行する
+  ・エージェントに直接追加したプロンプトツールの画像・文書入力は未対応
+  ・ファイル処理でエージェントフロー／クラウドフロー経由等を選ぶ場合は、入力の受け渡しと利用条件を経路別に検証する（テキストのプロンプト利用全般にフローは不要）
 
 ★ ベストプラクティス: OneDrive for Business の ConvertFile アクションで PDF に変換してから渡す
   → 下記「OneDrive PDF 変換パターン」を参照
