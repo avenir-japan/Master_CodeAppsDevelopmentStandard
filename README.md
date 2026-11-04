@@ -244,6 +244,7 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 ## 案件開発の進め方（Copilot 運用）
 
 - GitHub Copilot の参照方針：[.github/copilot-instructions.md](./.github/copilot-instructions.md)
+- 要件整理と開発入力ファイルの構成方針：[.github/skills/spec-builder/SKILL.md](./.github/skills/spec-builder/SKILL.md)
 - 要件ディスカバリーと開発入力ファイルの作成（M365 Copilot／Copilot Cowork／VS Code GitHub Copilot 共通）：
   [.github/skills/spec-builder/references/requirements-discovery.md](./.github/skills/spec-builder/references/requirements-discovery.md)
 
@@ -252,11 +253,13 @@ README では全体像だけを示し、**Copilot の詳細ルールの正本は
 前提: 管理者が展開した githubmcp に各自の GitHub アカウントで接続済みであること。Copilot Chat・Copilot Cowork からはリポジトリを読むだけにし、完成した Markdown は人が VS Code またはローカルのファイル操作で案件リポジトリへ配置します。
 
 1. 本リポジトリを参照対象として指定する。
-2. 「要件ディスカバリーと開発入力ファイルの作成」の実際のファイルパス
+2. spec-builder の構成方針
+   [.github/skills/spec-builder/SKILL.md](./.github/skills/spec-builder/SKILL.md)
+   と「要件ディスカバリーと開発入力ファイルの作成」の手順
    [.github/skills/spec-builder/references/requirements-discovery.md](./.github/skills/spec-builder/references/requirements-discovery.md)
-   を指定し、その手順に従って要件整理を進めるよう依頼する。
+   の実際のファイルパスを指定し、両方を参照して要件整理を進めるよう依頼する。
 3. 目的・現状・制約・構成を 1 問ずつ確認する。
-4. 構成が確定した後、必要な開発入力ファイルの候補を提示させる。
+4. 構成が確定した後、`SPEC.md` を中心に、内容に応じて詳細文書を分割するかを含め、必要な開発入力ファイルの候補を提示させる。
 5. 作成対象について合意した後に、完成した Markdown を出力し、人が案件リポジトリへ配置する。
 
 VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意した `SPEC.md` と必要な詳細文書を案件リポジトリへ直接作成します。単一文書なら索引や追加の文書セットは不要です。
