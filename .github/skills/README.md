@@ -137,7 +137,8 @@ triggers: # スキル発動条件キーワード（必須）
 ## 推奨開発フロー
 
 ```
-0. spec-to-markdown   → 既存仕様書を factsheet / document に正規化（必要時）
+0. spec-builder       → 対話で要件を整理し、SPEC.md と必要な開発入力ファイルを合意・作成
+  spec-to-markdown   → 既存資料の変換が必要な場合のみ factsheet / document に正規化
 1. architecture       → 全体設計・コンポーネント選定（Teams / M365 Copilot 優先。画面 UI が必要なら Canvas App を基本案とし、要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案。実現性・ライセンス・費用と承認を確認）
 2. standard           → 共通基盤の確認（.env・認証）
 3. dataverse          → カスタムテーブルが必要な場合、設計承認後にテーブル構築・セキュリティロール設定（依存するアプリ・フローより先）
