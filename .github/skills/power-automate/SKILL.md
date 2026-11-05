@@ -22,6 +22,8 @@ triggers:
 
 **フロー種別を先に確認する**: 通常のイベント／スケジュール起点、Canvas App から呼び出すもの、Copilot Studio エージェントから呼び出すもの、クラウドフローからエージェントを呼び出すものは、トリガー・接続・課金条件が同一とは限らない。特に「エージェントフロー」と呼ぶ前に実際のトリガーと実行主体を確認し、クラウドフロー起点の Credits 判定を流用しない（[ライセンス確認ルール](../standard/references/license-requirements.md#1-基本方針)）。
 
+既存フローの編集・失敗 run の診断に FlowAgent MCP を使う場合は、任意の経路として[利用前のゲートと手順](references/flow-agent-mcp.md)を確認する。UI 雛形 / clone 定義を正本とする方針は変えない。
+
 ## 核心原則: 接続参照（Connection Reference）が有効化成功の鍵
 
 ```

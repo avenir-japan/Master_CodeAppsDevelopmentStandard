@@ -35,17 +35,17 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 
 ## サブリファレンス（必要に応じて参照）
 
-| リファレンス                                                                   | 内容                                                                 |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| [構築リファレンス](references/build-reference.md)                              | 構築手順の詳細・Instructions テンプレート・スクリプトコード          |
-| [外部トリガー](references/trigger.md)                                          | 承認済み例外案の UI 設定。後半の API フロー作成例は廃止・履歴用       |
-| [トリガーパターン](references/trigger-patterns.md)                             | トリガーの設定パターン集                                             |
-| [トリガートラブルシューティング](references/trigger-troubleshooting.md)        | トリガー関連のトラブルシューティング                                 |
-| [トラブルシューティング](references/troubleshooting.md)                        | トリガー以外を含む障害切り分け・復旧手順                             |
-| [納品時制約](references/managed-solution-constraints.md)                       | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
-| [ニュース配信エージェント](references/market-research-report.md)               | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
-| [ニュース配信デプロイガイド（履歴）](references/market-research-deployment-guide.md) | 過去の案件固有構成の記録（実行禁止）                             |
-| [ニュース配信メールテンプレート](references/market-research-email-template.md) | ニュース配信メールの HTML テンプレート                               |
+| リファレンス                                                                         | 内容                                                                 |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [構築リファレンス](references/build-reference.md)                                    | 構築手順の詳細・Instructions テンプレート・スクリプトコード          |
+| [外部トリガー](references/trigger.md)                                                | 承認済み例外案の UI 設定。後半の API フロー作成例は廃止・履歴用      |
+| [トリガーパターン](references/trigger-patterns.md)                                   | トリガーの設定パターン集                                             |
+| [トリガートラブルシューティング](references/trigger-troubleshooting.md)              | トリガー関連のトラブルシューティング                                 |
+| [トラブルシューティング](references/troubleshooting.md)                              | トリガー以外を含む障害切り分け・復旧手順                             |
+| [納品時制約](references/managed-solution-constraints.md)                             | マネージド / アンマネージド納品時の Copilot Studio 固有制約          |
+| [ニュース配信エージェント](references/market-research-report.md)                     | RSS + Web検索 + Work IQ MCP によるニュース収集・配信エージェント構築 |
+| [ニュース配信デプロイガイド（履歴）](references/market-research-deployment-guide.md) | 過去の案件固有構成の記録（実行禁止）                                 |
+| [ニュース配信メールテンプレート](references/market-research-email-template.md)       | ニュース配信メールの HTML テンプレート                               |
 
 > ニュース配信の上記 3 資料と `scripts/deploy_news_*`・`scripts/deploy_market_insight.py` は案件固有の履歴資料であり、通常の構築・実行手順ではない。`fix_email_*`・`setup_email_trigger.py`・`deploy_email_trigger.py` も事例別の復旧履歴で、一括適用しない。これらの実行は安全のため無効化している。削除せず記録として保持し、採用時は案件ごとの設計・検証・承認を経て新たに実装する。
 
@@ -55,17 +55,17 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 
 設計提示時に含める内容:
 
-| 項目                     | 内容                                                                          |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| エージェント名・説明     | 名前と役割の説明                                                              |
-| Instructions             | 指示テキストの全文案                                                          |
-| 推奨プロンプト           | 3〜5 個のタイトル＋プロンプト文（GPT コンポーネントの conversationStarters）  |
-| 会話の開始のメッセージ   | エージェントに合った挨拶テキスト（ConversationStart トピックの SendActivity） |
-| 会話の開始のクイック返信 | 3〜5 個のクイック返信テキスト（ConversationStart トピックの quickReplies）    |
+| 項目                     | 内容                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| エージェント名・説明     | 名前と役割の説明                                                                                                                         |
+| Instructions             | 指示テキストの全文案                                                                                                                     |
+| 推奨プロンプト           | 3〜5 個のタイトル＋プロンプト文（GPT コンポーネントの conversationStarters）                                                             |
+| 会話の開始のメッセージ   | エージェントに合った挨拶テキスト（ConversationStart トピックの SendActivity）                                                            |
+| 会話の開始のクイック返信 | 3〜5 個のクイック返信テキスト（ConversationStart トピックの quickReplies）                                                               |
 | 会話経路・既存トピック   | 新規では必要な会話経路を設計する。既存エージェントの改修ではトピックの用途・依存先・維持／変更／削除案を確認し、削除案は個別に承認を得る |
-| ナレッジ                 | データソース（Dataverse テーブル / SharePoint / ファイル等）                  |
-| ツール                   | MCP Server の接続先・用途                                                     |
-| チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                |
+| ナレッジ                 | データソース（Dataverse テーブル / SharePoint / ファイル等）                                                                             |
+| ツール                   | MCP Server の接続先・用途                                                                                                                |
+| チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                                                                           |
 
 ```
 フロー: 設計提示 → ユーザー承認 → アイコン画像提案 → ユーザー選択 → UI で Bot 作成 → スクリプトで設定適用
@@ -263,6 +263,8 @@ if ai_idx >= 0:
 6. **Step 5-6**: エージェント公開 + 説明設定
 7. **Step 7-8**: Teams / Copilot チャネル公開設定
 8. **Step 9**: ナレッジ・ツール・トリガーの手動追加案内
+
+ナレッジ、MCP、トリガー、外部文書やユーザー入力を扱う場合は、公開・再公開前に[外部入力と公開前チェック](references/external-input-release-check.md)で権限・操作範囲と利用者視点の試験を確認する。
 
 **完了判定**: 保存・公開済み（構成を読み戻し、公開状態を確認）と、稼働中（承認済み接続・トリガーで実入力から目的の出力／副作用が確認できる）は別の状態。デプロイ成功のログや公開だけでは稼働完了としない。チャネル到達性、接続認証、少数の実ケースと失敗時動作を承認された方法で検証し、未検証項目を明記する。
 

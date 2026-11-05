@@ -9,7 +9,7 @@
 - 既定の UI / チャネル優先順位は **Teams / Microsoft 365 Copilot → 画面 UI が本当に必要なら Canvas App を基本案** とする。Canvas App のデータソース・コネクタのライセンスは案件ごとに確認する
 - Canvas App では仕様・技術要件を満たすのが難しい場合は **Code Apps / Model-Driven Apps** も代替候補として提案し、実現性・ライセンス・費用を確認してユーザー承認後に採否を決める
 - Code Apps の利用者には Premium の利用権が必要。Premium ライセンスの割り当て以外に従量課金、App Pass、auto-claim も公式の前提条件に挙げられているため、案件に適用する付与方法と費用を確認する（[Microsoft Learn](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/overview#license-end-users-with-power-apps-premium)、確認日: 2026-10-08）
-- Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず **ライセンスと Credits の評価項目** として案件ごとに確認する
+- Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは、消費量の大小にかかわらず **ライセンスと Credits の評価項目** として案件ごとに確認する。コネクタの Premium 区分だけで Power Automate Premium の追加購入を断定せず、フローの種別・プランと対象利用者／実行主体の権利を照合する（下記「エージェントフローと Premium コネクタ」を参照）
 - ライセンス要件は、納品形態ではなく構成に依存する
 - Copilot Credits、Code Apps、Copilot Studio の課金条件は更新されやすい
 - 利用者と実行主体のライセンス適合をそれぞれ確認し、原則として既定ベースライセンス内で成立させる
@@ -44,6 +44,12 @@
 - **SR 2610140060001409**: テナントに容量がない場合と、容量が当該環境で利用できない場合について、対象前提ではエージェントの作成・公開、固定応答、生成回答、エージェントから呼ぶフローの通常アクションは動作する一方、トピック内／直接ツールとしてのプロンプトとフロー内の AI Builder 機能は使えないとの回答。設定・環境で挙動が異なり得るという留保があり、公開資料が全機能について同じ分岐を明記しているとは扱わない。
 
 上記二つの SR は **Standard ハーネス／M365 Copilot ライセンスを持つ社内利用者による Teams／Microsoft 365 Copilot での認証済み利用／回答で扱った対象機能・経路** に限り、他チャネルには適用しない。[公式料金表](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)の No charge 表記は対象条件の控除・課金判定を裏付けるが、「No charge でも対象環境に利用可能な容量が必要」「容量不足時にどの機能が止まるか」という細かな機能別の結論は SR に依存する。公式の[容量管理](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-copilot-credits-capacity)には超過時の一般的な停止条件やエージェントフローの例外もあるため、これと SR の『容量なし』の個別回答を同じ条件の規則として統合しない。対象環境で相違が出た場合は条件・確認日・実測結果を残し、未確認として管理者と再照会する。
+
+### エージェントフローと Premium コネクタの利用権
+
+**コネクタ区分、フローの請求先、利用権、追加購入の要否は別判定**とする。一般の Power Automate クラウドフローでは Premium コネクタの実行に利用者の適切なライセンスまたはフローへの Process ライセンス等が必要となる場合がある。一方、Copilot Studio の**エージェントフローに変換すると Copilot Studio 容量を使用し、Power Automate の請求から切り替わる**。したがって、一般クラウドフローのライセンス規則をエージェントフローへそのまま当てはめ、Premium 区分だけで Power Automate Premium の追加購入を断定しない。Copilot Studio の standalone サブスクリプションでは Premium コネクタによるデータ接続が案内されている。ただし、この記述と請求先の切替だけでは、**Microsoft 365 Copilot ライセンス保有者がエージェントから呼ぶエージェントフロー内の任意の Premium コネクタを Power Automate Premium なしで実行できる**とまでは確認できない。コネクタ固有の利用条件、実際のフロープラン、接続所有者と利用者の権利、対象環境の Copilot Studio 容量を照合し、追加ライセンス・費用の要否を個別判定する。SR 2610090060002798 の AI Builder に関する回答を他の Premium コネクタへ拡張しない。
+
+根拠（確認日: 2026-11-05）: [Agent flows overview — Manage agent flow capacity usage / Convert a Power Automate flow to an agent flow](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview)、[Get access to Copilot Studio — Standalone Copilot Studio subscription](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing-subscriptions)、[Power Automate licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)。エージェントのツールとして呼ぶ経路には [Create an agent flow as a tool — requirements / prerequisites](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) のトリガー・応答・Copilot Studio 利用権の条件も適用する。
 
 ## 2. このパッケージで先に確認すること
 
