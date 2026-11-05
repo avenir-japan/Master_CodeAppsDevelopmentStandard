@@ -27,14 +27,14 @@
 
 公開後に利用者が実行できるかは、対象の **Standard ハーネス、Teams／Microsoft 365 Copilot での認証済み社内利用、Microsoft 365 Copilot ライセンス、対象の AI 機能と呼び出し経路** を案件ごとに照合して判定する。以下は Microsoft Learn（2026-10-30 確認）と依頼者から提供された 2026-10 のサポート回答要旨に基づく。SR の回答本文は確認していない。匿名・外部利用者、他チャネル、他ハーネス、一般のクラウドフローには SR の結論を拡張しない。
 
-| 判定する軸 | 納品前に確認すること |
-| --- | --- |
-| 1. 利用権・追加ライセンス | 作成者・認証利用者・接続所有者・実行主体と機能ごとの利用権。AI Builder クレジットや Power Automate Premium が不要という SR 結論は対象構成に限定する |
+| 判定する軸                  | 納品前に確認すること                                                                                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. 利用権・追加ライセンス   | 作成者・認証利用者・接続所有者・実行主体と機能ごとの利用権。AI Builder クレジットや Power Automate Premium が不要という SR 結論は対象構成に限定する                                |
 | 2. 対象環境で利用可能な容量 | 購入済み Copilot Studio 容量の有無と、対象環境への割り当て、テナント未割り当てプールの利用設定、または環境に紐づけた従量課金プランを確認する。明示割り当てだけを唯一の方法としない |
-| 3. 使用量の計測・表示 | 管理センターで公開後の対象実行の使用量・表示条件を確認する。表示された利用量をそのまま請求・控除量とみなさない |
-| 4. 購入済み容量からの控除 | 認証済み M365 Copilot 利用者の対象実行が No charge となる表・脚注・前提と、該当しない経路を区別する。容量が必要でも控除ゼロとなる条件がある |
-| 5. 従量課金 | 対象実行が No charge か、環境の従量課金プランで請求され得るかを判定する。従量課金を使用するならプランと対象環境の紐付けを確認する |
-| 6. 容量不足時の実行可否 | テナントに容量なし／容量があっても当該環境で利用不可を分け、公開後に対象 AI ツール・プロンプト・モデルが実行可能か確認する。非課金と実行可能は別判定とする |
+| 3. 使用量の計測・表示       | 管理センターで公開後の対象実行の使用量・表示条件を確認する。表示された利用量をそのまま請求・控除量とみなさない                                                                     |
+| 4. 購入済み容量からの控除   | 認証済み M365 Copilot 利用者の対象実行が No charge となる表・脚注・前提と、該当しない経路を区別する。容量が必要でも控除ゼロとなる条件がある                                        |
+| 5. 従量課金                 | 対象実行が No charge か、環境の従量課金プランで請求され得るかを判定する。従量課金を使用するならプランと対象環境の紐付けを確認する                                                  |
+| 6. 容量不足時の実行可否     | テナントに容量なし／容量があっても当該環境で利用不可を分け、公開後に対象 AI ツール・プロンプト・モデルが実行可能か確認する。非課金と実行可能は別判定とする                         |
 
 [Copilot Studio の請求レートと脚注](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)は Standard ハーネスにおける認証済み Microsoft 365 Copilot 利用者の対象 B2E 実行を No charge とする一方、エージェントフローは **「エージェントがフローを呼び出したとき」トリガー**の条件を明記し、別トリガーへ一般化しない。[容量管理](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-copilot-credits-capacity)には未割り当てテナント容量、環境割り当て、従量課金、超過時の制御が別々に記載されている。No charge と容量不足時の実行可否は別々に判定し、案件の構成・環境で照合する。エージェントのテスト、フローのテスト、プロンプトの単体テストが成功しても、**顧客テナントでの公開後実行や非課金の根拠にはならない**。
 
@@ -47,9 +47,28 @@
 
 ### エージェントフローと Premium コネクタの利用権
 
-**コネクタ区分、フローの請求先、利用権、追加購入の要否は別判定**とする。一般の Power Automate クラウドフローでは Premium コネクタの実行に利用者の適切なライセンスまたはフローへの Process ライセンス等が必要となる場合がある。一方、Copilot Studio の**エージェントフローに変換すると Copilot Studio 容量を使用し、Power Automate の請求から切り替わる**。したがって、一般クラウドフローのライセンス規則をエージェントフローへそのまま当てはめ、Premium 区分だけで Power Automate Premium の追加購入を断定しない。Copilot Studio の standalone サブスクリプションでは Premium コネクタによるデータ接続が案内されている。ただし、この記述と請求先の切替だけでは、**Microsoft 365 Copilot ライセンス保有者がエージェントから呼ぶエージェントフロー内の任意の Premium コネクタを Power Automate Premium なしで実行できる**とまでは確認できない。コネクタ固有の利用条件、実際のフロープラン、接続所有者と利用者の権利、対象環境の Copilot Studio 容量を照合し、追加ライセンス・費用の要否を個別判定する。SR 2610090060002798 の AI Builder に関する回答を他の Premium コネクタへ拡張しない。
+### 判定の要点
 
-根拠（確認日: 2026-11-05）: [Agent flows overview — Manage agent flow capacity usage / Convert a Power Automate flow to an agent flow](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview)、[Get access to Copilot Studio — Standalone Copilot Studio subscription](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing-subscriptions)、[Power Automate licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)。エージェントのツールとして呼ぶ経路には [Create an agent flow as a tool — requirements / prerequisites](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) のトリガー・応答・Copilot Studio 利用権の条件も適用する。
+- **一般の Power Automate クラウドフロー**
+  - Premium コネクタの実行には、利用者の適切なライセンスまたはフローへの Process ライセンス等が必要となる場合がある。
+  - エージェントから呼び出しているだけでは、エージェントフローに変換されたことにはならない。フローのプランを確認する。
+- **Copilot Studio のエージェントフロー**
+  - 個別の Power Automate ライセンスを必要とせず、Premium コネクタを使用できる。
+  - Premium コネクタであることだけを理由に、Power Automate Premium の追加購入を必須としない。
+  - 既存のクラウドフローを変換すると、請求先が Power Automate から Copilot Studio 容量に切り替わる。変換には対象環境のプリペイド容量または従量課金設定が必要で、元には戻せない。
+- **Copilot Credits が No charge となる条件**
+  - Microsoft 365 Copilot ライセンスで認証された社内利用者がエージェントと対話する。
+  - エージェントが、その認証済み利用者の ID で動作する。
+  - エージェントフローを **When an agent calls the flow** トリガーで起動する。
+  - フェアユースの範囲内である。
+  - 上記を満たす場合、フロー内の全アクションが No charge の対象となる。
+- **上記の No charge 条件に該当しない場合**
+  - イベント・スケジュール・Power Automate クラウドフロー起点などの実行には、No charge の扱いを適用しない。Copilot Credits の消費と対象環境の容量・従量課金設定を確認する。
+- **別途確認すること**
+  - No charge は、コネクタ固有の契約・接続権限や外部サービス料金の免除を意味しない。実際のフロープラン、利用者・実行主体・接続の権利、およびコネクタ固有の条件を確認する。
+  - SR 2610090060002798 の AI Builder に関する回答を、他の Premium コネクタへ拡張しない。
+
+根拠（確認日: 2026-11-05）: [FAQ for agent flows — ライセンスと Premium コネクタ](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-faqs)、[Agent flows overview — 容量・変換・自律実行](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview)、[Billing rates and management — 料金表と脚注 1](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)、[Power Automate licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)。エージェントのツールとして呼ぶ経路には [Create an agent flow as a tool — requirements / prerequisites](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) のトリガー・応答・Copilot Studio 利用権の条件も適用する。
 
 ## 2. このパッケージで先に確認すること
 
