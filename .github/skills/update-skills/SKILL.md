@@ -51,7 +51,7 @@ triggers:
 
 | スクリプト | 用途 |
 |---|---|
-| [scripts/validate_skill.py](scripts/validate_skill.py) | 構成検証: フォルダ名＝`name` 一致 / Step 番号が整数連番 / `references`・`scripts` の有無 / 秘匿情報スキャン（Step 3・7） |
+| [scripts/validate_skill.py](scripts/validate_skill.py) | 構成検証: フォルダ名＝`name` 一致 / Step 番号が整数連番 / `references`・`scripts` の有無 / スキル内 Markdown のローカル見出しリンク / 秘匿情報スキャン（Step 3・7） |
 | [scripts/manage_skill_pr.py](scripts/manage_skill_pr.py) | リモートのオープン PR を走査し、対象スキルに触れる PR を検出して「更新 or 新規」とマージ順を提示（Step 5） |
 | [scripts/publish_skill.py](scripts/publish_skill.py) | 公開を一括自動化: PR 先リポジトリを一時 clone → ブランチ → スキル＋集約ファイルをコピー → 検証 → commit → push → PR 作成/更新（Step 6）。`--dry-run` 対応 |
 
@@ -79,7 +79,8 @@ triggers:
 ### Step 1: 構成を整える（役割分離）
 
 1. **`SKILL.md`（正常系）**: 番号付き **Step** でワークフローを書く。トリガー語・使用ツール・出力フォーマットを明示。
-   冗長な背景説明やコード全文は書かず `references/` へ逃がす。
+   冗長な背景説明やコード全文は書かず `references/` へ逃がす。更新前に既存の見出し構成を確認し、同じ論点は既存節に統合する。
+   判断事項は短い箇条書き、比較は観点をそろえた表、手順は見出しと番号付きリストで整理し、長文の段落・巨大な表・末尾への継ぎ足しを避ける。情報を削らず、詳細へのリンクで本文を短く保つ。
 2. **`references/`（参考・異常系）**: `troubleshooting.md`（異常系）と必要な参考資料を置く。
 3. **`scripts/`（利用スクリプト）**: 手順内で使ったスクリプトを置く。手作業を残さずスクリプト化する。
 4. **集約ファイルの同時更新（新規スキル時は必須）**: スキルを新規追加したら、カタログ `../README.md` の
@@ -115,7 +116,7 @@ triggers:
 `validate_skill.py` で機械的に検証する（手作業でのチェックを残さない）。
 
 ```powershell
-# 対象スキルを検証（フォルダ名＝name / Step 整数連番 / references・scripts 有無 / 秘匿情報）
+# 対象スキルを検証（フォルダ名＝name / Step 整数連番 / references・scripts 有無 / ローカル見出しリンク / 秘匿情報）
 python .github/skills/update-skills/scripts/validate_skill.py .github/skills/<skill-name>
 
 # 全スキルを一括検証

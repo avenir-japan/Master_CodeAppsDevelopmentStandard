@@ -63,6 +63,8 @@ sess.patch(f"{API}/bots({bot_id})", json=patch)
 
 ## botcomponents（配下コンポーネント）
 
+スキルは同一階層にファイルを置く **フラット Python バンドル**を前提とする。JavaScript / pptxgenjs やサブフォルダ依存の構成、同梱画像を直接読み込む構成は使わない。画像等が必要なら Base64 埋め込みを検討する。
+
 | componenttype | 種別 | data / 格納先 |
 |---|---|---|
 | **9** | InlineAgentSkill（スキル）または McpTool（ツール） | `data` 列（`kind:` で判別） |

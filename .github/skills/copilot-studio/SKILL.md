@@ -38,6 +38,7 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 | リファレンス                                                                         | 内容                                                                 |
 | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
 | [構築リファレンス](references/build-reference.md)                                    | 構築手順の詳細・Instructions テンプレート・スクリプトコード          |
+| [ナレッジソースの選定](references/knowledge-source-selection.md)                     | ファイル直接登録・SharePoint サイト参照・Dataverse 取り込みの比較と検証導入パッケージの条件付き初期提案 |
 | [外部トリガー](references/trigger.md)                                                | 承認済み例外案の UI 設定。後半の API フロー作成例は廃止・履歴用      |
 | [トリガーパターン](references/trigger-patterns.md)                                   | トリガーの設定パターン集                                             |
 | [トリガートラブルシューティング](references/trigger-troubleshooting.md)              | トリガー関連のトラブルシューティング                                 |
@@ -89,163 +90,15 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 
 ## 納品時の切り分け
 
-Copilot Studio の納品、環境移送、顧客環境へのインポートに関する相談を受けた場合は、**何が自動整理できて、何が半自動で反映できて、何が顧客環境でしか完了できないか** を先に切り分ける。
-
-| 論点                  | Copilot で自動整理                                  | スクリプトで半自動                       | 顧客管理者が実施                                  |
-| --------------------- | --------------------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
-| ナレッジ URL 差し替え | 変数化方針、環境変数名、差し替え対象 URL 一覧の提案 | 補助ファイル、設定値、手順書の更新       | 顧客環境の実 URL 確定と現在値投入                 |
-| チャネル設定          | 必要チャネルと公開手順の整理                        | 説明文、配布手順、補助ドキュメントの整備 | Teams / M365 Copilot / Web の実公開設定           |
-| 認証設定              | 必要な認証方式、前提条件、確認項目の整理            | 設定雛形、手順書、入力項目一覧の整備     | Entra ID SSO、OAuth、シークレット投入、管理者同意 |
-
-Copilot は次を既定動作とする。
-
-1. ナレッジ URL は固定値のままにせず、まず変数化または差し替え手順を提案する
-2. チャネル設定と認証設定は、ソリューション import だけで完了するように見せず、`納品先での別作業` と明示する
-3. 顧客テナントでしか分からない URL、テナント ID、クライアント ID、シークレット、管理者承認有無は、Copilot が仮決めしない
-4. マネージド案件では、Instructions やナレッジ設定の軽微変更も顧客側編集前提にせず、再提供運用を優先して案内する
-5. エージェントの公開状態、チャネル設定、利用者への提供状態、関連フローの稼働状態、エンドツーエンドの実行成功を別々に確認する。一つの状態だけで他を推定しない
-
-詳細な制約は [納品時制約](references/managed-solution-constraints.md) を参照。
+- Copilot はナレッジ URL の変数化・差し替え対象、チャネル・認証の要件を整理し、スクリプトで設定値・補助文書を整える。顧客管理者は実 URL・資格情報・管理者同意、Teams / M365 Copilot / Web の実公開と SSO / OAuth を確認・実施する。
+- ソリューション import と、公開・チャネル・認証・フロー稼働・実入力による実行成功は別々に判定する。マネージド案件では顧客側の直接編集を既定とせず再提供する。詳細は [納品時制約](references/managed-solution-constraints.md) を参照する。
 
 ## 絶対遵守ルール
 
-### Bot 作成は API 不可 → Copilot Studio UI 必須
-
-```
-❌ Dataverse bots テーブルへの直接 INSERT
-   → PVA Bot Management Service にプロビジョニングされない
-   → Copilot Studio UI で「エージェントの作成中に問題が発生しました」エラー
-   → botroutinginfo が 404 になる
-
-✅ Copilot Studio UI で手動作成 → API で設定変更のみ
-```
-
-### GPT コンポーネント（componenttype=15）の扱い
-
-1. **UI が作成したコンポーネントを特定して更新する**
-   - `bots(id)?$select=configuration` → `configuration.gPTSettings.defaultSchemaName` で UI コンポーネントの schemaname を取得
-   - API で新しい GPT コンポーネントを INSERT すると UI と API で別々のコンポーネントが存在し、UI は自分のコンポーネントしか読まない
-
-2. **configuration を PATCH する際は既存値をディープマージする**
-   - `configuration` を丸ごと上書きすると `gPTSettings.defaultSchemaName` やモデル設定が消える
-   - 必ず GET → ディープマージ → PATCH
-   - `optInUseLatestModels` は明示的に `False` を設定 — `True` だと UI で選択した基盤モデルが別モデルへ強制変更される
-   - `aISettings` も丸ごと上書きせずディープマージで既存のモデル選択を保持
-
-3. **GPT コンポーネントを棚卸しし、既存のものは保持する**
-   - `componenttype eq 15` で全取得 → `defaultSchemaName` と一致する UI コンポーネントを特定。他のコンポーネントは参照・依存関係を調査し、削除する場合は ID ごとの明示承認と復旧計画を要する。スキーマ名だけで自動削除しない。
-
-### 指示（Instructions）の YAML 形式 — PVA ダブル改行フォーマット
-
-PVA パーサーは標準 YAML のシングル改行 (`\n`) を**構造行**として認識しない。
-YAML の**構造行**（kind, displayName, conversationStarters 等）はダブル改行 (`\n\n`) で区切る必要がある。
-ただし `instructions: |-` ブロック内のテキストはシングル改行で記述する。
-
-```python
-# ✅ 正しい構築方法
-def _build_gpt_yaml():
-    # instructions ブロック（シングル改行）
-    inst_block = "\n".join(f"  {line}" for line in GPT_INSTRUCTIONS.splitlines())
-
-    # conversationStarters（ダブル改行）
-    starter_lines = []
-    for p in PREFERRED_PROMPTS:
-        starter_lines.append(f"  - title: {p['title']}")
-        starter_lines.append(f"    text: {p['text']}")
-    starters_block = "\n\n".join(starter_lines)
-
-    return (
-        "kind: GptComponentMetadata\n\n"
-        f"displayName: {BOT_NAME}\n\n"
-        f"instructions: |-\n{inst_block}\n\n"
-        f"conversationStarters:\n\n{starters_block}\n\n"
-    )
-```
-
-```
-❌ yaml.dump() → PVA パーサーと非互換
-❌ 全行シングル改行 → conversationStarters / quickReplies が UI に反映されない
-❌ 全行ダブル改行 → instructions テキストが空行だらけになる
-❌ conversationStarters の title/text をダブルクォートで囲む → PVA に反映されない
-✅ 構造行はダブル改行、instructions ブロック内はシングル改行
-✅ conversationStarters の title/text はクォートなし
-✅ displayName キーを含める（UI が表示に使用）
-✅ instructions 内で単一波括弧 {変数名} を使わない → PVA が Power Fx 式として解釈し IdentifierNotRecognized エラー。自然言語で記述する
-```
-
-### ConversationStart トピックの YAML 形式
-
-ConversationStart トピック（componenttype=9）も同じダブル改行フォーマット。
-
-```python
-lines = []
-lines.append("kind: AdaptiveDialog")
-lines.append("beginDialog:")
-lines.append("  kind: OnConversationStart")
-lines.append("  id: main")
-lines.append("  actions:")
-lines.append("    - kind: SendActivity")
-lines.append(f"      id: {send_id}")
-lines.append("      activity:")
-lines.append("        text:")
-lines.append(f"          - {greeting_text}")  # クォートなし
-lines.append("        speak:")
-lines.append(f'          - "{greeting_text}"')
-lines.append("        quickReplies:")
-for qr in QUICK_REPLIES:
-    lines.append(f"          - kind: MessageBack")
-    lines.append(f"            text: {qr}")
-# ダブル改行で結合
-new_data = "\n\n".join(lines) + "\n\n"
-```
-
-```
-❌ シングル改行 → 送信ノードが消え、quickReplies が UI に反映されない
-❌ 挨拶テキストに生改行 \n を含める → YAML が壊れる（スペースに置換する）
-✅ 全行ダブル改行で結合
-✅ actions 配下は 4 スペースインデント
-```
-
-### 基盤モデル選択の保持（aISettings）
-
-PVA は GPT コンポーネントの `data` YAML 末尾に基盤モデル情報を格納する:
-
-```yaml
-aISettings:
-  model:
-    modelNameHint: <UI で選択したモデル識別子>
-```
-
-GPT コンポーネントの `data` を上書きすると、この `aISettings` セクションが消えて
-UI で選択したモデル設定が失われる。
-
-```python
-# ✅ 更新前に既存データから aISettings セクションを抽出 → 新 YAML の末尾に付加
-existing_data = ui_comp.get("data", "")
-ai_idx = existing_data.find("\naISettings:")
-if ai_idx < 0:
-    ai_idx = existing_data.find("aISettings:")
-if ai_idx >= 0:
-    ai_settings_section = existing_data[ai_idx:].rstrip()
-    final_yaml = new_yaml.rstrip("\n") + "\n\n" + ai_settings_section + "\n\n"
-```
-
-```
-❌ GPT data を丸ごと上書き → 基盤モデルがデフォルトに戻る
-✅ 更新前に aISettings セクションを抽出して保持
-✅ 初回デプロイ後にユーザーが UI でモデルを設定 → 2 回目以降のデプロイで保持される
-```
-
-### 説明（Description）の保存場所
-
-```
-❌ YAML 内の description キー → UI が読まない
-❌ bot エンティティの description プロパティ → 存在しない
-✅ botcomponents テーブルの description カラム
-
-注意: data PATCH の非同期処理が description を上書きする
-→ 対策: publish 後に description を別途 PATCH する
-```
+- v1 Bot は Dataverse `bots` への直接 INSERT ではなく Copilot Studio UI で作成し、プロビジョニング完了後に設定する。
+- GPT (`componenttype=15`) は UI 作成済みの `configuration.gPTSettings.defaultSchemaName` と照合して更新する。別コンポーネントの自動削除は禁止。既存設定を GET → ディープマージ → PATCH し、`optInUseLatestModels=False` と `aISettings` のモデル選択を保持する。
+- Instructions / ConversationStart は PVA 固有のダブル改行 YAML を使い、`yaml.dump()` で書き戻さない。説明は `botcomponents.description` に publish 後に設定する。
+- 更新コード、フォーマット例、例外と復旧条件は [構築リファレンス](references/build-reference.md#構築手順) を参照する。
 
 ## 構築手順
 
@@ -278,9 +131,7 @@ Instructions テンプレート・既存エージェント改善パターンは 
 
 ## エージェントの評価
 
-- 内容品質と処理成功は別の観点として評価し、基準と結果を分けて記録する。処理が完了したことだけで内容品質を合格としない
-- エージェントの目的に合う固定の回帰ケースを用意し、複数回実行してケース別の結果と実行間の変動を記録する
-- モデルを比較するときは、入力、Instructions、出力契約、利用するナレッジ・ツール、評価基準などの条件をそろえる。モデル・設定・実行条件と、結果および変動を記録し、特定モデルや一律の合格点を標準として固定しない
+内容品質と処理成功を分け、固定の回帰ケースを複数回実行して変動を記録する。モデル比較は入力・Instructions・ナレッジ・ツール・出力契約・評価基準をそろえる（[評価の詳細](references/build-reference.md#評価と完了判定の補足)）。
 
 ## .env 必須項目
 

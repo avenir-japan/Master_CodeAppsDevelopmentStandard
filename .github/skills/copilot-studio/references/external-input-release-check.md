@@ -12,7 +12,7 @@
 4. 外部文章や取得した文書の指示をエージェントの業務指示として実行させない方針と、
    拒否すべき操作・期待応答をテストケースとして記録する。
 5. ライセンス、Copilot Credits、DLP、対象チャネルの適合は
-   [Phase 0](../../standard/SKILL.md#開発着手前の実現可能性ゲート必須)で判断する。
+   [Phase 0](../../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で判断する。
 
 ## 公開前の受入
 

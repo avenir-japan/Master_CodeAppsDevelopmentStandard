@@ -187,6 +187,10 @@ Code Apps 側の生成結果:
 
 ## 代表的アクションパターン
 
+### GrantAccess / RevokeAccess（Dataverse 非バインドアクション）
+
+`PerformBoundAction` では `Bound action 'GrantAccess' is not found`（BadRequest）。`PerformUnboundAction` に `actionName` と `Target` パラメータを指定すると Draft 作成・有効化に成功した（2026-05-02 検証）。`@odata.type` は式と解釈されるため `@@odata.type` としてエスケープする。接続は `runtimeSource: "embedded"` と `connectionReferenceLogicalName` で参照する。`Target` / `PrincipalAccess` / `Revokee` の payload を Compose に分けると UI で編集しやすい。
+
 ### Dataverse レコード取得
 
 ```python
@@ -433,7 +437,7 @@ Dataverse の File 型列（FileAttributeMetadata）や Image 型列にフロー
 
 ```
 ★ 重要ポイント:
-  ✅ operationId は "UpdateEntityFileImageFieldContent"（唯一の正解）
+  ✅ operationId は "UpdateEntityFileImageFieldContent"（唯一の正解。Draft 作成・有効化成功、2026-04-27 検証）。`UploadFile` は存在せず `WorkflowOperationInputsApiOperationNotFound` になる
   ❌ "UploadFile" は Dataverse コネクタに存在しない → InvalidOpenApiFlow エラー
   ✅ item にはバイナリコンテンツを渡す（@base64ToBinary() 等）
   ✅ x-ms-file-name でファイル名を指定（日本語ファイル名も可）
@@ -569,8 +573,9 @@ CN_DV_AI: {
 
 ```
 ✅ operationId: "aibuilderpredict_customprompt"（Draft 作成＆有効化ともに成功）
-❌ operationId: "PerformBoundAction" + msdyn_PredictByReference（InvalidOpenApiFlow）
+❌ operationId: "PerformBoundAction" / "PerformUnboundAction" + msdyn_PredictByReference（InvalidOpenApiFlow で Draft 作成自体が失敗）
 ✅ connectionReferences に別キー（_1 サフィックス）で登録、同じ接続参照を参照可能
+✅ parameters の `recordId`（AI Model ID）と `item/requestv2/...` に入力を渡し、テキスト出力は `body/responsev2/predictionOutput/text` を参照（構造化出力は次節参照）
 ```
 
 ### AI Builder 出力の参照方法（★ 重要 — ParseJson は不要）
@@ -619,7 +624,7 @@ CN_DV_AI: {
 ````
 
 ```
-❌ body/subject パラメータは存在しない → InvalidOpenApiFlow の原因
+❌ body/subject パラメータは operationSchema に存在しない → 有効化時に InvalidOpenApiFlow (0x80060467)。エラーメッセージにパラメータ名が出ず特定しにくい
 ✅ 使用可能: poster, location, body/recipient/groupId, body/recipient/channelId, body/messageBody
 ✅ messageBody は HTML 対応
 ✅ チャネル ID/チーム ID はユーザーに Teams で右クリック → 「チャネルへのリンクを取得」で URL をもらう

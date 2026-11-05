@@ -31,12 +31,7 @@ Power Platform 開発で使いやすい **factsheet 群** と **全体 document.
 - `--input` / `--output` を指定した場合はそのパスを優先する
 - 入力の元資料は読み取り専用として扱い、移動・削除しない
 
-### 推奨の始め方
-
-- `@PowerCode input フォルダの仕様書を requirements markdown に変換して`
-- `@PowerCode /home/.../input の PDF と Excel を factsheet 化して`
-- `@PowerCode spec-to-markdown`
-- `@PowerCode spec-to-markdown input`
+利用例と入力セットの扱いは[変換ガイド](references/conversion-guide.md#2-推奨コマンド)を参照する。
 
 ## 目的
 
@@ -60,43 +55,11 @@ Power Platform 開発で使いやすい **factsheet 群** と **全体 document.
   document.md          # 全体統合ドキュメント
 ```
 
-### 既定フォルダ運用
+入力セット別の出力命名と固定出力パスの指定は[変換ガイド](references/conversion-guide.md#2-推奨コマンド)を参照する。
 
-```text
-work/
-  spec-to-markdown/
-    input/
-      customer-a/
-      project-x/
-    output/
-      batch-2026-05-11-20-15-58/
-      customer-a-2026-05-11-20-17-42/
-```
+## factsheet と document.md の整理
 
-- `input/` 直下にファイルを置いた場合は `batch-<timestamp>/`
-- `input/customer-a/` のような入力セットを指定した場合は `customer-a-<timestamp>/`
-- 出力先を固定したい場合だけ `--output /absolute/path/to/output` を使う
-
-## factsheet で必ず整理する項目
-
-- 対象業務 / 目的
-- 利用者 / ロール
-- Dataverse テーブル候補
-- 主要列 / マスタ / リレーション候補
-- UI / チャネル要件（Teams / Microsoft 365 Copilot 優先、画面 UI が本当に必要なら Canvas App を基本案とする。Canvas App では要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案し、実現性・ライセンス・費用を確認）
-- Power Automate の自動化要件
-- Copilot Studio / AI Builder の利用余地
-- 外部連携
-- セキュリティ / 権限 / 監査の論点
-- 未確定事項 / 要確認事項
-
-## document.md で必ず整理する項目
-
-- 対象文書一覧
-- 文書間の重複 / 差分 / 矛盾
-- 共通業務フロー
-- Power Platform 全体構成の初期案
-- Phase 0 でユーザー確認が必要な論点
+各資料の業務・データ・UI・自動化・AI・権限の候補と未確定事項を factsheet に記録し、文書間の重複・矛盾、共通業務フロー、全体構成の初期案、Phase 0 の確認事項を `document.md` に統合する。項目・テンプレートと UI の選択条件は[変換ガイド](references/conversion-guide.md#4-factsheet-テンプレート)を参照する。
 
 ## MarkItDown 方針
 

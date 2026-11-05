@@ -67,166 +67,18 @@ UI で設定変更した場合も、これらは**設定の静的整合を確認
 
 ## 設計確認テンプレート
 
-v2 を採用すると決まったら、実装前に少なくとも次の内容をユーザーへ提示して承認を取る。
-このテンプレートは **Teams / Microsoft 365 Copilot 単独利用** を前提にしている。
-
-### 確認項目
-
-| 項目           | 何を決めるか                                       |
-| -------------- | -------------------------------------------------- |
-| エージェント名 | Teams / M365 Copilot 上での表示名                  |
-| 役割           | 何を支援するエージェントか                         |
-| 対象利用者     | 誰が使うか。社内限定か                             |
-| 利用チャネル   | Teams / Microsoft 365 Copilot のどちらを主に使うか |
-| Instructions   | 守るべきルール、回答方針、禁止事項                 |
-| モデル方針     | どのモデル系列を使うか                             |
-| メモリ利用     | 会話メモリを使うか                                 |
-| MCP / ツール   | 何の MCP サーバーや接続を使うか                    |
-| 公開情報       | アイコン、短い説明、長い説明、開発元名、各種 URL   |
-| 非対応事項     | Code Apps 呼び出しや Web 埋め込みが不要であること  |
-
-### 提示テンプレート
-
-以下の形で、そのまま設計確認に使える。
-
-```md
-## Copilot Studio v2 エージェント設計案
-
-- エージェント名:
-- 目的:
-- 主な利用者:
-- 利用チャネル: Teams / Microsoft 365 Copilot
-- v2 採用理由:
-  - 単独利用であり、外部埋め込みや Code Apps 連携が不要
-  - 新アーキ（cliagent）の構造で運用したい
-
-### Instructions 案
-
-<ここに指示文全文>
-
-### モデル / メモリ
-
-- モデル系列:
-- 会話メモリ: 有効 / 無効
-
-### 使うツール / MCP
-
-- 利用する MCP サーバー:
-- 接続準備の要否:
-- Confirm が必要な対象:
-
-### 公開情報
-
-- 短い説明:
-- 長い説明:
-- 開発元名:
-- Web サイト:
-- 利用規約 URL:
-- プライバシー URL:
-- アイコン案:
-
-### 非対応事項の確認
-
-- Code Apps からの呼び出し: なし
-- Web 埋め込み / SDK 連携: なし
-- 既存 v1 トリガー資産の流用: 不要
-```
-
-### 設計確認時の質問テンプレート
-
-ユーザーへの確認は、少なくとも次の 4 点を含める。
-
-1. このエージェントは Teams / Microsoft 365 Copilot 単独利用で、外部からは呼び出しませんか。
-2. Instructions に必ず守らせたい業務ルールや禁止事項は何ですか。
-3. 使いたい MCP サーバーや接続先は何ですか。
-4. 公開時に表示したい説明文、開発元名、リンク類は何ですか。
+エージェント名・目的・対象利用者、Teams / Microsoft 365 Copilot の利用チャネル、Instructions 全文、モデル・メモリ、MCP / 接続、公開情報と非対応事項を設計提示し、承認を得る。質問例と記入用テンプレートは [手動作成チェックリスト](references/manual-creation-checklist.md#設計確認の提示項目とテンプレート) を参照する。
 
 ## v1 との主な違い
 
-| 観点         | v1（`copilot-studio`）           | v2（本スキル）                                                 |
-| ------------ | -------------------------------- | -------------------------------------------------------------- |
-| Bot 作成     | UI 手動前提                      | 上流では API 作成可能。マスターでは UI 手動を既定              |
-| 設定の保存先 | GPT コンポーネント + PVA YAML    | `bots.configuration` の **BotConfiguration JSON**              |
-| recognizer   | クラシック PVA 系                | `CLICopilotRecognizer`                                         |
-| Instructions | PVA ダブル改行 YAML              | `agentSettings.instructions.segments[].value` のプレーン文字列 |
-| モデル指定   | `aISettings.model.modelNameHint` | `agentSettings.model.series`                                   |
-| メモリ       | 個別設定                         | `agentSettings.enableMemory`                                   |
-| スキル構成   | ナレッジ / トピック中心          | **フラット Python スキルバンドル**（type=9 + type=14）         |
-| MCP 追加     | 既存資産あり                     | **Copilot Studio UI で手動追加** が正本                        |
+v1 は UI 作成の GPT コンポーネント・PVA YAML・`aISettings.model.modelNameHint` を使う。v2 は UI 手動作成を既定とし、`bots.configuration` の BotConfiguration JSON・`CLICopilotRecognizer`・プレーン文字列の Instructions・`agentSettings.model.series` / `enableMemory` を使う。スキルはフラット Python バンドル、MCP は UI 手動追加と Confirm が必要（[構造と対比](references/new-architecture.md#v1旧アーキとの対比早見)）。
 
 ## 必須要件・落とし穴
 
-### configuration は BotConfiguration JSON
-
-v2 では Instructions やモデル設定は GPT YAML ではなく、`bots.configuration` 内の JSON に入る。
-
-```json
-{
-  "$kind": "BotConfiguration",
-  "recognizer": { "$kind": "CLICopilotRecognizer" },
-  "agentSettings": {
-    "$kind": "AgentSettings",
-    "model": { "$kind": "ModelConfig", "series": "<対象環境で確認したモデルシリーズ>" },
-    "instructions": {
-      "$kind": "Instructions",
-      "segments": [
-        { "$kind": "StaticSegment", "value": "<エージェントの指示文>" }
-      ]
-    },
-    "enableMemory": true
-  }
-}
-```
-
-- `series` はプレースホルダー。モデル名を固定せず、採用前に対象環境の Copilot Studio UI と Microsoft 公式資料で現在利用できる値・利用条件を確認する（[モデル名の障害例](references/troubleshooting.md)）
-- v1 の PVA ダブル改行 YAML は不要
-- 既存設定を変更するときは **GET → ディープマージ → PATCH** を前提にする
-- `configuration` の丸ごと上書きはモデルやメモリ設定を壊しやすい
-
-### スキルはフラット Python バンドル前提
-
-新ランタイムでは次の制約を前提にする:
-
-```
-❌ JavaScript / pptxgenjs 前提
-✅ Python ベースで実装する
-
-❌ サブフォルダに依存したバンドル構成
-✅ 同一階層のフラット構成でまとめる
-
-❌ 同梱画像ファイルをそのまま読む前提
-✅ 必要なら Base64 埋め込みで扱う
-```
-
-botcomponents の基本構造:
-
-| componenttype | 役割                       | 格納先     |
-| ------------- | -------------------------- | ---------- |
-| 9             | InlineAgentSkill / McpTool | `data`     |
-| 14            | スキル同梱ファイル         | `filedata` |
-
-### MCP サーバーは UI 手動追加が正本
-
-v2 の MCP サーバー追加は API 自動化しない。
-接続参照の内部状態と **Confirm** 操作に依存するため、**Copilot Studio UI で手動追加 → Confirm → 再公開** を正常系とする。
-
-手順は [references/mcp-servers.md](references/mcp-servers.md) を参照。
-
-### アイコン設定と公開は v2 専用の確認観点で扱う
-
-v2 では BotConfiguration だけ見ていれば十分ではない。
-UI での見え方、MCP の Confirm 状態、再公開の要否も含めて確認する。
-
-- 作成直後のチェックは [references/manual-creation-checklist.md](references/manual-creation-checklist.md)
-- アイコン設定と公開前後の確認は [references/icon-and-publish.md](references/icon-and-publish.md)
-- 公開時の説明文案は [references/publish-description-template.md](references/publish-description-template.md)
-
-### よくある失敗
-
-- `configuration` を丸ごと上書きしてモデルやメモリを消す
-- MCP サーバー追加後に **Confirm** を押さず、公開だけで済ませる
-- `missing connection reference` を API 不具合と誤認し、UI での再追加を試さない
-- v2 を外部連携用途に選んでしまい、後から埋め込み不可に気づく
+- `configuration` を直接更新する場合は GET → ディープマージ → PATCH とし、モデル・メモリ等を保持する。モデルシリーズは固定せず対象環境の UI・公式資料で確認する（[BotConfiguration と構造](references/new-architecture.md#configurationbotconfiguration-json)）。v1 用 PVA YAML は使わない。
+- v2 スキルは Python のフラットバンドル。JavaScript / pptxgenjs・サブフォルダ・同梱画像の直接読み込みを前提にせず、必要なら Base64 を使用する。`botcomponents` の type=9 は InlineAgentSkill / McpTool、type=14 は親スキルの同梱ファイル（[構造](references/new-architecture.md#botcomponents配下コンポーネント)）。
+- MCP は API 自動追加せず、接続参照を確認して UI で追加 → Confirm → 再公開（[手順](references/mcp-servers.md)）。`missing connection reference` 等は [トラブルシューティング](references/troubleshooting.md) で切り分ける。
+- アイコン・公開情報・UI 表示・MCP Confirm 状態を [アイコンと公開の最小ガイド](references/icon-and-publish.md) で確認する。
 
 ## サブリファレンス
 

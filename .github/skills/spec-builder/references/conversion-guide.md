@@ -56,7 +56,7 @@ powershell -ExecutionPolicy Bypass -File run_windows.ps1
 - checklist: `<repo-root>/spec/.cache/conversion-checklist.json`
 - pending JSON: checklist と同じ `spec/.cache/` に自動配置
 
-`spec/input/` に変換対象がない場合、`convert_documents.py` はワークスペース・フォルダ全体をスキャンし、変換候補になりうるファイル（対応拡張子）がないか確認する。見つかった場合は候補一覧を提示するので、元の場所を `--input` で指定するか、必要に応じて `spec/input/` へコピーする。
+`spec/input/` に変換対象がない場合、`convert_documents.py` はワークスペース・フォルダ全体をスキャンし、変換候補になりうるファイル（対応拡張子）がないか確認する。見つかった場合は候補一覧を提示するので、元の場所を `--input` で指定するか、必要に応じて `spec/input/` へコピーする。`--input` / `--staging` / `--docs`（互換: `--output`）/ `--checklist` の指定があれば既定値より優先する。
 元資料は移動・削除しない。コピーする場合も元ファイルは保持し、重複する候補は入力パスを指定して区別する。
 オプション（checklist のパスを変えると pending JSON も同じディレクトリに移動する）:
 
@@ -112,25 +112,28 @@ python convert_documents.py \
 ### business-requirements.md
 
 - 概要（対象業務・プロジェクト背景・開発段階・目的・検証仮説・スコープと対象外・成功条件）
-- ステークホルダー / ロール（表）
+- ステークホルダー / ロール（ロール・担当業務・関心事の表）
 - ユーザーストーリー（As a…I want…so that…形式）
 - 業務フロー
-- 未確定事項 / 要確認事項（表）
+- 資料由来の事実は出典を示し、未確認事項と改善仮説・提案を区別する
+- 未確定事項 / 要確認事項（項目・確認先・期限・ステータスの表）
 - 要件変更履歴（理由を併記）
 
 ### functional-requirements.md
 
 - 機能一覧（MoSCoW 優先度・受け入れ条件の表 — 受け入れ条件の正はここ。今回の対象範囲と対象外は business-requirements の判断を反映）
-- Dataverse テーブル候補（表）
-- UI 要件 / 自動化要件 / AI 連携要件（コンポーネント選定は `.github/skills/architecture/SKILL.md` の判断フローを優先。画面 UI が本当に必要なら Canvas App を基本案とし、Canvas App では要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案。実現性・ライセンス・費用を確認し、外部ユーザー向けの構成も案件要件と実現可能性で判断）
+- Dataverse テーブル候補（テーブル名・主な列・リレーションの表）
+- UI 要件（Teams / Microsoft 365 Copilot を優先し、画面 UI が本当に必要なら Canvas App を基本案とする。難しい場合は Code Apps / Model-Driven Apps を代替候補として提案し、実現性・ライセンス・費用とユーザー承認を確認。外部ユーザー向けの構成も案件要件と実現可能性で判断）
+- Power Automate の自動化要件、Copilot Studio / AI Builder の利用余地（採否・v1/v2 判断は [architecture](../../architecture/SKILL.md) に従う）、外部連携
 - 非機能要件（パフォーマンス・セキュリティ・可用性・スケーラビリティ・ユーザビリティの表 — test の非機能テストと区分を一致させる）
 - 要件変更履歴（理由を併記）
 
 ### design-requirements.md
 
-> ★ 全体構成・コンポーネント選定・構築フェーズは `.github/skills/architecture/SKILL.md` を正とし、
-> architecture スキルの判断フロー・設計アウトプットテンプレート（`references/design-patterns.md` §8）で確定した結果を転記する。
+> 全体構成・コンポーネント選定・構築フェーズは [architecture](../../architecture/SKILL.md) を正とし、
+> [設計アウトプットテンプレート](../../architecture/references/design-patterns.md)で確定した結果を転記する。
 
+- 事実と出典、未確認事項、To-Be 業務フローと役割・承認境界、KPI 仮説・測定方法、推奨案と代替案、採用の承認結果を区別する
 - Power Platform 全体構成案（architecture スキルのテンプレート準拠、Mermaid 構成図）
 - Phase 0 実現可能性判定（重要経路ごとの判定表または参照先、未確認・不適合への対応、承認者と承認結果）
 - 採用した構成・実装範囲と、PoC / MVPで対象外にした本番向け作り込みや後続判断事項
@@ -143,13 +146,15 @@ python convert_documents.py \
 
 ### test-requirements.md
 
-- テスト戦略（今回確認する目的・未検証の範囲を含める。PoC / MVPの結果を本番品質の保証として扱わない）
-- テストシナリオ（前提条件・操作手順・期待結果・優先度の表）
+- テスト戦略（テスト方針・環境・自動化範囲・今回確認する目的・未検証の範囲。PoC / MVP の結果を本番品質の保証として扱わない）
+- テストシナリオ（シナリオ名・前提条件・操作手順・期待結果・優先度の表）
 - 受け入れ条件（functional の機能 # を参照し確認方法を定義 — 条件本文の正は functional 側、二重管理しない）
-- 非機能テスト（合格基準の表 — 区分は functional の非機能要件と一致させる）
+- 非機能テスト（区分・テスト内容・合格基準の表 — 区分は functional の非機能要件と一致させる）
 - 要件変更履歴（理由を併記）
 
 ## 7. conversion-checklist の運用
+
+`pending_skills.json` と仮の staging を作成しただけでは本文抽出は未完了。そこで止まる場合は準備済みの成果物・未完了の抽出と統合・次の操作を分けて報告する。新しい資料を処理した場合や 5 文書が揃っていない場合、変換スクリプトは `spec/output/docs/` の同名ファイルを書き直すため、確定要件の正本を置かない。確認済みの内容だけを[要件ディスカバリー](requirements-discovery.md)で合意した開発入力へ反映する。
 
 - 新規ファイルが `spec/input/` に増えたらチェックリストへ追加
 - `is_completed=false` のファイルは再処理対象
@@ -160,8 +165,8 @@ python convert_documents.py \
 
 ## 8. 処理ルール
 
-- 画像は必ず agent-ocr
-- 画像以外は anthropics/skills（`context_hint` を参照して抽出観点を確認）
+- 画像は必ず agent-ocr。`pending_ocr.json` の `ocr_prompt_hint` を抽出指示とし、`staging_markdown_path` の `元のファイル名.元の拡張子.MD` に反映する
+- 画像以外は `pending_skills.json` の `source_path` を anthropics/skills で読み、`context_hint` の抽出観点に従って `staging_markdown_path` に反映する。処理後は docs の 5 文書を更新する
 - 推測で埋めず、情報不足は `要確認`
 - OCR 抽出では表を markdown table 化し、判読不能箇所は `[判読不可]` とする
 
@@ -170,6 +175,8 @@ python convert_documents.py \
 補足: anthropics/skills（Claude）も画像読解は可能だが、この運用では OCR を agent-ocr に固定する。
 
 ## 9. staging → docs 統合後の開発フロー
+
+統合時は checklist の `is_completed=false` を確認し、未完了の staging を補完する。全 staging を横断して各 docs の `要確認` を確認できた要件に更新し、`index.md` の処理状況テーブルも更新する。業務要件の開発段階・スコープが不明なら推測せず `要確認` とする。機能要件へ今回の範囲と対象外を反映し、設計要件へ Phase 0 の重要経路の判定・未確認事項・承認結果を記録する。PoC / MVP のフローアクションは目的達成と必要な検証に絞り、本番化時の判断事項を分ける。テスト要件は functional の機能番号に結び付け、未検証範囲を明示し、結果を本番品質の保証にしない。
 
 staging が全件完了したら、以下の流れで開発に入る。
 

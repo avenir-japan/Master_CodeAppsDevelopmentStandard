@@ -19,8 +19,8 @@ python .github/skills/power-automate/scripts/validate_flow_definition.py path/to
 `deploy_flow.py`、`deploy_flow_create_notify.py`、`deploy_flow_sp_teams.py` は引数なしでは API に接続しない。
 新規作成の承認後に `--execute` を指定する。既存フローの置換は、既存定義の退避と
 呼び出し元・ワークフロー ID への依存の確認後に、出力で確認した ID を
-`--execute --replace-workflow-id <workflowid>` として指定する。同名複数件は実行を中止する。
-削除・再作成はべき等ではなく、削除後の失敗による欠損を自動回復しない。
+`--execute --replace-workflow-id <確認した workflowid>` として指定する。接続参照の状態・依存も確認する。同名フローが複数ある場合、または指定 ID が一致しない場合は、**接続参照を作成・更新する前に停止**する。
+削除・再作成は ID や参照先を維持しない安全な上書きではなく、べき等でもない。削除後の失敗による欠損を自動回復しない。
 旧 `deploy_flow_sp_incident_v2.py` は履歴用で実行不可。新規 SharePoint 実装は
 プロパティトリガーと識別子によるコンテンツ取得を基に構築する。
 

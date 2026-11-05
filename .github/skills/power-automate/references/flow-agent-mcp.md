@@ -7,7 +7,7 @@ FlowAgent MCP はクラウドフローの編集・失敗 run の診断に使う*
 ## 利用前のゲート
 
 1. 対象環境・ソリューション・フロー・変更範囲、実行主体、使用する接続を特定する。
-2. [MCP クライアント状態チェック](../../standard/SKILL.md#事前検証-mcp-クライアント状態チェック)で
+2. [MCP ツールの利用可能性確認](../../standard/SKILL.md#事前検証-mcp-ツールの利用可能性)で
    VS Code の MCP 利用可否を確認し、利用する FlowAgent プラグインの入手元とバージョンを確認する。
 3. プラグインが要求する Node.js / Azure CLI 等と、対象環境に対する権限を確認する。
    `.vscode/mcp.json` にはシークレットを記載しない。FlowAgent 側の Azure CLI 認証と

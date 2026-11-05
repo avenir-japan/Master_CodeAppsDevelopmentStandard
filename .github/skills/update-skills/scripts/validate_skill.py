@@ -6,6 +6,7 @@
   3. Step 見出し（## / ### Step N）が整数で連番になっている（飛び・重複なし）。
   4. references/ と scripts/ の有無（無ければ警告）。
   5. 秘匿情報スキャン（実 GUID / *.crm*.dynamics.com / 実メール / クライアントシークレット様）。
+  6. スキル内 Markdown のローカル見出しリンクが実在するか確認。
 
 依存なし（標準ライブラリのみ）。どのリポジトリでも動く。
 
@@ -24,6 +25,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 # Windows の既定コンソール（cp932 等）でも絵文字・日本語を出力できるようにする
 try:
@@ -87,6 +89,8 @@ EMAIL_ALLOW = ("example.com", "example.org", "contoso.com", "noreply.github.com"
 NON_EMAIL_RE = re.compile(r"@(odata|microsoft|xmlns)\.", re.IGNORECASE)
 # プレースホルダー的な組織名（<org> / {org} / yourorg）は許容
 CRM_PLACEHOLDER = re.compile(r"https://(<org>|\{org\}|yourorg|\{[^}]+\})\.crm", re.IGNORECASE)
+LOCAL_HEADING_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^\s)]+\.md|)\#([^\s)]+)\)")
+HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
 
 
 def load_env(start: Path) -> None:
@@ -145,6 +149,53 @@ def scan_secrets(path: Path, rep: Report) -> None:
                 rep.warn(f"{rel}:{i}: 実メールアドレスらしき値 {em}（admin@example.com 等に置換）")
 
 
+def markdown_lines(path: Path):
+    """コードフェンス内の例示を除いた行を返す。"""
+    fence = None
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+            continue
+        if fence is None:
+            yield number, line
+
+
+def heading_anchors(path: Path) -> set[str]:
+    anchors: set[str] = set()
+    counts: dict[str, int] = {}
+    for _, line in markdown_lines(path):
+        match = HEADING_RE.match(line)
+        if not match:
+            continue
+        title = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", match.group(1))
+        title = re.sub(r"<[^>]*>", "", title)
+        slug = re.sub(r"[^\w\- ]", "", title.lower()).replace(" ", "-")
+        count = counts.get(slug, 0)
+        anchors.add(f"{slug}-{count}" if count else slug)
+        counts[slug] = count + 1
+    return anchors
+
+
+def scan_heading_links(skill_dir: Path, rep: Report) -> None:
+    cache: dict[Path, set[str]] = {}
+    for source in skill_dir.rglob("*.md"):
+        for number, line in markdown_lines(source):
+            for link in LOCAL_HEADING_LINK_RE.finditer(line):
+                target = (source.parent / unquote(link.group(1))).resolve() if link.group(1) else source.resolve()
+                if not target.is_file():
+                    rep.err(f"{source.relative_to(skill_dir)}:{number}: リンク先ファイルがない: {link.group(1)}")
+                else:
+                    if target not in cache:
+                        cache[target] = heading_anchors(target)
+                    if unquote(link.group(2)) not in cache[target]:
+                        rep.err(f"{source.relative_to(skill_dir)}:{number}: 見出しリンクがない: {link.group(0)}")
+
+
 def validate_skill(skill_dir: Path) -> Report:
     rep = Report(skill_dir.name)
     folder = skill_dir.name
@@ -193,6 +244,7 @@ def validate_skill(skill_dir: Path) -> Report:
         if p.is_file() and (p.suffix in exts or p.name == ".env.example"):
             scan_secrets(p, rep)
 
+    scan_heading_links(skill_dir, rep)
     return rep
 
 

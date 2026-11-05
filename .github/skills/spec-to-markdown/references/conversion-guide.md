@@ -11,6 +11,8 @@ Power Platform 向け要件整理に使えるよう、出力は raw markdown の
 
 ## 2. 推奨コマンド
 
+依頼例: `@PowerCode input フォルダの仕様書を requirements markdown に変換して`、`@PowerCode spec-to-markdown input`。入力を指定する場合は `@PowerCode <input パス> の PDF と Excel を factsheet 化して` と伝える。
+
 まずリポジトリルートで preflight/bootstrap を実行する。
 
 ```bash
@@ -55,7 +57,8 @@ work/spec-to-markdown/input/
 
 - `python convert_documents.py` の既定入力は `input/` 全体
 - `python convert_documents.py --input <repo-root>/work/spec-to-markdown/input/customer-a` とすると `customer-a-<timestamp>/` 配下へ出力される
-- `--output` を省略すると、毎回タイムスタンプ付きの別フォルダになるため上書き事故を避けやすい
+- `input/` 直下のファイルは `batch-<timestamp>/`、入力セットを指定すると `<input-set>-<timestamp>/`（例: `customer-a-<timestamp>/`）へ出力する
+- `--output` を省略すると、毎回タイムスタンプ付きの別フォルダになるため上書き事故を避けやすい。固定したい場合だけ `--output <出力先の絶対パス>` を使う
 - 入力ファイルは読み取り専用として扱い、元資料を移動・削除しない。変換結果は出力フォルダに作成する
 
 ## 3. 対応対象
@@ -69,6 +72,8 @@ work/spec-to-markdown/input/
 > Word / markdown / html まで含めるのは、添付仕様や補足メモが混在しやすいため。
 
 ## 4. factsheet テンプレート
+
+各 factsheet は対象業務・目的、利用者・ロール、Dataverse テーブル・主要列・マスタ・リレーション候補、UI・チャネル要件、Power Automate の自動化要件、Copilot Studio / AI Builder の利用余地、外部連携、セキュリティ・権限・監査、未確定事項を整理する。UI は Teams / Microsoft 365 Copilot を初期候補とし、画面が必要なら Canvas App を基本案にする。Canvas App で難しい場合に Code Apps / Model-Driven Apps を代替案とし、実現性・ライセンス・費用を確認する。選定は [architecture](../../architecture/SKILL.md) に引き継ぐ。
 
 各 factsheet は最低限次の構造にする。
 
@@ -111,6 +116,8 @@ work/spec-to-markdown/input/
 ```
 
 ## 5. document.md テンプレート
+
+対象文書一覧と文書間の重複・差分・矛盾、共通業務フロー、Power Platform 全体構成の初期案、Phase 0 でユーザー確認が必要な論点を含める。
 
 ```markdown
 # Power Platform requirements document

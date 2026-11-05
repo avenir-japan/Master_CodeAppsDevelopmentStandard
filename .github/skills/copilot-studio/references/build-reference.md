@@ -2,6 +2,21 @@
 
 ## 構築手順
 
+構築前にエージェント名・説明、Instructions 全文、推奨プロンプト（conversationStarters のタイトルと本文を 3〜5 個）、ConversationStart の挨拶とクイック返信（3〜5 個）、会話経路、ナレッジ、MCP 接続先、公開情報（短い説明・詳細な説明・背景色・開発者名）を設計提示し、承認を得る。既存エージェントはトピックの用途・依存先と維持／変更／削除案を確認し、削除は ID ごとに承認を得る（[既存エージェント改善パターン](#既存エージェント改善パターン)）。
+
+設計承認後・Bot 作成前に [アイコン作成リファレンス](../../standard/references/icon-creation.md) に従い 3〜4 案を提案して選択を受け、PNG 240 / 192 / 32 の 3 サイズを生成する。`bots.iconbase64` と Teams マニフェストへ登録する。
+
+#### Bot の作成経路（v1）
+
+```
+❌ Dataverse bots テーブルへの直接 INSERT
+   → PVA Bot Management Service にプロビジョニングされない
+   → Copilot Studio UI で「エージェントの作成中に問題が発生しました」エラー
+   → botroutinginfo が 404 になる
+
+✅ Copilot Studio UI で手動作成 → API で設定変更のみ
+```
+
 ### Step 0: Copilot Studio UI での Bot 作成（ユーザー手動）
 
 ユーザーに依頼する際は、ソリューションの **スキーマ名（`SOLUTION_NAME`）** と **表示名** の両方を伝える。
@@ -138,6 +153,89 @@ existing = api_get("botcomponents",
 # 更新: api_patch("botcomponents(comp_id)", {"data": GPT_YAML})
 ```
 
+#### GPT コンポーネントの安全な更新
+
+1. **UI が作成したコンポーネントを特定して更新する**
+   - `bots(id)?$select=configuration` → `configuration.gPTSettings.defaultSchemaName` で UI コンポーネントの schemaname を取得
+   - API で新しい GPT コンポーネントを INSERT すると UI と API で別々のコンポーネントが存在し、UI は自分のコンポーネントしか読まない
+
+2. **configuration を PATCH する際は既存値をディープマージする**
+   - `configuration` を丸ごと上書きすると `gPTSettings.defaultSchemaName` やモデル設定が消える
+   - 必ず GET → ディープマージ → PATCH
+   - `optInUseLatestModels` は明示的に `False` を設定 — `True` だと UI で選択した基盤モデルが別モデルへ強制変更される
+   - `aISettings` も丸ごと上書きせずディープマージで既存のモデル選択を保持
+
+3. **GPT コンポーネントを棚卸しし、既存のものは保持する**
+   - `componenttype eq 15` で全取得 → `defaultSchemaName` と一致する UI コンポーネントを特定。他のコンポーネントは参照・依存関係を調査し、削除する場合は ID ごとの明示承認と復旧計画を要する。スキーマ名だけで自動削除しない。
+
+#### PVA YAML と Instructions の改行形式
+
+PVA パーサーは標準 YAML のシングル改行 (`\n`) を**構造行**として認識しない。
+YAML の**構造行**（kind, displayName, conversationStarters 等）はダブル改行 (`\n\n`) で区切る必要がある。
+ただし `instructions: |-` ブロック内のテキストはシングル改行で記述する。
+
+```python
+# ✅ 正しい構築方法
+def _build_gpt_yaml():
+    # instructions ブロック（シングル改行）
+    inst_block = "\n".join(f"  {line}" for line in GPT_INSTRUCTIONS.splitlines())
+
+    # conversationStarters（ダブル改行）
+    starter_lines = []
+    for p in PREFERRED_PROMPTS:
+        starter_lines.append(f"  - title: {p['title']}")
+        starter_lines.append(f"    text: {p['text']}")
+    starters_block = "\n\n".join(starter_lines)
+
+    return (
+        "kind: GptComponentMetadata\n\n"
+        f"displayName: {BOT_NAME}\n\n"
+        f"instructions: |-\n{inst_block}\n\n"
+        f"conversationStarters:\n\n{starters_block}\n\n"
+    )
+```
+
+```
+❌ yaml.dump() → PVA パーサーと非互換
+❌ 全行シングル改行 → conversationStarters / quickReplies が UI に反映されない
+❌ 全行ダブル改行 → instructions テキストが空行だらけになる
+❌ conversationStarters の title/text をダブルクォートで囲む → PVA に反映されない
+✅ 構造行はダブル改行、instructions ブロック内はシングル改行
+✅ conversationStarters の title/text はクォートなし
+✅ displayName キーを含める（UI が表示に使用）
+✅ instructions 内で単一波括弧 {変数名} を使わない → PVA が Power Fx 式として解釈し IdentifierNotRecognized エラー。自然言語で記述する
+```
+
+#### 基盤モデル選択の保持
+
+PVA は GPT コンポーネントの `data` YAML 末尾に基盤モデル情報を格納する:
+
+```yaml
+aISettings:
+  model:
+    modelNameHint: <UI で選択したモデル識別子>
+```
+
+GPT コンポーネントの `data` を上書きすると、この `aISettings` セクションが消えて
+UI で選択したモデル設定が失われる。
+
+```python
+# ✅ 更新前に既存データから aISettings セクションを抽出 → 新 YAML の末尾に付加
+existing_data = ui_comp.get("data", "")
+ai_idx = existing_data.find("\naISettings:")
+if ai_idx < 0:
+    ai_idx = existing_data.find("aISettings:")
+if ai_idx >= 0:
+    ai_settings_section = existing_data[ai_idx:].rstrip()
+    final_yaml = new_yaml.rstrip("\n") + "\n\n" + ai_settings_section + "\n\n"
+```
+
+```
+❌ GPT data を丸ごと上書き → 基盤モデルがデフォルトに戻る
+✅ 更新前に aISettings セクションを抽出して保持
+✅ 初回デプロイ後にユーザーが UI でモデルを設定 → 2 回目以降のデプロイで保持される
+```
+
 ### Step 4.5: 会話の開始設定（メッセージ + クイック返信）
 
 **⚠️ yaml.dump() / yaml.safe_load() → yaml.dump() のパイプラインは使用禁止（最重要）**
@@ -169,31 +267,58 @@ existing_data = topic.get("data", "")
 id_match = re.search(r'id:\s+(sendMessage_\w+)', existing_data)
 send_id = id_match.group(1) if id_match else "sendMessage_fix01"
 
-# ★ YAML を手動で全体構築（yaml.dump() 禁止）
-new_data = f'''kind: AdaptiveDialog
-beginDialog:
-  kind: OnConversationStart
-  id: main
-  actions:
-  - kind: SendActivity
-    id: {send_id}
-    activity:
-      text:
-      - "{GREETING_MESSAGE}"
-      speak:
-      - "{GREETING_MESSAGE}"
-      quickReplies:
-      - kind: MessageBack
-        text: クイック返信テキスト1
-      - kind: MessageBack
-        text: クイック返信テキスト2
-'''
+# ★ PVA 構造行はダブル改行で組み立てる（yaml.dump() 禁止）
+greeting_text = GREETING_MESSAGE.replace("\n", " ")
+QUICK_REPLIES = ["クイック返信テキスト1", "クイック返信テキスト2"]
+lines = [
+    "kind: AdaptiveDialog", "beginDialog:", "  kind: OnConversationStart",
+    "  id: main", "  actions:", "    - kind: SendActivity",
+    f"      id: {send_id}", "      activity:", "        text:",
+    f"          - {greeting_text}", "        speak:",
+    f'          - "{greeting_text}"', "        quickReplies:",
+]
+for qr in QUICK_REPLIES:
+    lines.extend(["          - kind: MessageBack", f"            text: {qr}"])
+new_data = "\n\n".join(lines) + "\n\n"
 
 api_patch(f"botcomponents({topic_id})", {"data": new_data})
 ```
 
 > **挨拶メッセージ**: 設計時にエージェントの目的に合ったテキストを提案する。
 > 例: 「こんにちは！インシデント管理アシスタントです。インシデントの起票・検索・ステータス更新など、お気軽にお申し付けください。」
+
+#### ConversationStart YAML の改行形式
+
+ConversationStart トピック（componenttype=9）も同じダブル改行フォーマット。
+
+```python
+lines = []
+lines.append("kind: AdaptiveDialog")
+lines.append("beginDialog:")
+lines.append("  kind: OnConversationStart")
+lines.append("  id: main")
+lines.append("  actions:")
+lines.append("    - kind: SendActivity")
+lines.append(f"      id: {send_id}")
+lines.append("      activity:")
+lines.append("        text:")
+lines.append(f"          - {greeting_text}")  # クォートなし
+lines.append("        speak:")
+lines.append(f'          - "{greeting_text}"')
+lines.append("        quickReplies:")
+for qr in QUICK_REPLIES:
+    lines.append(f"          - kind: MessageBack")
+    lines.append(f"            text: {qr}")
+# ダブル改行で結合
+new_data = "\n\n".join(lines) + "\n\n"
+```
+
+```
+❌ シングル改行 → 送信ノードが消え、quickReplies が UI に反映されない
+❌ 挨拶テキストに生改行 \n を含める → YAML が壊れる（スペースに置換する）
+✅ 全行ダブル改行で結合
+✅ actions 配下は 4 スペースインデント
+```
 
 ### Step 5: エージェント公開
 
@@ -206,6 +331,17 @@ api_post(f"bots({bot_id})/Microsoft.Dynamics.CRM.PvaPublish", {})
 ```python
 # data PATCH の非同期処理が description を上書きするため publish 後に設定
 api_patch(f"botcomponents({comp_id})", {"description": description_text})
+```
+
+#### 説明（Description）の保存場所
+
+```
+❌ YAML 内の description キー → UI が読まない
+❌ bot エンティティの description プロパティ → 存在しない
+✅ botcomponents テーブルの description カラム
+
+注意: data PATCH の非同期処理が description を上書きする
+→ 対策: publish 後に description を別途 PATCH する
 ```
 
 ### Step 7: Teams / Copilot チャネル公開設定
@@ -284,7 +420,7 @@ api_post(f"bots({bot_id})/Microsoft.Dynamics.CRM.PvaPublish", {})
 
 1. Copilot Studio → エージェントを開く
 2. 左メニュー「ナレッジ」→「+ ナレッジの追加」
-3. データソースを選択（Dataverse テーブル / SharePoint サイト / ファイル等）
+3. [ナレッジソースの選定](knowledge-source-selection.md)で方式、ハーネス、利用権、検索品質、権限、容量を確認し、データソースを選択（Dataverse テーブル / SharePoint サイト / ファイル等）。SharePoint サイト URL 参照と「ファイルのアップロード」欄の SharePoint 取り込みは別方式
 4. 対象を設定して保存
 
 #### ツールの追加
@@ -350,6 +486,12 @@ https://copilotstudio.microsoft.com/c2/tenants/{TENANT_ID}/environments/{ENV_ID}
 > **デプロイスクリプトが接続マネージャー URL を自動生成して表示する。**
 > 未認証の接続があるとエージェントがツールを呼び出せず、処理が途中で止まる。
 ```
+
+### 評価と完了判定の補足
+
+- 内容品質と処理成功は別の観点として評価し、基準と結果を分けて記録する。処理が完了したことだけで内容品質を合格としない
+- エージェントの目的に合う固定の回帰ケースを用意し、複数回実行してケース別の結果と実行間の変動を記録する
+- モデルを比較するときは、入力、Instructions、出力契約、利用するナレッジ・ツール、評価基準などの条件をそろえる。モデル・設定・実行条件と、結果および変動を記録し、特定モデルや一律の合格点を標準として固定しない
 
 ## Instructions テンプレート
 
