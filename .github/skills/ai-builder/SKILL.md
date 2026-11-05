@@ -24,29 +24,30 @@ Power Automate フローから **aibuilderpredict_customprompt** で呼び出す
 
 ## 名称と利用経路を分けて確認する
 
-AI Builder はプロンプトや OCR・文書処理等の AI モデルを含む機能群であり、プロンプトビルダーはプロンプトを作成する画面、プロンプトツールはエージェントから再利用可能なプロンプトを呼ぶ手段を指す（[プロンプトの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview)、2026-10-30 確認）。[請求資料](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)の「AI ツール」は料金区分の文脈で読み、すべてのエージェントツールや Instructions・生成回答と同義にしない。旧称「AI Builder プロンプト」や現行 UI 名が異なっても、検証済み API・スキーマ識別子（例: `AIModelPublish`、`InvokeAIBuilderModelTaskAction`、`aibuilderpredict_customprompt`）を名称合わせのために変更しない。
+| 用語 | 指すもの |
+| --- | --- |
+| AI Builder | プロンプトや OCR・文書処理等の AI モデルを含む機能群 |
+| プロンプトビルダー | プロンプトを作成する画面 |
+| プロンプトツール | エージェントから再利用可能なプロンプトを呼ぶ手段 |
 
-このスキルの API 実装は **Dataverse のプロンプトをエージェントへ直接追加したツール**または**クラウドフローのアクション**で利用する特定の経路を扱う。トピック内のプロンプト、エージェントフロー内のプロンプトも別経路として設計時に比較し、いずれも利用可能な入力型・出力契約、接続・容量条件をその経路で確認する。エージェントフロー（「エージェントがフローを呼び出したとき」トリガー）を、一般のクラウドフローと同一視しない。方式選定は [architecture](../architecture/SKILL.md)、容量と公開後実行は[ライセンス確認ルール](../standard/references/license-requirements.md)を正本とする。
+名称の根拠は[プロンプトの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview)（2026-10-30 確認）。[請求資料](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)の「AI ツール」は料金区分の文脈で読み、すべてのエージェントツールや Instructions・生成回答と同義にしない。旧称「AI Builder プロンプト」や現行 UI 名が異なっても、検証済み API・スキーマ識別子（例: `AIModelPublish`、`InvokeAIBuilderModelTaskAction`、`aibuilderpredict_customprompt`）を名称合わせのために変更しない。
+
+このスキルの API 実装は **Dataverse のプロンプトをエージェントへ直接追加したツール**または**クラウドフローのアクション**で利用する特定の経路を扱う。トピック内・エージェントフロー内のプロンプトも別経路として設計時に比較する。
+
+- 各経路で利用可能な入力型・出力契約、接続・容量条件を確認する。エージェントフロー（「エージェントがフローを呼び出したとき」トリガー）を一般のクラウドフローと同一視しない。
+- 方式選定は [architecture](../architecture/SKILL.md)、容量と公開後実行は[ライセンス確認ルール](../standard/references/license-requirements.md)を正本とする。
 
 ## AI Builder 採用後の実装方式選択
 
-```
-AI Builder の採用が決まった場合、以下を用途・入力形式・精度・運用負荷とライセンス・Credits 条件に照らして比較する:
+AI Builder の採用が決まったら、用途・入力形式・精度・運用負荷とライセンス・Credits 条件をそろえて比較する。
 
-✅ AI プロンプト（カスタムプロンプト）は柔軟な抽出・分類・要約の候補
-  - 請求書処理、ドキュメント情報抽出、分類、要約 等で比較する
-  - プロンプトテキスト + document/image 入力で柔軟に対応
-  - トレーニングデータ不要、即座にデプロイ・更新可能
-  - プロンプト変更だけで出力形式・抽出項目を自由に調整
+| 観点 | AI プロンプト（カスタムプロンプト） | プレビルトモデル（請求書処理モデル等） |
+| --- | --- | --- |
+| 用途・精度 | 請求書処理、ドキュメント情報抽出、分類、要約等で柔軟な抽出・分類・要約の候補 | 既存モデルの対応範囲と精度が要件を満たすか確認 |
+| 入力・変更 | プロンプトテキスト + document/image 入力。プロンプト変更だけで出力形式・抽出項目を調整可能 | 対応する入力形式を要件と照合 |
+| 導入・運用 | トレーニングデータ不要で即座にデプロイ・更新可能 | カスタムモデルを使う場合は学習データと運用負荷も評価 |
 
-✅ プレビルトモデル（請求書処理モデル等）も比較する
-  - 既存モデルの対応範囲と精度が要件を満たすか確認する
-  - カスタムモデルを使う場合は学習データと運用負荷も評価する
-
-プレビルトモデルを優先する例:
-  - 手書き文字の高精度 OCR が必須で AI プロンプトでは精度不足の場合
-  - 既存のプレビルトモデルが組み込まれたワークフローを維持する必要がある場合
-```
+手書き文字の高精度 OCR が必須で AI プロンプトでは精度不足の場合、または既存のプレビルトモデルが組み込まれたワークフローを維持する必要がある場合は、プレビルトモデルを優先する。
 
 ## 前提: 設計フェーズ完了後に構築に入る（必須）
 
@@ -64,312 +65,38 @@ AI Builder の採用が決まった場合、以下を用途・入力形式・精
 | 利用先             | Copilot Studio ツール or Power Automate フロー       |
 | shouldPromptUser   | 各入力変数をユーザーに自動的に尋ねるか（true/false） |
 
-## ★ 最重要発見: AIModelPublish 1ステップ・アクティベーション
+## AIModelPublish によるアクティブ化
 
-**2026-04-15 検証済み: `AIModelPublish` アクションは1ステップでモデルを完全にアクティブ化する。**
+**2026-04-15 検証済み**: 新規 Model は `msdyn_TemplateId@odata.bind` で作成し、プレフィックスなしの unbound action `AIModelPublish` で完全にアクティブ化する。`RunConfigurationId` に `model_id` を渡すと同じ ID の Run Config が生成され、Published Training（state=2, status=6）と Run Config（state=2, status=7）が自動作成されて Model は Active（state=1, status=1）になる。新規作成は 2 API コールで完了する（[呼び出しコード](references/build-reference.md#step-2-aimodelpublish-で1ステップ完全アクティブ化)）。
 
-```
-従来（旧パターン — ❌ 複雑で環境差異に弱い）:
-  1. Create Model
-  2. Create Training Config (statecode=2, statuscode=6 を指定)
-  3. Create Run Config (statecode=2, statuscode=7 を指定)
-  4. PATCH Model (_msdyn_activerunconfigurationid_value + statecode=1)
-  → 環境によって statecode/statuscode 指定や _value PATCH が拒否される
+1. 新規: Model を作成し、`AIModelPublish` を呼ぶ。
+2. 更新: 既存 Model の Active Run Config ID を取得し、`msdyn_customconfiguration` を PATCH する。再公開は不要（[更新手順](references/build-reference.md#既存-ai-プロンプトの更新パターン)）。
 
-正解（新パターン — ✅ シンプルで確実）:
-  1. Create Model（msdyn_TemplateId@odata.bind 形式）
-  2. AIModelPublish（msdyn_ プレフィックスなし unbound action）
-     → Published Training Config (state=2, status=6) を自動生成
-     → Run Config (state=2, status=7) を自動生成（RunConfigurationId の値が ID になる）
-     → Model を Active (state=1, status=1) に自動変更
-  → 完了! わずか 2 API コール
-
-更新時:
-  1. 既存 Model を検索 → Active Run Config の ID を取得
-  2. Run Config の msdyn_customconfiguration を PATCH
-  → 完了!（再公開不要）
-```
-
-### AIModelPublish の呼び出し方
-
-```python
-import requests
-
-token = get_token()
-headers = {
-    "Authorization": f"Bearer {token}",
-    "OData-MaxVersion": "4.0",
-    "OData-Version": "4.0",
-    "Content-Type": "application/json; charset=utf-8",
-}
-r = requests.post(
-    f"{DATAVERSE_URL}/api/data/v9.2/AIModelPublish",  # ★ msdyn_ プレフィックスなし!
-    headers=headers,
-    json={
-        "TemplateId": GPT_TEMPLATE_ID,       # GPT Dynamic Prompt テンプレート固定値
-        "ModelId": model_id,                  # 作成した Model の GUID
-        "RunConfigurationId": model_id,       # ★ model_id を渡すと Run Config ID = model_id
-        "ModelName": PROMPT_NAME,
-        "CustomConfiguration": custom_config_json_str,
-        "RunConfiguration": custom_config_json_str,
-    },
-)
-assert r.status_code < 400, f"AIModelPublish 失敗: {r.status_code}"
-# → Model が Active、activeRun = model_id
-```
-
-### 重要な注意点
-
-| 項目               | 説明                                                                    |
-| ------------------ | ----------------------------------------------------------------------- |
-| アクション名       | `AIModelPublish`（`msdyn_AIModelPublish` ではない! プレフィックスなし） |
-| RunConfigurationId | `model_id` を渡すと Run Config がその ID で自動作成される               |
-| 自動生成物         | Published Training (state=2,status=6) + Run Config (state=2,status=7)   |
-| 結果               | Model が state=1（Active）に自動変更される                              |
-| 副作用             | Published Training Config は DELETE 不可（405）→ 無害                   |
-| 失敗時             | 既に Active な Run Config がある場合 `AnotherRunConfigAlreadyPublished` |
+旧パターンとの違いや失敗時の対応は[構築リファレンスのトラブルシューティング](references/build-reference.md#トラブルシューティング)を参照する。
 
 ## Dataverse データ構造
 
-AI Builder の AI プロンプトは **3 つの Dataverse テーブル** + **1 つの botcomponent** で構成される。
-
-```
-┌─────────────────────────┐
-│  msdyn_aimodel          │  ← AI プロンプト本体
-│  (msdyn_aimodels)       │
-│                         │
-│  msdyn_name             │  プロンプト名
-│  _msdyn_templateid_value│  GPT Prompt テンプレート ID
-│  _msdyn_activerunconfigurationid_value │  → Run Config
-│  statecode=1 (Active)   │
-└──────────┬──────────────┘
-           │ 1:N
-           ▼
-┌─────────────────────────┐
-│  msdyn_aiconfiguration  │  ← 設定（AIModelPublish で自動生成）
-│  (msdyn_aiconfigurations│
-│                         │
-│  Training (type=190690000, state=2, status=6) │  Published Training
-│  Run     (type=190690001, state=2, status=7)  │  Active Run Config
-│    msdyn_customconfiguration = JSON            │  ← プロンプト定義本体
-└─────────────────────────┘
-
-┌─────────────────────────┐
-│  botcomponent           │  ← エージェントとの紐付け（Copilot Studio 利用時のみ）
-│  (botcomponents)        │
-│                         │
-│  componenttype=9        │  トピックと同じ型
-│  kind: TaskDialog       │  AI プロンプトアクション
-│  action.aIModelId       │  → msdyn_aimodel の GUID
-│  _parentbotid_value     │  → エージェント (bots)
-└─────────────────────────┘
-```
-
-### テンプレート ID（固定値）
-
-| テンプレート名     | ID                                     |
-| ------------------ | -------------------------------------- |
-| GPT Dynamic Prompt | `edfdb190-3791-45d8-9a6c-8f90a37c278a` |
-
-### msdyn_customconfiguration の JSON 構造
-
-```json
-{
-  "version": "GptDynamicPrompt-2",
-  "prompt": [
-    { "type": "literal", "text": "以下の情報を分析してください: " },
-    { "type": "inputVariable", "id": "input_text" },
-    { "type": "literal", "text": " を基にレポートを作成。" }
-  ],
-  "definitions": {
-    "inputs": [
-      {
-        "id": "input_text",
-        "text": "input_text",
-        "type": "text",
-        "quickTestValue": "テスト用のサンプルテキスト"
-      }
-    ],
-    "formulas": [],
-    "data": [],
-    "output": {
-      "formats": ["json"],
-      "jsonSchema": {
-        "type": "object",
-        "properties": {
-          "summary": { "type": "string" },
-          "key_points": { "type": "array", "items": { "type": "string" } }
-        }
-      },
-      "jsonExamples": [
-        { "summary": "出力例", "key_points": ["ポイント1", "ポイント2"] }
-      ]
-    }
-  },
-  "modelParameters": {
-    "modelType": "gpt-41-mini",
-    "gptParameters": { "temperature": 0 }
-  },
-  "settings": {
-    "recordRetrievalLimit": 30,
-    "shouldPreserveRecordLinks": null,
-    "runtime": null
-  },
-  "code": "",
-  "signature": ""
-}
-```
-
-#### prompt 配列の要素型
-
-| type            | 説明             | 必須フィールド |
-| --------------- | ---------------- | -------------- |
-| `literal`       | 固定テキスト     | `text`         |
-| `inputVariable` | 入力変数への参照 | `id`           |
-
-#### definitions.inputs の型
-
-| type       | 説明             | 備考                        |
-| ---------- | ---------------- | --------------------------- |
-| `text`     | テキスト入力     | `quickTestValue` でテスト値 |
-| `document` | ドキュメント入力 | ファイルアップロード        |
-| `image`    | 画像入力         | 画像ファイル                |
-
-#### definitions.output の形式
-
-| formats    | 説明         | 追加フィールド                     |
-| ---------- | ------------ | ---------------------------------- |
-| `["text"]` | テキスト出力 | なし                               |
-| `["json"]` | JSON 出力    | `jsonSchema` + `jsonExamples` 必須 |
-
-#### modelParameters.modelType の値
-
-| 値            | モデル       |
-| ------------- | ------------ |
-| `gpt-41-mini` | GPT-4.1 mini |
-| `gpt-41`      | GPT-4.1      |
-| `o3-mini`     | o3-mini      |
-
-### botcomponent の YAML 構造（kind: TaskDialog）
-
-```yaml
-kind: TaskDialog
-
-inputs:
-  - kind: AutomaticTaskInput
-    propertyName: text
-    name: text
-    shouldPromptUser: true
-
-modelDisplayName: AI Prompt Sample
-
-modelDescription: AI Prompt Sample
-
-action:
-  kind: InvokeAIBuilderModelTaskAction
-  aIModelId: ${AI_MODEL_ID}
-
-outputMode: All
-```
+AI プロンプト本体（`msdyn_aimodel`）、公開後の設定（`msdyn_aiconfiguration`）と、Copilot Studio 利用時のみ必要な `botcomponent` の構造・JSON / YAML 例および照合値は[構築リファレンス](references/build-reference.md#dataverse-データ構造)を参照する。
 
 ## 構築手順
 
-詳細な構築手順・デプロイスクリプトテンプレートは [構築リファレンス](references/build-reference.md) を参照。
+設計承認後、[構築リファレンス](references/build-reference.md#構築手順)のコードと検証条件に従う。
+
+1. `msdyn_TemplateId@odata.bind` とソリューションヘッダーで Model を作成する。
+2. `AIModelPublish` でアクティブ化し、Active 状態を照合する。
+3. Copilot Studio のツールとして使う場合のみ `botcomponent` を追加し、エージェントを再公開する。
 
 ## Power Automate フローからの AI Builder 呼び出し
 
 AI Builder プロンプトを **Power Automate フロー内で呼び出す** パターン。
 Copilot Studio ツールではなく、Dataverse トリガー等と組み合わせて自動実行する場合に使う。
 
-詳細は [Power Automate 連携リファレンス](references/power-automate-integration.md) を参照。
-
-## 絶対遵守ルール
-
-### AI Model 作成（★ 最重要）
-
-```
-✅ テンプレート ID は固定値 edfdb190-3791-45d8-9a6c-8f90a37c278a（GPT Dynamic Prompt）
-✅ Model 作成は msdyn_TemplateId@odata.bind 形式を使用
-✅ AIModelPublish (msdyn_ プレフィックスなし) で1ステップ完全アクティブ化
-✅ RunConfigurationId に model_id を渡す → Run Config がその ID で作成される
-✅ 更新時は Active Run Config の msdyn_customconfiguration を PATCH するだけ
-❌ _msdyn_templateid_value を使う → 一部環境で拒否される
-❌ _msdyn_activerunconfigurationid_value を直接 PATCH → 一部環境で拒否される
-❌ statecode/statuscode を Config 作成時に指定 → 一部環境で拒否される
-❌ PublishAIConfiguration を新規モデルに使う → AIModelPublish 単体で十分
-❌ msdyn_AIModelPublish（msdyn_ プレフィックス付き）→ 404
-❌ msdyn_Publish → 404
-❌ SetState → 404
-```
-
-### プロンプト定義
-
-```
-✅ prompt 配列は literal と inputVariable を交互に配置
-✅ inputVariable の id は definitions.inputs の id と一致させる
-✅ JSON 出力の場合は jsonSchema + jsonExamples の両方を定義
-✅ modelType は有効な値を使用（gpt-41-mini, gpt-41, o3-mini）
-✅ temperature は 0〜1 の float 値
-```
-
-### botcomponent（エージェント追加）
-
-```
-✅ componenttype=9（トピックと同じ型番）
-✅ schemaname は {botSchema}.action.{PromptNameNoSpaces} 形式
-✅ YAML の kind は TaskDialog
-✅ action.kind は InvokeAIBuilderModelTaskAction
-✅ action.aIModelId は msdyn_aimodel の GUID（ハイフン付き小文字）
-✅ inputs の propertyName は customconfiguration の inputs.id と一致
-✅ shouldPromptUser: true でエージェントがユーザーに入力を求める
-❌ yaml.dump() で YAML を生成 → PVA パーサーと非互換
-❌ componenttype を間違える → エージェントに表示されない
-```
-
-### ソリューション管理
-
-```
-✅ msdyn_aimodel の作成は solution ヘッダー付きで POST
-✅ AIModelPublish 後、自動生成された Config もソリューションに含まれる
-✅ AddSolutionComponent (componenttype=401) で検証・補完
-❌ デフォルトソリューションに入ったままにする → 環境間移行不可
-```
-
-### Power Automate フロー連携
-
-```
-✅ aibuilderpredict_customprompt で Active Model を参照（recordId パラメータ）
-✅ Model が Active でないとフロー有効化時に GetPredictionSchema 検証で失敗
-✅ Model → Flow の順でデプロイ（Model が Active 必須）
-✅ フロー定義の dict キーに動的値を使う場合は f-string 必須
-✅ 新しい Dataverse 列を追加した後は PublishAllXml でコネクタメタデータ更新
-❌ Draft Model を参照するフローを有効化 → "GetPredictionSchema failed"
-```
+デプロイ順序、動的パラメータと列追加後の確認は [Power Automate 連携リファレンス](references/power-automate-integration.md) を参照する。
 
 ## ファイル入力（Image or Document Input）の制限事項
 
-公式ドキュメント: https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations
-
-### 対応ファイル形式
-
-| 条件                          | 対応形式                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------- |
-| 標準（Code Interpreter オフ） | **PNG, JPG, JPEG, PDF** のみ                                              |
-| Code Interpreter オン         | 上記 + **Word (.doc/.docx), Excel (.xls/.xlsx), PowerPoint (.ppt/.pptx)** |
-
-### サイズ・ページ数・時間制限
-
-| 制限項目           | 値                                         |
-| ------------------ | ------------------------------------------ |
-| ファイルサイズ合計 | **25 MB 未満**（全ファイル合計）           |
-| ページ数           | **50 ページ未満**                          |
-| 処理タイムアウト   | **100 秒**（超過するとタイムアウトエラー） |
-
-### その他の制限
-
-- [Microsoft Learn: プロンプト入力の制限](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations)（2026-10-30 確認）では、**エージェントへ直接追加したプロンプトツール**の画像・文書入力は未対応。これはテキストのプロンプト利用全般がフロー必須という意味ではない
-- 文書を扱う場合はエージェントフロー／クラウドフロー経由でプロンプトを呼ぶ方法等を候補とし、経路ごとの入力・出力、認証・容量・課金、エージェントとのファイル受け渡しを実際に検証する。トピック内のプロンプトも直接ツールと同じ制限だとは推定しない
-- 対応形式への変換が必要な場合は OneDrive for Business `ConvertFile` による PDF 変換等を候補として検証する
+- **エージェントへ直接追加したプロンプトツール**の画像・文書入力は未対応。テキストのプロンプト利用全般がフロー必須という意味ではない（[Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations)、2026-10-30 確認）。
+- ファイル形式（Code Interpreter の有無）、サイズ・ページ数・時間の上限と、フロー経由・変換時の検証条件は[構築リファレンス](references/build-reference.md#ファイル入力image-or-document-inputの制限事項)を参照する。
 
 ## .env 追加パラメータ
 

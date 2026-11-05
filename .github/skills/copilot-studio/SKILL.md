@@ -29,9 +29,11 @@ triggers:
 
 # Copilot Studio エージェント構築スキル
 
-このスキルは **既存アーキテクチャ（v1）を採用したエージェント**の構築・設定を扱い、採用後の構成では生成オーケストレーション（Generative Orchestration）を使用する。Teams / Microsoft 365 Copilot 単独向けの新アーキテクチャ（cliagent）を採用する場合は [copilot-studio-v2](../copilot-studio-v2/SKILL.md) の制約と手順を優先し、v1 用の API・トピック操作を流用しない。
-Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できない。この方針を適用する前に、[ライセンス確認ガイド](../standard/references/license-requirements.md)に従って採用機能と作成者・利用者の利用権を確認し、不適合なら構築に進まず構成・追加ライセンスを相談する。
-外部トリガーやニュース配信は要件がある場合のみ検討する。外部トリガーからエージェントを呼ぶ構成は標準案ではなく、ライセンス・Credits・実現可能性を確認して承認された例外案として扱う。
+このスキルは **既存アーキテクチャ（v1）を採用したエージェント**の構築・設定を扱い、採用後の構成では生成オーケストレーション（Generative Orchestration）を使用する。
+
+- **v2 を採用する場合**: Teams / Microsoft 365 Copilot 単独向けの新アーキテクチャ（cliagent）は [copilot-studio-v2](../copilot-studio-v2/SKILL.md) の制約と手順を優先し、v1 用の API・トピック操作を流用しない。
+- **利用権**: Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できない。適用前に[ライセンス確認ガイド](../standard/references/license-requirements.md)に従って採用機能と作成者・利用者の利用権を確認し、不適合なら構築に進まず構成・追加ライセンスを相談する。
+- **例外案**: 外部トリガーやニュース配信は要件がある場合のみ検討する。外部トリガーからエージェントを呼ぶ構成は標準案ではなく、ライセンス・Credits・実現可能性を確認して承認された場合に限る。
 
 ## サブリファレンス（必要に応じて参照）
 
@@ -68,9 +70,11 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 | ツール                   | MCP Server の接続先・用途                                                                                                                |
 | チャネル公開設定         | 簡単な説明・詳細な説明・背景色・開発者名（デフォルト値を提案）                                                                           |
 
-```
-フロー: 設計提示 → ユーザー承認 → アイコン画像提案 → ユーザー選択 → UI で Bot 作成 → スクリプトで設定適用
-```
+構築前の順序:
+
+1. エージェント設計を提示してユーザー承認を得る。
+2. アイコン画像を提案し、ユーザーの選択を受ける。
+3. UI で Bot を作成し、承認された設定をスクリプトで適用する。
 
 ## アイコン画像提案（設計承認後・構築前）
 
@@ -104,18 +108,16 @@ Microsoft 365 サブスクリプションに含まれる Copilot Studio for Team
 
 詳細な構築手順・スクリプトコードは [構築リファレンス](references/build-reference.md) を参照。
 
-高レベルの手順:
+作成時に標準ハーネスを選ぶ（理由は [license-requirements.md §1](../standard/references/license-requirements.md#1-基本方針)）。詳細の旧 Step 番号と操作は[構築リファレンス](references/build-reference.md#構築手順)を参照する。
 
-- Copilot Studio のエージェントは作成時に標準ハーネスを選ぶ（理由は [license-requirements.md §1](../standard/references/license-requirements.md#1-基本方針)）。
-
-1. **Step 0**: Copilot Studio UI で Bot 作成（ユーザー手動）
-2. **Step 1-1.5**: Bot 検索 + プロビジョニング完了待ち
-3. **Step 2**: 既存トピック・GPT コンポーネントの棚卸し。通常は保持し、個別承認のない削除をしない
-4. **Step 3**: 生成オーケストレーション有効化
-5. **Step 4-4.5**: Instructions + 会話の開始設定
-6. **Step 5-6**: エージェント公開 + 説明設定
-7. **Step 7-8**: Teams / Copilot チャネル公開設定
-8. **Step 9**: ナレッジ・ツール・トリガーの手動追加案内
+1. Copilot Studio UI で Bot を作成する（ユーザー手動）。
+2. Bot を照合し、プロビジョニング完了を待つ。
+3. 既存トピック・GPT コンポーネントを棚卸しする。通常は保持し、個別承認のない削除をしない。
+4. 生成オーケストレーションを有効化する。
+5. Instructions と会話の開始を設定する。
+6. エージェントを公開し、説明を設定する。
+7. Teams / Copilot チャネルの公開を設定する。
+8. ナレッジ・ツール・トリガーの手動追加を案内する。
 
 ナレッジ、MCP、トリガー、外部文書やユーザー入力を扱う場合は、公開・再公開前に[外部入力と公開前チェック](references/external-input-release-check.md)で権限・操作範囲と利用者視点の試験を確認する。
 

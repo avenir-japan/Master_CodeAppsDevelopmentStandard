@@ -19,8 +19,11 @@ triggers:
 
 # 仕様書→要件 markdown 変換スキル
 
-PDF・PowerPoint・Excel・Word などの仕様書を **MarkItDown ベースで markdown に変換**し、  
-Power Platform 開発で使いやすい **factsheet 群** と **全体 document.md** に整理する。
+PDF・PowerPoint・Excel・Word などの資料を MarkItDown ベースで変換し、Power Platform 開発向けの `factsheets/*.md` と `document.md` に整理する。
+
+- **入口の判断**: 依頼の主目的と成果物の位置づけは [spec-builder の共通の入口](../spec-builder/SKILL.md#共通の入口)を正本とする。
+- **変換精度が不足する場合**: OCR 等を併用する。
+- **要件確定も必要な場合**: 出典と未決事項を確認して [spec-builder の要件ディスカバリー](../spec-builder/references/requirements-discovery.md) に引き継ぐ。変換成果物を確定した開発入力としない。
 
 ## 最初の依頼を簡単にする
 

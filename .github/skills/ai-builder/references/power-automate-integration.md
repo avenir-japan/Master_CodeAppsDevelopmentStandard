@@ -16,6 +16,8 @@ Dataverse レコードの自動分析・自動更新を行うパターン。
   → "GetPredictionSchema failed with BadRequest"
 ```
 
+新しい Dataverse 列を追加した後は、`PublishAllXml` でコネクタメタデータを更新してからフローを検証する。
+
 ## フロー定義の構造
 
 ### 接続参照の構成（2 つ必要）

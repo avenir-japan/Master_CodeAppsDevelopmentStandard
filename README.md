@@ -1,7 +1,7 @@
 # Power Platform コードファースト開発標準
 
 Power Platform の業務アプリやエージェントを **VS Code + GitHub Copilot** で開発するための、実践的な開発標準リポジトリです。
-UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱いますが、このリポジトリの実装標準は **TypeScript + React + Tailwind CSS + shadcn/ui による Code Apps** を基本とします。
+UI 実装方式として **Code Apps / Canvas Apps / Model-Driven Apps** を扱います。Code Apps を採用した案件では **TypeScript + React + Tailwind CSS + shadcn/ui** を実装標準とします。方式選定時の初期提案とは区別します。
 
 > [!TIP]
 > このリポジトリを GitHub Copilot と使う場合は、まず **`@PowerCode` + Azure 上の指定モデル** を入口として使う運用を推奨します（社内方針。具体名は社内の案内に従います）。
@@ -268,13 +268,16 @@ VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意
 
 ## カスタムエージェント前提の利用方法
 
-- この開発標準の実装・運用ルールは、GitHub Copilot カスタムエージェントのスキル（`.github/skills/`）に定義されています。
-- 利用者は手順書を読み込んで操作するのではなく、カスタムエージェントに要件を伝えて進める前提です。
-- このリポジトリで Power Platform 案件を進める場合は、通常の汎用 Agent よりも **`@PowerCode` を第一選択** とします。
-- モデルは社内の案内に従い **Azure 上の指定モデル** を原則利用します（社内方針）。高難度の作業や比較レビューも指定モデルの中から選び、詳細は [standard スキル](./.github/skills/standard/SKILL.md) の「Copilot 向け優先判断基準」を正本とします。
-- チャット入力例 （バッククオート不要）: @PowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
-- 既存仕様書がある場合の入力例: @PowerCode spec-to-markdown
-- 既定以外の場所を使う場合の入力例: @PowerCode /home/.../input の仕様書を requirements markdown に変換して
+実装・運用ルールは GitHub Copilot カスタムエージェントのスキル（`.github/skills/`）に定義されています。利用者は手順書を読み込んで操作するのではなく、要件を伝えて進めます。
+
+- **エージェント**: Power Platform 案件では汎用 Agent より **`@PowerCode` を第一選択** とします。
+- **モデル**: 社内の案内に従い **Azure 上の指定モデル** を原則利用します（社内方針）。高難度の作業や比較レビューも指定モデルから選びます。詳細は [standard スキル](./.github/skills/standard/SKILL.md) の「Copilot 向け優先判断基準」を正本とします。
+
+チャット入力例（バッククオート不要）:
+
+- 方式選定: @PowerCode 在庫管理アプリを作りたい。Code Apps と Canvas Apps のどちらで進めるべきか設計して
+- 既存仕様書: @PowerCode spec-to-markdown
+- 入力場所の指定: @PowerCode /home/.../input の仕様書を requirements markdown に変換して
 
 > [!NOTE]
 > Microsoft Learn の現行 Code Apps 概要に合わせ、このリポジトリでは **Code Apps は SPA をホストする機能** として扱います。
@@ -290,12 +293,14 @@ VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | VS Code・Copilot を初回設定したい     | [VS Code・Copilot 環境構築](./.github/skills/standard/references/vscode-copilot-setup.md)                                                                                                                                             |
 | 何から始めるか決めたい                | [architecture](./.github/skills/architecture/SKILL.md)                                                                                                                                                                                |
-| 仕様書から要件を整理したい            | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
+| ヒアリングから要件・SPEC を作りたい  | [spec-builder](./.github/skills/spec-builder/SKILL.md)                                                                                                                                                                                 |
+| 既存資料を Markdown に変換したい      | [spec-to-markdown](./.github/skills/spec-to-markdown/SKILL.md)                                                                                                                                                                        |
 | Dataverse のテーブル設計から始めたい  | [dataverse](./.github/skills/dataverse/SKILL.md)                                                                                                                                                                                      |
 | Copilot Studio の会話ログを分析したい | [Conversation Transcript 分析](./.github/skills/dataverse/references/conversation-transcript-analysis.md)                                                                                                                             |
 | UI 実装に入りたい                     | [code-apps](./.github/skills/code-apps/SKILL.md) / [canvas-app](./.github/skills/canvas-app/SKILL.md) / [model-driven-app](./.github/skills/model-driven-app/SKILL.md) / [generative-page](./.github/skills/generative-page/SKILL.md) |
 | 自動化や通知を作りたい                | [power-automate](./.github/skills/power-automate/SKILL.md)                                                                                                                                                                            |
-| エージェントや AI を作りたい          | [copilot-studio](./.github/skills/copilot-studio/SKILL.md) / [ai-builder](./.github/skills/ai-builder/SKILL.md)                                                                                                                       |
+| エージェントを作りたい                | [architecture](./.github/skills/architecture/SKILL.md) で構成を選定 → [copilot-studio（v1）](./.github/skills/copilot-studio/SKILL.md) / [copilot-studio-v2](./.github/skills/copilot-studio-v2/SKILL.md)                       |
+| AI プロンプトを作りたい              | [ai-builder](./.github/skills/ai-builder/SKILL.md)                                                                                                                                                                                     |
 
 詳細な構成規約や全スキルの一覧は [スキルカタログ](./.github/skills/README.md) を参照してください。
 
@@ -310,7 +315,7 @@ VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意
 .
 ├── .github/
 │   ├── agents/                      # Copilot カスタムエージェント定義
-│   └── skills/                      # 製品単位で統合された 12 スキル
+│   └── skills/                      # 共通基盤・要件整理・製品別の 14 スキル
 │       ├── architecture/            # アーキテクチャ設計
 │       ├── standard/                # 共通基盤（認証・アイコン・メールテンプレート）
 │       ├── dataverse/               # テーブル設計・構築・セキュリティロール
@@ -318,10 +323,13 @@ VS Code GitHub Copilot から始める場合も同じ手順を参照し、合意
 │       ├── canvas-app/              # Canvas App 開発（AI 編集・Git 管理・限定移送・添付パターン）
 │       ├── generative-page/         # Generative Pages 開発
 │       ├── model-driven-app/        # モデル駆動型アプリ構築
-│       ├── copilot-studio/          # エージェント構築・トリガー・ニュース配信
+│       ├── copilot-studio/          # v1 エージェント構築
+│       ├── copilot-studio-v2/       # v2（cliagent）構築
 │       ├── power-automate/          # クラウドフロー作成・デプロイ
 │       ├── ai-builder/              # AI プロンプト作成
-│       └── spec-to-markdown/        # 仕様書→要件 markdown 変換
+│       ├── spec-builder/            # 要件整理・SPEC 作成
+│       ├── spec-to-markdown/        # 既存資料の Markdown 変換
+│       └── update-skills/          # スキルの更新・検証
 ├── src/
 │   ├── components/                  # 再利用 UI コンポーネント
 │   ├── pages/                       # サンプルページ実装

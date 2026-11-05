@@ -34,13 +34,15 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 
 ## いつこのスキルを使うか
 
-このスキルが向くのは、**Teams / Microsoft 365 Copilot 単独利用** のとき。ここでの「単独」はエージェントへの外部からの呼び出しや埋め込みが不要という意味であり、ナレッジやエージェント内部のツールを一切使わないという意味ではない。エージェントフローを使う場合は、選んだハーネスでその連携がサポートされるか別途確認する（[Microsoft Learn: エージェントフローをツールとして作成](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) の手順は Standard ハーネス向け）。
+このスキルが向くのは **Teams / Microsoft 365 Copilot 単独利用** のとき。「単独」は外部からの呼び出しや埋め込みが不要という意味で、ナレッジや内部ツールを使わないという意味ではない。
 
-| v2（本スキル）が向く                                    | v1（既存 `copilot-studio`）が向く                            |
-| ------------------------------------------------------- | ------------------------------------------------------------ |
-| Teams / M365 Copilot で単独利用し、外部から呼び出さない | Code Apps / Web サイト / 他システムから呼び出す              |
-| 新アーキの構造を前提に保守したい                        | 外部公開、埋め込み、既存トリガー資産を使いたい               |
-| Python スキルバンドル前提で構成したい                   | 会話開始、クイック返信、ニュース配信など v1 資産を流用したい |
+エージェントフローを使う場合は、選んだハーネスで連携がサポートされるか別途確認する。[Microsoft Learn: エージェントフローをツールとして作成](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) の手順は Standard ハーネス向け。
+
+| 判断軸 | v2（本スキル）が向く | v1（既存 `copilot-studio`）が向く |
+| --- | --- | --- |
+| 利用チャネル・呼び出し元 | Teams / M365 Copilot で単独利用し、外部から呼び出さない | Code Apps / Web サイト / 他システムからの呼び出し、外部公開・埋め込みが必要 |
+| 保守対象 | 新アーキの構造を前提に保守したい | 既存トリガー資産を使いたい |
+| 再利用する資産 | Python スキルバンドル前提で構成したい | 会話開始、クイック返信、ニュース配信など v1 資産を流用したい |
 
 > **致命的制約**: v2（cliagent）は **Code Apps から呼び出せず、Web 埋め込みにも向かない**。
 > 外部連携や埋め込みがあるなら [../copilot-studio/SKILL.md](../copilot-studio/SKILL.md) を使う。
@@ -71,7 +73,13 @@ UI で設定変更した場合も、これらは**設定の静的整合を確認
 
 ## v1 との主な違い
 
-v1 は UI 作成の GPT コンポーネント・PVA YAML・`aISettings.model.modelNameHint` を使う。v2 は UI 手動作成を既定とし、`bots.configuration` の BotConfiguration JSON・`CLICopilotRecognizer`・プレーン文字列の Instructions・`agentSettings.model.series` / `enableMemory` を使う。スキルはフラット Python バンドル、MCP は UI 手動追加と Confirm が必要（[構造と対比](references/new-architecture.md#v1旧アーキとの対比早見)）。
+| 観点 | v1 | v2 |
+| --- | --- | --- |
+| 作成・設定 | UI 作成の GPT コンポーネント、PVA YAML | UI 手動作成を既定、`bots.configuration` の BotConfiguration JSON、`CLICopilotRecognizer` |
+| Instructions・モデル | `aISettings.model.modelNameHint` | プレーン文字列の Instructions、`agentSettings.model.series` / `enableMemory` |
+| スキル・MCP | v1 資産を利用 | フラット Python バンドル。MCP は UI 手動追加と Confirm が必要 |
+
+構造の詳細は[新アーキテクチャの対比](references/new-architecture.md#v1旧アーキとの対比早見)を参照する。
 
 ## 必須要件・落とし穴
 

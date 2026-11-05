@@ -14,6 +14,8 @@
   ※ Published Training Config (state=2) は DELETE 不可 (405) → 無害
 ```
 
+従来の旧パターンは Model 作成 → Training Config 作成（state=2, status=6）→ Run Config 作成（state=2, status=7）→ `_msdyn_activerunconfigurationid_value` と `statecode=1` の Model PATCH。環境によって `statecode` / `statuscode` 指定や `_value` PATCH が拒否されるため、新規作成では以下の 2 API コールを使う。
+
 ## 構築手順
 
 ### Step 1: AI Model 作成
@@ -243,6 +245,160 @@ def _delete_model_and_configs(model_id):
     time.sleep(3)
 ```
 
+## Dataverse データ構造
+
+プロンプト本体と公開後の設定は `msdyn_aimodel` と `msdyn_aiconfiguration` に保存する。Model 作成時は既存の `msdyn_aitemplate`（GPT Dynamic Prompt）を参照し、Copilot Studio にツールとして追加する場合のみ `botcomponent` も使用する。いずれも Dataverse テーブルであり、下図ではテンプレート参照と作成・更新するレコードを分けて示す。
+
+```
+既存の msdyn_aitemplate (msdyn_aitemplates)
+  └─ GPT Dynamic Prompt のテンプレート ID を Model 作成時に参照
+
+┌─────────────────────────┐
+│  msdyn_aimodel          │  ← AI プロンプト本体
+│  (msdyn_aimodels)       │
+│                         │
+│  msdyn_name             │  プロンプト名
+│  _msdyn_templateid_value│  GPT Prompt テンプレート ID
+│  _msdyn_activerunconfigurationid_value │  → Run Config
+│  statecode=1 (Active)   │
+└──────────┬──────────────┘
+           │ 1:N
+           ▼
+┌─────────────────────────┐
+│  msdyn_aiconfiguration  │  ← 設定（AIModelPublish で自動生成）
+│  (msdyn_aiconfigurations│
+│                         │
+│  Training (type=190690000, state=2, status=6) │  Published Training
+│  Run     (type=190690001, state=2, status=7)  │  Active Run Config
+│    msdyn_customconfiguration = JSON            │  ← プロンプト定義本体
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│  botcomponent           │  ← エージェントとの紐付け（Copilot Studio 利用時のみ）
+│  (botcomponents)        │
+│                         │
+│  componenttype=9        │  トピックと同じ型
+│  kind: TaskDialog       │  AI プロンプトアクション
+│  action.aIModelId       │  → msdyn_aimodel の GUID
+│  _parentbotid_value     │  → エージェント (bots)
+└─────────────────────────┘
+```
+
+### テンプレート ID（固定値）
+
+| テンプレート名     | ID                                     |
+| ------------------ | -------------------------------------- |
+| GPT Dynamic Prompt | `edfdb190-3791-45d8-9a6c-8f90a37c278a` |
+
+Model 作成時はこのテンプレート ID を `msdyn_TemplateId@odata.bind` に指定し、ソリューションヘッダー付きで POST する。`AIModelPublish` 後に自動生成される Config も対象ソリューションに含まれることを確認し、不足時は `AddSolutionComponent`（componenttype=401）で補完する。デフォルトソリューションだけに残さず、環境間移行を確認する。
+
+### msdyn_customconfiguration の JSON 構造
+
+```json
+{
+  "version": "GptDynamicPrompt-2",
+  "prompt": [
+    { "type": "literal", "text": "以下の情報を分析してください: " },
+    { "type": "inputVariable", "id": "input_text" },
+    { "type": "literal", "text": " を基にレポートを作成。" }
+  ],
+  "definitions": {
+    "inputs": [
+      {
+        "id": "input_text",
+        "text": "input_text",
+        "type": "text",
+        "quickTestValue": "テスト用のサンプルテキスト"
+      }
+    ],
+    "formulas": [],
+    "data": [],
+    "output": {
+      "formats": ["json"],
+      "jsonSchema": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string" },
+          "key_points": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "jsonExamples": [
+        { "summary": "出力例", "key_points": ["ポイント1", "ポイント2"] }
+      ]
+    }
+  },
+  "modelParameters": {
+    "modelType": "gpt-41-mini",
+    "gptParameters": { "temperature": 0 }
+  },
+  "settings": {
+    "recordRetrievalLimit": 30,
+    "shouldPreserveRecordLinks": null,
+    "runtime": null
+  },
+  "code": "",
+  "signature": ""
+}
+```
+
+#### prompt 配列の要素型
+
+| type            | 説明             | 必須フィールド |
+| --------------- | ---------------- | -------------- |
+| `literal`       | 固定テキスト     | `text`         |
+| `inputVariable` | 入力変数への参照 | `id`           |
+
+`prompt` 配列は `literal` と `inputVariable` を交互に配置し、`inputVariable.id` を `definitions.inputs[].id` と一致させる。
+
+#### definitions.inputs の型
+
+| type       | 説明             | 備考                        |
+| ---------- | ---------------- | --------------------------- |
+| `text`     | テキスト入力     | `quickTestValue` でテスト値 |
+| `document` | ドキュメント入力 | ファイルアップロード        |
+| `image`    | 画像入力         | 画像ファイル                |
+
+#### definitions.output の形式
+
+| formats    | 説明         | 追加フィールド                     |
+| ---------- | ------------ | ---------------------------------- |
+| `["text"]` | テキスト出力 | なし                               |
+| `["json"]` | JSON 出力    | `jsonSchema` + `jsonExamples` 必須 |
+
+#### modelParameters.modelType の値
+
+| 値            | モデル       |
+| ------------- | ------------ |
+| `gpt-41-mini` | GPT-4.1 mini |
+| `gpt-41`      | GPT-4.1      |
+| `o3-mini`     | o3-mini      |
+
+`modelType` は上記の有効な値を使い、`temperature` は 0〜1 の float 値とする。
+
+### botcomponent の YAML 構造（kind: TaskDialog）
+
+`componenttype=9` を指定し、`schemaname` を `{botSchema}.action.{PromptNameNoSpaces}` 形式にする。YAML は `kind: TaskDialog`、`action.kind: InvokeAIBuilderModelTaskAction` とし、`action.aIModelId` に `msdyn_aimodel` の GUID（ハイフン付き小文字）を指定する。`inputs.propertyName` は `customconfiguration` の `definitions.inputs[].id` と一致させる。`shouldPromptUser: true` にするとエージェントがユーザーに入力を求める。
+
+```yaml
+kind: TaskDialog
+
+inputs:
+  - kind: AutomaticTaskInput
+    propertyName: text
+    name: text
+    shouldPromptUser: true
+
+modelDisplayName: AI Prompt Sample
+
+modelDescription: AI Prompt Sample
+
+action:
+  kind: InvokeAIBuilderModelTaskAction
+  aIModelId: ${AI_MODEL_ID}
+
+outputMode: All
+```
+
 ## ファイル入力（Image or Document Input）の制限事項
 
 公式ドキュメント: https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations
@@ -260,12 +416,12 @@ def _delete_model_and_configs(model_id):
 | ------------------ | ------------------------------- |
 | ファイルサイズ合計 | **25 MB 未満**（全ファイル合計）|
 | ページ数           | **50 ページ未満**               |
-| 処理タイムアウト   | **100 秒**                      |
+| 処理タイムアウト   | **100 秒**（超過するとタイムアウトエラー） |
 
 ### その他の制限
 
 - **エージェントへ直接追加したプロンプトツール**では画像・文書入力は未対応（[Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-inputs-prompt#limitations)、2026-10-30 確認）。テキストのプロンプト利用全般にフローは不要
-- ファイル処理にはエージェントフロー／クラウドフロー経由等を比較し、入力とエージェント間の受け渡し・容量条件を経路別に確認する
+- ファイル処理にはエージェントフロー／クラウドフロー経由等を比較し、経路ごとの入力・出力、認証・容量・課金とエージェント間のファイル受け渡しを実際に検証する。トピック内のプロンプトも直接ツールと同じ制限だとは推定しない
 - 非対応ファイル形式は OneDrive for Business `ConvertFile` で PDF 変換する案等を検証する
 
 ## トラブルシューティング

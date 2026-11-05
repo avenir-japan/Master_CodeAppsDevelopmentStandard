@@ -18,9 +18,12 @@ triggers:
 
 # Power Automate クラウドフロー構築スキル
 
-ソリューション対応のクラウドフローを作成・デプロイする。既存スクリプトは Dataverse Web API（`workflows`）による作成・更新が主で、Flow API は環境解決・起動と一部のデプロイ経路に使用する（[経路と条件](references/code-first-flow-authoring.md#認証環境解決と接続参照)）。対象は通常のイベント／スケジュール、Canvas App や Copilot Studio からの呼び出し、クラウドフローからのエージェント起動など。**トリガー・実行主体・接続・課金条件を個別に確認**し、エージェントフローと断定したりクラウドフロー起点の Credits 判定を流用しない（[ライセンス確認ルール](../standard/references/license-requirements.md#1-基本方針)）。
+ソリューション対応のクラウドフローを作成・デプロイする。
 
-既存フローの編集・失敗 run の診断に FlowAgent MCP を使う場合は、任意経路として[利用前のゲート](references/flow-agent-mcp.md)を確認する。UI 雛形 / clone 定義を正本とする方針は変えない。
+- **対象**: 通常のイベント／スケジュール、Canvas App や Copilot Studio からの呼び出し、クラウドフローからのエージェント起動など。
+- **実装経路**: 既存スクリプトは Dataverse Web API（`workflows`）での作成・更新が主。Flow API は環境解決・起動と一部のデプロイ経路に使用する（[経路と条件](references/code-first-flow-authoring.md#認証環境解決と接続参照)）。
+- **採用条件**: トリガー・実行主体・接続・課金条件を個別に確認する。エージェントフローと断定せず、クラウドフロー起点の Credits 判定を流用しない（[ライセンス確認ルール](../standard/references/license-requirements.md#1-基本方針)）。
+- **任意の診断経路**: 既存フローの編集・失敗 run に FlowAgent MCP を使う場合は[利用前のゲート](references/flow-agent-mcp.md)を確認する。UI 雛形 / clone 定義を正本とする方針は変えない。
 
 ## 核心原則: 接続参照（Connection Reference）が有効化成功の鍵
 
@@ -28,7 +31,8 @@ triggers:
 
 ## 前提: 設計フェーズ完了後にデプロイに入る（必須）
 
-デプロイ前にフロー名・目的、トリガー、条件分岐を含むアクション一覧、必要な接続、通知先・件名・本文の概要、[命名規則](references/naming-conventions.md)をユーザーへ提示し承認を得る。最初に作る最小単位は、Power Automate UI で保存可能な最小フローとその clone 定義。実装・デプロイは承認後に行う。
+1. デプロイ前にフロー名・目的、トリガー、条件分岐を含むアクション一覧、必要な接続、通知先・件名・本文の概要、[命名規則](references/naming-conventions.md)をユーザーへ提示し、承認を得る。
+2. 承認後、Power Automate UI で保存可能な最小フローとその clone 定義を最初の単位として実装・デプロイする。
 
 ## 大前提: 一つのソリューション内に開発
 
@@ -48,17 +52,21 @@ triggers:
 
 ## 絶対遵守ルール
 
-- **方式**: まず既定アクションで MVP に必要な処理と検証を成立させる。Graph HTTP の使用条件、コネクタの責務境界と変数配置・式の制約は[実装ガイド](references/code-first-flow-authoring.md#アクション組み立て復旧時の注意)。
-- **定義**: UI で保存可能な最小雛形を作り、pac / clone / export で取得した action 名・operationId・パラメータ形・接続参照を正本に拡張する。トリガー・アクション名は追加直後に `連番_処理内容（既定の日本語UIアクション名）` に固定し、式は取得済みの内部名を使う（[コードファースト](references/code-first-flow-authoring.md#1-最小雛形を-ui-で成立させてから-clone-する)、[命名規則](references/naming-conventions.md)）。
-- **接続**: Power Automate UI で接続を事前作成し、Connected 状態の接続を検索してソリューション内の接続参照に紐づける。Flow API / PowerApps API / Graph API / Dataverse API のスコープを混用しない（[認証と接続](references/code-first-flow-authoring.md#認証環境解決と接続参照)）。
-- **起動と応答**: Webhook 型は有効化後に Flow API `/start` を実施する。Power Apps V2 や Teams 投稿、Dataverse File 列、AI Builder、GrantAccess / RevokeAccess は UI 由来の形に従う（[トリガー・アクション](references/trigger-action-patterns.md)）。Microsoft 365 Copilot Chat へのリンク応答は[表示と出力契約](references/code-first-flow-authoring.md#microsoft-365-copilot-chat-のリンク応答)を参照。
-- **既存フロー**: 削除・再作成はべき等更新ではない。`--execute` / `--replace-workflow-id` は退避・参照先・ID 依存・承認を確認した場合だけ指定する（[デプロイ前チェック](references/pre-deploy-checks.md#破壊的なサンプルデプロイ)、[Modern Flow 復旧条件](references/code-first-flow-authoring.md#アクション組み立て復旧時の注意)）。
+- **方式**: まず既定アクションで MVP に必要な処理と検証を成立させる。Graph HTTP の使用条件、コネクタの責務境界と変数配置・式の制約は[実装ガイド](references/code-first-flow-authoring.md#アクション組み立て復旧時の注意)を参照。
+- **定義**: UI で保存可能な最小雛形を作り、pac / clone / export で取得した action 名・operationId・パラメータ形・接続参照を正本に拡張する（[コードファースト](references/code-first-flow-authoring.md#1-最小雛形を-ui-で成立させてから-clone-する)）。
+- **命名と式**: トリガー・アクション名は追加直後に `連番_処理内容（既定の日本語UIアクション名）` に固定し、式は取得済みの内部名を使う（[命名規則](references/naming-conventions.md)）。
+- **接続**: Power Automate UI で事前作成し、Connected 状態の接続を検索してソリューション内の接続参照に紐づける。
+- **認証**: Flow API / PowerApps API / Graph API / Dataverse API のスコープを混用しない（[認証と接続](references/code-first-flow-authoring.md#認証環境解決と接続参照)）。
+- **起動**: Webhook 型は有効化後に Flow API `/start` を実施する。
+- **アクションと応答**: Power Apps V2、Teams 投稿、Dataverse File 列、AI Builder、GrantAccess / RevokeAccess は UI 由来の形に従う（[トリガー・アクション](references/trigger-action-patterns.md)）。Microsoft 365 Copilot Chat へのリンク応答は[表示と出力契約](references/code-first-flow-authoring.md#microsoft-365-copilot-chat-のリンク応答)を参照。
+- **既存フローの例外**: 削除・再作成はべき等更新ではない。`--execute` / `--replace-workflow-id` は退避・参照先・ID 依存を確認し、承認を得た場合だけ指定する（[デプロイ前チェック](references/pre-deploy-checks.md#破壊的なサンプルデプロイ)、[Modern Flow 復旧条件](references/code-first-flow-authoring.md#アクション組み立て復旧時の注意)）。
 
 ## 構築手順（5ステップ — 接続参照を確認し、有効化と実行を検証）
 
 ### Step 1: 環境 ID 解決 + 接続検索
 
-Flow API で `DATAVERSE_URL` から環境 ID を解決し、PowerApps API で対象環境の Connected 接続を探す。接続が無ければ UI で作成・再認証してから進む。解決方法と 504 / Timeout 時の再試行は[実装ガイド](references/code-first-flow-authoring.md#認証環境解決と接続参照)。
+1. Flow API で `DATAVERSE_URL` から環境 ID を解決する（504 / Timeout 時の再試行は[実装ガイド](references/code-first-flow-authoring.md#認証環境解決と接続参照)）。
+2. PowerApps API で対象環境の Connected 接続を探す。無ければ UI で作成・再認証してから進む。
 
 ### Step 2: 接続参照の作成（★ 有効化成功の核心）
 
@@ -74,7 +82,8 @@ Dataverse `workflows` に `MSCRM.SolutionUniqueName` を付け、対象ソリュ
 
 ### Step 5: 有効化 + Webhook 登録
 
-接続参照を確認して有効化する。Dataverse Webhook 型のみ Flow API `/start` で登録し、その他のトリガーには不要な起動呼び出しをしない。デザイナー保存・公開/有効化・実行 run と出力を別ゲートで検証する（[トリガーごとの条件](references/code-first-flow-authoring.md#定義作成有効化の詳細)、[次の確認ゲート](references/pre-deploy-checks.md#次の確認ゲート)）。
+1. 接続参照を確認して有効化する。Dataverse Webhook 型のみ Flow API `/start` で登録し、その他のトリガーには起動呼び出しをしない（[トリガーごとの条件](references/code-first-flow-authoring.md#定義作成有効化の詳細)）。
+2. デザイナー保存・公開/有効化・実行 run と出力を別ゲートで検証する（[次の確認ゲート](references/pre-deploy-checks.md#次の確認ゲート)）。
 
 ## 通知デザイン（デフォルト適用 — ユーザー指定不要）
 

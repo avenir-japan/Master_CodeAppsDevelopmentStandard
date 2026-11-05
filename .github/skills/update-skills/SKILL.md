@@ -80,7 +80,9 @@ triggers:
 
 1. **`SKILL.md`（正常系）**: 番号付き **Step** でワークフローを書く。トリガー語・使用ツール・出力フォーマットを明示。
    冗長な背景説明やコード全文は書かず `references/` へ逃がす。更新前に既存の見出し構成を確認し、同じ論点は既存節に統合する。
-   判断事項は短い箇条書き、比較は観点をそろえた表、手順は見出しと番号付きリストで整理し、長文の段落・巨大な表・末尾への継ぎ足しを避ける。情報を削らず、詳細へのリンクで本文を短く保つ。
+   - 対象・実施内容・例外・承認条件など異なる判断軸が一段落や一項目に混在したら、意味のまとまりごとに短い箇条書きへ分ける。
+   - 比較は観点をそろえた表、順序のある手順は番号付きリスト、異なる論点は既存見出しで整理する。単純な説明は機械的に分割しない。
+   - 長文の段落・巨大な表・末尾への継ぎ足しを避ける。条件や例外を削らず、詳細へのリンクで本文を短く保つ。
 2. **`references/`（参考・異常系）**: `troubleshooting.md`（異常系）と必要な参考資料を置く。
 3. **`scripts/`（利用スクリプト）**: 手順内で使ったスクリプトを置く。手作業を残さずスクリプト化する。
 4. **集約ファイルの同時更新（新規スキル時は必須）**: スキルを新規追加したら、カタログ `../README.md` の
@@ -131,14 +133,10 @@ python .github/skills/update-skills/scripts/validate_skill.py --all
 
 1. **公式仕様の検証**: API 名・スコープ・エンドポイント等は **Microsoft Learn MCP**（`microsoft_docs_search` /
    `microsoft_docs_fetch`）で裏取りし、推測を残さない。Learn MCP が無い場合のみ Web 取得にフォールバック。
-2. **ブラウザ操作の自動化**: ポータル操作が必要な手順は **VS Code 統合 Playwright ブラウザ**（`playwright-browser_navigate` /
-   `playwright-browser_click` / `playwright-browser_snapshot` / `playwright-browser_type` / `playwright-browser_handle_dialog` 等）で自動化できる形に書く。
-   最初のブラウザ起動より前に `AskUserQuestion` で使用する Microsoft Edge プロファイルを確認し、
-   回答前は操作を開始せず、同一タスクでは選択したプロファイルを継続利用する手順を必ず含める。
-   Playwright MCP サーバー・Playwright 単体ブラウザのインストール・起動は行わない
-   （→ [ブラウザ自動化方針](../standard/references/browser-automation.md)）。手動 UI 操作は最終手段とし、
-   その場合も画面パスとセレクタの目印を明記する。
-   統合ブラウザが使えない環境では、同文書の「組織のポリシーで VS Code 統合ブラウザが使えない場合」に従う。
+2. **ブラウザ操作の自動化**: ポータル操作が必要な手順は、次の条件を満たす形に書く。
+   - **使用ツール**: **VS Code 統合 Playwright ブラウザ**（`playwright-browser_navigate` / `playwright-browser_click` / `playwright-browser_snapshot` / `playwright-browser_type` / `playwright-browser_handle_dialog` 等）を使う。Playwright MCP サーバー・Playwright 単体ブラウザはインストール・起動しない（→ [ブラウザ自動化方針](../standard/references/browser-automation.md)）。
+   - **事前確認**: 最初のブラウザ起動前に `AskUserQuestion` で Microsoft Edge プロファイルを確認する。回答前は操作せず、同一タスクでは選択したプロファイルを継続利用する。
+   - **代替手段**: 手動 UI 操作は最終手段とし、画面パスとセレクタの目印を明記する。統合ブラウザが使えない環境では、同文書の「組織のポリシーで VS Code 統合ブラウザが使えない場合」に従う。
 3. **CLI 化**: 繰り返す操作は `scripts/` に追加し、本文からはスクリプト呼び出しで参照する。
 
 ### Step 5: PR 戦略を決める（更新 / 新規 + マージ順）
@@ -180,8 +178,8 @@ python .github/skills/update-skills/scripts/publish_skill.py --skill <skill-name
 1. 対象リポジトリの作業クローンを用意（既存ブランチがあればそれを `checkout`）。
 2. スキルの差分（`SKILL.md` / `references/` / `scripts/`）＋集約ファイルをクローンへ反映する。
 3. **push 前に再度 `validate_skill.py` を実行**し、秘匿情報が混入していないことを確認する。
-4. コミット → `gh pr create`（新規）または既存ブランチへ `git push`（更新）。
-   既存 PR 更新時は新しい PR を作らない。
+4. [Git 更新時の言語規則](../../copilot-instructions.md#git-更新時の言語)に従って日本語のコミットメッセージを付け、コミット → `gh pr create`（新規）または既存ブランチへ `git push`（更新）。
+   既存 PR 更新時は新しい PR を作らない。ユーザーへの変更要約とプッシュ結果も日本語で報告する。
 5. 新規 PR の場合は、本文に **Step 5 で決めたマージ順**を記載する。
 
 > シークレット（`.env` の値・クライアントシークレット等）は**絶対にコミット・出力しない**。
