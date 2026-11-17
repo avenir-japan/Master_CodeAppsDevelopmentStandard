@@ -50,7 +50,7 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 ## このマスターでの既定フロー
 
 1. [architecture](../architecture/SKILL.md) で v1 / v2 とフローの呼び出し元を選び、採用する重要経路の技術・ライセンス・Credits を [共通の実現可能性ゲート](../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で判定する。エージェントフローを使う場合は選んだハーネスでの利用可否を確認し、[power-automate](../power-automate/SKILL.md) に入出力・接続・実行主体を渡す
-2. ユーザーへ設計と未確認事項を提示し承認を得る。重要経路が未確認・不適合なら本実装を始めない
+2. ユーザーへ設計と未確認事項を提示し承認を得る。開発環境の重要経路は最小検証・代替案で解消し、顧客環境でしか判定できない条件は利用開始前のゲートに分ける
 3. Copilot Studio UI で v2 エージェントを手動作成する
 4. [手動作成チェックリスト](references/manual-creation-checklist.md) に沿って、作成直後の確認を行う
 5. 設定変更や調査では **BotConfiguration JSON** と **botcomponents 構造** を前提に扱う

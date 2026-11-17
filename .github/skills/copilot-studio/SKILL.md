@@ -101,7 +101,7 @@ triggers:
 
 - v1 Bot は Dataverse `bots` への直接 INSERT ではなく Copilot Studio UI で作成し、プロビジョニング完了後に設定する。
 - GPT (`componenttype=15`) は UI 作成済みの `configuration.gPTSettings.defaultSchemaName` と照合して更新する。別コンポーネントの自動削除は禁止。既存設定を GET → ディープマージ → PATCH し、`optInUseLatestModels=False` と `aISettings` のモデル選択を保持する。
-- Instructions / ConversationStart は PVA 固有のダブル改行 YAML を使い、`yaml.dump()` で書き戻さない。説明は `botcomponents.description` に publish 後に設定する。
+- Instructions は処理順・出力契約を先に整理し、本文の文字数と短縮後の要件網羅を確認する（[指示の設計・文字数確認](references/build-reference.md#生成オーケストレーションの-instructions-設計と文字数確認)）。ConversationStart とともに PVA 固有のダブル改行 YAML を使い、`yaml.dump()` で書き戻さない。説明は `botcomponents.description` に publish 後に設定する。
 - 更新コード、フォーマット例、例外と復旧条件は [構築リファレンス](references/build-reference.md#構築手順) を参照する。
 
 ## 構築手順
@@ -126,8 +126,10 @@ triggers:
 構造化 JSON を出力するエージェントは、実際の入力を使い、次のゲートを別々に確認する。
 
 1. Instructions が保存・読み戻しできること（実行時の動作確認とは区別する）。
-2. 出力が契約に適合すること。最上位キーだけでなく、配列要素のキー・型・必須項目も照合する。
+2. Instructions、ツール名・説明・入力説明、ナレッジ名・説明・用途とフローの解析スキーマが同じ入出力・参照目的を示すこと。出力は最上位キーだけでなく、配列要素のキー・型・必須項目も照合する。
 3. 入力に確定メタデータがある場合、出力のファイル名などが元の値と完全一致すること。構造適合だけで合格にしない。
+
+MVP の失敗時動作は既存のアクション依存関係を優先し、解析失敗時に後続の書き込みが動かない代表ケースを確認する。異常値ごとに独自の条件分岐や専用エラー応答を増やさない。具体的な副作用リスクがある場合だけ追加の検査・分岐を案件で判断する。失敗を成功として返さない。
 
 Instructions テンプレート・既存エージェント改善パターンは [構築リファレンス](references/build-reference.md#instructions-テンプレート) を参照。
 
