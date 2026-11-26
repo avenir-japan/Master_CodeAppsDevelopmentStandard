@@ -22,6 +22,10 @@
 ユーザーに依頼する際は、ソリューションの **スキーマ名（`SOLUTION_NAME`）** と **表示名** の両方を伝える。
 Copilot Studio UI のドロップダウンには表示名が表示されるため、スキーマ名だけではユーザーが特定できない。
 
+**作成前に主要言語を確認する（必須）**: 標準の主要言語は **日本語（日本）** とする。Copilot Studio の[対応言語](https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-language-support)と対象環境での利用可否を確認する。主要言語は[エージェント作成後に変更できない](https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-first-bot#change-the-primary-language-solution-and-schema-name)ため、作成画面で日本語（日本）が選択されていることを確認してから作成する。対象環境の既定言語と異なる場合は、言語を一致させる必要があると決めつけず、作成・インポート時の警告や利用可否を確認してから進める。
+
+PAC CLI を使う場合は、対象バージョンの `pac copilot init` が日本語の主要言語を指定・保持できるか確認する。CLI の引数に言語指定がない場合、または scaffold が日本語であると確認できない場合は、`--environment` による Bootstrap（環境へのインポートとエージェント作成）を実行しない。ローカル scaffold の言語設定を手編集しても安全に反映できると推定せず、サポートされた手順が確認できなければ UI 作成を使う。
+
 **⚠️ プロビジョニング完了を待つこと（重要）**
 
 Bot を「作成」した直後は Dataverse に `bots` レコードが即座に作成されるが、
@@ -43,11 +47,11 @@ Bot を「作成」した直後は Dataverse に `bots` レコードが即座に
 2. 「+ 作成」をクリック
 3. エージェント名を入力
 4. ★「エージェント設定 (オプション)」を展開:
-   - 言語: 日本語 (日本)
+   - 言語: 日本語（日本）。作成前に対象環境での利用可否も確認
    - ソリューション: 「{SOLUTION_DISPLAY_NAME}」を選択
      （スキーマ名: {SOLUTION_NAME}、表示名: {SOLUTION_DISPLAY_NAME}）
    - スキーマ名: {prefix}_agent_name
-5. 「作成」をクリック
+5. 主要言語が日本語（日本）であることを確認して「作成」をクリック
 6. ★ エージェントが完全にロードされるまで待つ（トピック一覧が表示されるまで）
 7. UI で Bot ID と既存構成を照合する（旧デプロイスクリプトへの入力には URL でなく正確な GUID が必要）
 ```
