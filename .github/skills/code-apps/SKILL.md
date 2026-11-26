@@ -112,14 +112,14 @@ UI 設計・CSP 構成・メール送信パターンまで Code Apps 開発の�
 ## 前提: 設計フェーズ完了後に実装に入る（必須）
 
 **このスキルでコードを書く前に、[architecture スキル](../architecture/SKILL.md) で Code Apps / Canvas Apps / Model-Driven Apps の候補を比較し、Code Apps で進めることをユーザーに確認済みであること。**
-そのうえで [デザインシステム](references/design-system.md) を参照して UI 設計を行い、ユーザーの承認を得る。
+そのうえで [デザインシステム](references/design-system.md) を参照して UI 設計を行う。Phase 0 の承認済み範囲なら再承認を求めず、範囲・重要経路・既知の追加費用が変わる場合だけ影響を示して再判断を得る。
 
 ```
 ① architecture スキルで UI 方式候補を比較し、Code Apps 採用をユーザーに確認
 ② デザインシステムリファレンス（references/design-system.md）を読み込む
 ③ 画面構成・コンポーネント選定・Lookup 名前解決パターンを設計
-④ ユーザーに設計を提示し、「この設計で進めてよいですか？」と承認を得る
-⑤ 承認後、このスキルに従って実装
+④ 承認済み範囲との差分を確認し、変更があれば影響を提示して再判断を得る
+⑤ このスキルに従って実装
 ```
 
 > **設計で提示する内容**: 画面一覧（ページ名・ルート）、各画面のコンポーネント構成（ListTable / InlineEditTable / StatsCards / FormModal 等）、

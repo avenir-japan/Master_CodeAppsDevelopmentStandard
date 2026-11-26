@@ -108,7 +108,7 @@ python .github/skills/standard/scripts/setup_environment.py --auth-only
 
 Python と pip が利用可能な場合は、`spec-to-markdown` 用 `.venv` の作成と `requirements.txt` の導入まで自動で試行します。未導入ツールがある場合は、次に実行すべきコマンドを表示します。
 
-セットアップ後は、M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれからでも [要件ディスカバリー](./.github/skills/spec-builder/references/requirements-discovery.md)を開始し、案件固有の SPEC と必要な開発入力を合意します。既存の Office・PDF 等の変換が必要な場合は、原資料を保持したまま [仕様書変換](./.github/skills/spec-to-markdown/SKILL.md) を利用します。[architecture](./.github/skills/architecture/SKILL.md) で Teams / Microsoft 365 Copilot を起点に構成案と代替案、技術・ライセンス・Credits の実現可能性を確認し、**設計提示とユーザー承認後**に実装します。Code Apps や Dataverse を導入の既定前提にはしません。
+セットアップ後は、M365 Copilot・Copilot Cowork・VS Code GitHub Copilot のいずれからでも [要件ディスカバリー](./.github/skills/spec-builder/references/requirements-discovery.md)を開始し、案件固有の SPEC と必要な開発入力を合意します。既存の Office・PDF 等の変換が必要な場合は、原資料を保持したまま [仕様書変換](./.github/skills/spec-to-markdown/SKILL.md) を利用します。[architecture](./.github/skills/architecture/SKILL.md) で Teams / Microsoft 365 Copilot を起点に構成案と代替案を検討し、重要経路の技術的制限を先行確認します。明らかな追加利用権・費用は採用時に示し、顧客固有の利用条件や Credits 非消費の証明は自社開発の着手ゲートにせず引き渡し手順に分けます。**採用範囲の設計提示とユーザー承認後**に実装し、承認済み範囲内のフェーズごとの再承認は求めません。Code Apps や Dataverse を導入の既定前提にはしません。
 
 ---
 

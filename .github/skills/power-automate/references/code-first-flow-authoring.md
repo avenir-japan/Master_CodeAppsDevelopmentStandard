@@ -82,6 +82,16 @@ save / publish に加え、成功・条件不一致・処理失敗の各経路�
 
 通知などの経路を廃止するときは、アクションの削除と合わせて後続応答の `runAfter` と本文を更新し、残った参照式と未使用の connectionReferences を確認する。成功・失敗それぞれの応答経路を再検証する。
 
+### URL で指定された実行履歴を読み取り専用で調べる
+
+Power Automate の実行 URL をブラウザーで開けない場合も、直ちに調査不能とせず、既存認証で対象環境への参照権限を確認する。実行履歴の調査は、フロー編集・再実行とは別の読み取り作業とする。
+
+1. URL のホストとパスを確認し、環境 ID・フロー ID・実行 ID を取り出す。`pac org who --json` の環境 ID・組織 URL・接続先アカウントと照合し、一致しなければ停止する。
+2. 対象環境が一致し、既存の認証が使用できる場合に限り、共通の `auth_helper.py` の `flow_api_call("GET", path)` で Flow API にアクセスする。`path` は `/providers/Microsoft.ProcessSimple/environments/{environmentId}/flows/{flowId}` を起点に、フロー情報、`/runs/{runId}`、その `/actions` を順に指定し、返る ID・状態を照合する。多数の履歴は必要な件数に絞って確認する。Flow API のフロー ID を Dataverse の workflow ID と同一視しない。
+3. 実行全体の `Succeeded` だけで成果物成功とせず、条件分岐と保存・リンク作成・成功応答それぞれの `Succeeded` / `Skipped` / `Failed` を確認する。トークン、署名付き URL、回答本文、アクションの入出力全体を表示・保存しない。認証・権限・API のエラーは実際の状態とともに報告し、別アカウントでの回避や書き込みには進まない。
+
+この経路は案件での読取実績に基づく調査手順であり、すべての環境での API 権限やアクション履歴の取得を保証しない。
+
 ## 3. docs と UI がずれたら code view と clone 定義を正本にする
 
 Learn、swagger、過去の実装例と、Power Automate デザイナーの実際の code view が
@@ -129,6 +139,21 @@ stale に見えることがある。
 ## Microsoft 365 Copilot Chat のリンク応答
 
 成功応答にクリック可能な URL を表示するときは `message` に `[表示名](URL)` の Markdown リンクを使う（検証したケースではプレーン URL では不可）。表示用 `message` と機械可読な URL 出力は分け、既存の URL 出力契約を Markdown に置き換えない。成功表示だけを変更し、失敗応答と共有リンク作成後に応答する順序は保持して回帰確認する。
+
+## 接続の実行主体を選ぶ（`invoker` / `embedded`）
+
+実行者ごとに参照できるデータを分ける必要があるか、共通のデータを管理された接続で処理するかを先に決める。フローの `connectionReferences[*].runtimeSource` はコネクタごとに確認し、表示名やフロー ID の変更とは独立した設定として扱う。
+
+| 条件 | 選択候補 | 運用上の確認 |
+|---|---|---|
+| 利用者本人のアクセス権で読み書きし、個人ごとのデータ制限を守る | `invoker`（実行者が接続を提供） | 各利用者の接続、同意、対象リソースへの権限、利用チャネルでの認証導線 |
+| 複数利用者が同じ共有データ・保存先を扱い、組織がその権限を一元管理する | `embedded`（フローに設定した接続を使用） | 最小権限の接続所有者、接続参照の割当、所有者変更・失効時の運用、共有先と閲覧権限 |
+
+`embedded` を使うだけで利用者のデータ権限が維持されるわけではない。フローから取得した内容を誰に返すか、生成したファイルを誰が閲覧できるかを別に設計する。Copilot Studio から呼ぶ場合は、フロー内の `runtimeSource` とエージェントの**ツール認証設定**を別々に確認する。ツール設定の値からフロー内の接続実行主体を推定しない。
+
+既存フローの名前変更・デザイナー保存・ソリューション移送後には、前後の `runtimeSource` と接続参照先を再取得して比較する。差異があれば意図した実行主体を再判断し、予定利用者で取得・保存・応答・成果物の閲覧を試験する。顧客環境では実接続を再割当てし、開発環境の成功を流用しない。
+
+出典: [Power Automate のフロー共有と実行者接続](https://learn.microsoft.com/en-us/power-automate/create-team-flows#can-another-user-use-a-connection-provided-by-the-run-only-user)、[Copilot Studio のツール認証](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configure-enduser-authentication)。
 
 ## 5. 関連する基本原則
 

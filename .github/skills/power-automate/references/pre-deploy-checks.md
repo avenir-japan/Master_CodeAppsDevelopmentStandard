@@ -34,3 +34,15 @@ python .github/skills/power-automate/scripts/validate_flow_definition.py path/to
 [コードファースト実装ガイド](code-first-flow-authoring.md)のゲートごとに原因を切り分ける。
 Canvas App を使う案件では `sync_canvas` / `compile_canvas` の検証後に Designer で Save / Publish し、
 Copilot Studio を使う案件では公開前の設定検証と利用者視点の動作確認を別に実施する。
+
+### エージェントから呼ぶフローの応答時間
+
+「エージェントがフローを呼び出したとき」で起動するフローは、エージェントへの**同期応答を100秒以内**に返す必要がある。[Microsoft Learn のエージェントフロー要件](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flow-agent)を参照。計測対象は各フローの呼び出しから応答までであり、複数ツールを含む会話全体の経過時間を100秒の合否に使わない。Copilot Studio 上のツール所要時間、Power Automate の run 所要時間、応答アクションの完了時刻は範囲が異なるため、同じ呼び出しを識別して別々に記録する。保存などの副作用が応答前に成功していても、応答がタイムアウトすれば成功応答とは判定せず、再実行前に副作用の有無を確認する。
+
+## 納品前の名前・説明と不要資産の整理
+
+1. 対象ソリューションのフロー・エージェントツールを一覧にし、表示名、説明、検証用の接尾辞、使用中の入力・出力と参照先を確認する。内部 ID や既存のアクション名は、表示を整えるためだけに変更しない。
+2. 検証用の表示名・説明や実際に未使用の入力だけを、依存する呼び出し元と合わせて整理する。失敗検知・件数照合など必要な検証値は消さず、案件で採用していない列・項目を新たな必須条件にしない。
+3. 表示名変更の前後でフロー ID、定義、接続参照・`runtimeSource`、ツールの参照先を読み戻して差分を確認する。接続の実行方式が変わった場合は[実行主体の選定](code-first-flow-authoring.md)を再確認する。納品するソリューションを再エクスポートし、含まれるコンポーネントと説明を照合する。
+
+旧版・検証版が**別 ID の資産として存在する場合だけ**、利用中の参照と依存先を確認して整理方法を決める。アンマネージドソリューションから不要な旧版を外す操作は、フロー本体を[環境から削除する操作](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-solution#remove-objects-from-a-solution)とは異なる。旧版の除外・削除を納品前の一律手順にしない。
