@@ -11,8 +11,8 @@
    接続所有者の権限を利用者本人の権限と同一視しない。
 4. 外部文章や取得した文書の指示をエージェントの業務指示として実行させない方針と、
    拒否すべき操作・期待応答をテストケースとして記録する。
-5. ライセンス、Copilot Credits、DLP、対象チャネルの適合は
-   [Phase 0](../../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で判断する。
+5. 対象チャネルの既知の技術的制約と、明らかな追加利用権・費用は
+   [Phase 0](../../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で扱う。顧客固有の DLP・ライセンス・容量や Credits 非消費の証明は自社開発の着手条件にせず、必要な確認を引き渡し手順に分ける。
 
 ## 公開前の受入
 

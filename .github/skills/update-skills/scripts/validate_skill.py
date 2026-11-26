@@ -4,7 +4,7 @@
   1. SKILL.md が存在し、frontmatter の name がフォルダ名と一致する（kebab-case）。
   2. frontmatter に description / category / triggers がある。
   3. Step 見出し（## / ### Step N）が整数で連番になっている（飛び・重複なし）。
-  4. references/ と scripts/ の有無（無ければ警告）。
+  4. references/ の有無と、ローカルスクリプトを参照する場合の scripts/ の有無。
   5. 秘匿情報スキャン（実 GUID / *.crm*.dynamics.com / 実メール / クライアントシークレット様）。
   6. スキル内 Markdown のローカル見出しリンクが実在するか確認。
 
@@ -232,11 +232,13 @@ def validate_skill(skill_dir: Path) -> Report:
         if steps != expected:
             rep.err(f"Step 番号が整数連番でない: {steps}（期待: {expected}）")
 
-    # references / scripts の有無
+    # references / 利用する scripts の有無
     if not (skill_dir / "references").is_dir():
         rep.warn("references/ が無い（参考情報・異常系の置き場）")
     if not (skill_dir / "scripts").is_dir():
-        rep.warn("scripts/ が無い（利用スクリプトの置き場）")
+        local_script = re.compile(r"(?<![\w./-])(?:\./|\.\./)?scripts/[\w.-]+")
+        if any(local_script.search(md.read_text(encoding="utf-8")) for md in skill_dir.rglob("*.md")):
+            rep.warn("scripts/ が無い（参照するローカルスクリプトの置き場）")
 
     # 秘匿情報スキャン（テキスト系ファイルのみ）
     exts = {".md", ".py", ".ps1", ".json", ".jsonc", ".ts", ".tsx", ".env", ".example"}

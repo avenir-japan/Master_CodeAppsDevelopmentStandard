@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from validate_skill import Report, scan_heading_links
+from validate_skill import Report, scan_heading_links, validate_skill
 
 
 class HeadingLinkTests(unittest.TestCase):
@@ -35,6 +35,61 @@ class HeadingLinkTests(unittest.TestCase):
             self.assertEqual(2, len(report.errors))
             self.assertIn("見出しリンクがない", report.errors[0])
             self.assertIn("リンク先ファイルがない", report.errors[1])
+
+
+class ScriptDirectoryTests(unittest.TestCase):
+    def test_scriptless_skill_does_not_warn(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skill = Path(tmp) / "example"
+            skill.mkdir()
+            (skill / "references").mkdir()
+            (skill / "SKILL.md").write_text(
+                "---\nname: example\ndescription: Example\ncategory: guide\ntriggers:\n  - example\n---\n"
+                "# Example\nNo scripts are used.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual([], validate_skill(skill).warnings)
+
+    def test_missing_referenced_script_directory_warns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skill = Path(tmp) / "example"
+            skill.mkdir()
+            (skill / "references").mkdir()
+            (skill / "SKILL.md").write_text(
+                "---\nname: example\ndescription: Example\ncategory: guide\ntriggers:\n  - example\n---\n"
+                "# Example\nRun [checker](scripts/check.py).\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(any("scripts/ が無い" in w for w in validate_skill(skill).warnings))
+
+    def test_command_reference_warns_but_external_script_does_not(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skill = Path(tmp) / "example"
+            skill.mkdir()
+            (skill / "references").mkdir()
+            doc = skill / "SKILL.md"
+            doc.write_text(
+                "---\nname: example\ndescription: Example\ncategory: guide\ntriggers:\n  - example\n---\n"
+                "```powershell\npython ../standard/scripts/check.py\n```\n",
+                encoding="utf-8",
+            )
+            self.assertEqual([], validate_skill(skill).warnings)
+            doc.write_text(doc.read_text(encoding="utf-8") + "```powershell\npython scripts/check.py\n```\n", encoding="utf-8")
+            self.assertTrue(any("scripts/ が無い" in w for w in validate_skill(skill).warnings))
+
+    def test_referenced_script_directory_present_does_not_warn(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skill = Path(tmp) / "example"
+            skill.mkdir()
+            (skill / "references").mkdir()
+            (skill / "scripts").mkdir()
+            (skill / "scripts" / "check.py").write_text("", encoding="utf-8")
+            (skill / "SKILL.md").write_text(
+                "---\nname: example\ndescription: Example\ncategory: guide\ntriggers:\n  - example\n---\n"
+                "# Example\nRun [checker](scripts/check.py).\n",
+                encoding="utf-8",
+            )
+            self.assertEqual([], validate_skill(skill).warnings)
 
 
 if __name__ == "__main__":
