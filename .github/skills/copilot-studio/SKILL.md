@@ -31,6 +31,8 @@ triggers:
 
 このスキルは **既存アーキテクチャ（v1）を採用したエージェント**の構築・設定を扱い、採用後の構成では生成オーケストレーション（Generative Orchestration）を使用する。
 
+- **パッケージ既定**: Copilot Studio エージェントは Standard ハーネスの v1 を初期候補とする。作成前にハーネスを選び、作成後はポータル表示で照合する。`cliagent` のテンプレート名や Provisioned 表示だけでは Standard と判断しない（[ハーネスの選定](../architecture/SKILL.md#copilot-studio-の-v1--v2-の選び分け)）。
+
 - **v2 を採用する場合**: Teams / Microsoft 365 Copilot 単独向けの新アーキテクチャ（cliagent）は [copilot-studio-v2](../copilot-studio-v2/SKILL.md) の制約と手順を優先し、v1 用の API・トピック操作を流用しない。
 - **利用権**: 社内開発者には必要な利用権がある前提で進める。Microsoft 365 サブスクリプションに含まれる Copilot Studio for Teams プランでは生成オーケストレーションを利用できないため、採用する機能に明らかな追加利用権・費用があれば[ライセンス確認ガイド](../standard/references/license-requirements.md)に従い採用時に示す。顧客側の個別割当や Credits 非消費の証明を自社開発の着手ゲートにしない。
 - **例外案**: 外部トリガーやニュース配信は要件がある場合のみ検討する。外部トリガーからエージェントを呼ぶ構成は標準案ではなく、重要経路の技術的制限を確認し、明らかな追加利用権・費用を採用時に示して判断する。不明な Credits 条件を非消費と断定しない。
@@ -104,6 +106,7 @@ triggers:
 - v1 Bot は Dataverse `bots` への直接 INSERT ではなく Copilot Studio UI で作成し、プロビジョニング完了後に設定する。
 - GPT (`componenttype=15`) は UI 作成済みの `configuration.gPTSettings.defaultSchemaName` と照合して更新する。別コンポーネントの自動削除は禁止。既存設定を GET → ディープマージ → PATCH し、`optInUseLatestModels=False` と `aISettings` のモデル選択を保持する。
 - Instructions は処理順・出力契約を先に整理し、本文の文字数と短縮後の要件網羅を確認する（[指示の設計・文字数確認](references/build-reference.md#生成オーケストレーションの-instructions-設計と文字数確認)）。ConversationStart とともに PVA 固有のダブル改行 YAML を使い、`yaml.dump()` で書き戻さない。説明は `botcomponents.description` に publish 後に設定する。
+- Instructions は短い Markdown 見出し・番号付き手順・箇条書きで役割、参照条件、処理順、出力契約、回答できない場合を読みやすく分ける（[構造化の目安](references/build-reference.md#生成オーケストレーションの-instructions-設計と文字数確認)）。固定の章立てや案件専用の回答形式は強制しない。
 - 更新コード、フォーマット例、例外と復旧条件は [構築リファレンス](references/build-reference.md#構築手順) を参照する。
 
 ## 構築手順

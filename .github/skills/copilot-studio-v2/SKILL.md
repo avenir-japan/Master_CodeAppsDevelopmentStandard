@@ -22,6 +22,8 @@ triggers:
 Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 このマスターでは **手動作成前提** で安全に扱うためのスキル。
 
+> このパッケージで作成するエージェントの既定は **Standard ハーネス**（[architecture の選定](../architecture/SKILL.md#copilot-studio-の-v1--v2-の選び分け)）。Teams / Microsoft 365 Copilot 単独利用だけで本スキルを選ばない。`cliagent-1.0.0` や Provisioned の読み戻しは Standard の証明ではない。別ハーネスの実利用・費用を判断して例外採用する場合だけ使う。
+
 上流では API による完全自動構築までカバーしているが、このマスターでは
 **GitHub Copilot クレジット節約のため Bot 作成は UI 手動を既定** とし、
 以下を正本として扱う:
@@ -34,7 +36,7 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 
 ## いつこのスキルを使うか
 
-このスキルが向くのは **Teams / Microsoft 365 Copilot 単独利用** のとき。「単独」は外部からの呼び出しや埋め込みが不要という意味で、ナレッジや内部ツールを使わないという意味ではない。
+このスキルが向くのは **Teams / Microsoft 365 Copilot 単独利用で、ハーネスと v2 固有の構成を確認して例外採用した**とき。「単独」は外部からの呼び出しや埋め込みが不要という意味で、ナレッジや内部ツールを使わないという意味ではない。
 
 エージェントフローを使う場合は、選んだハーネスで連携がサポートされるか別途確認する。[Microsoft Learn: エージェントフローをツールとして作成](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) の手順は Standard ハーネス向け。
 
@@ -49,10 +51,10 @@ Copilot Studio の **新アーキテクチャ（`cliagent`）** を、
 
 ## このマスターでの既定フロー
 
-1. [architecture](../architecture/SKILL.md) で v1 / v2 とフローの呼び出し元を選び、[共通の Phase 0 確認](../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で重要経路の既知の障害と明らかな追加利用権・費用を扱う。エージェントフローを使う場合は選んだハーネスでの利用可否を確認し、[power-automate](../power-automate/SKILL.md) に入出力・接続・実行主体を渡す
+1. [architecture](../architecture/SKILL.md) で Standard 既定との違い、ハーネス・v1 / v2・フローの呼び出し元を選び、[共通の Phase 0 確認](../standard/references/power-platform-development-standard.md#開発着手前の実現可能性ゲート全案件必須)で重要経路の既知の障害と明らかな追加利用権・費用を扱う。エージェントフローを使う場合は選んだハーネスでの利用可否を確認し、[power-automate](../power-automate/SKILL.md) に入出力・接続・実行主体を渡す
 2. 設計と未確認事項（主要言語を含む）が Phase 0 の承認済み範囲内か確認し、範囲・重要経路・既知の追加費用が変わる場合だけ影響を示して再判断を得る。主要言語は作成後に変更できないため、標準の日本語（日本）と対象環境での利用可否を作成前に確認する。成否を左右する技術的な不確実性は最小検証で扱い、顧客環境固有の条件は引き渡し手順に分ける
 3. Copilot Studio UI で v2 エージェントを手動作成する
-4. [手動作成チェックリスト](references/manual-creation-checklist.md) に沿って、作成直後の確認を行う
+4. [手動作成チェックリスト](references/manual-creation-checklist.md) に沿って、**ポータル上の実際のハーネス表示**を含めて作成直後の確認を行う。想定と違えば編集・公開・テストを止める（[誤選択の切り分け](references/troubleshooting.md)）
 5. 設定変更や調査では **BotConfiguration JSON** と **botcomponents 構造** を前提に扱う
 6. MCP サーバー追加前に `standard/scripts/check_mcp_client.py studio` で事前確認し、その後 UI で手動追加して **Confirm** と再公開まで行う
 7. アイコン設定と公開前確認は [アイコンと公開の最小ガイド](references/icon-and-publish.md) と [外部入力と公開前チェック](../copilot-studio/references/external-input-release-check.md) を参照する

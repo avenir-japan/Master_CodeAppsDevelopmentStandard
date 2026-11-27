@@ -269,7 +269,7 @@ Power Platform 開発では、次の 3 層を混同しないこと。
 
 ### 2.2 .env ファイル設定
 
-環境情報は **Power Apps ポータル > 設定（右上の⚙）> セッション詳細** または PAC プロファイルから取得する。
+Dataverse URL は **Power Platform 管理センター → 管理 → 環境 → 対象環境 → 詳細の「URL」** から確認できる（[Microsoft Learn](https://learn.microsoft.com/en-us/power-platform/admin/edit-properties-environment#edit-an-environment)）。管理センターに入れない場合は **Power Apps ポータル > 設定（右上の⚙）> セッション詳細の Instance URL** または認証済み PAC プロファイルを使う。Copilot Studio の画面 URL に含まれる環境 ID と Dataverse URL は異なるため、対象環境の名前・ID を照合してから `.env` の `DATAVERSE_URL` に記入する。実 URL はリポジトリへ記録しない。
 
 > [!IMPORTANT]
 > このリポジトリを複数案件向けのマスターとして使う場合、`.env` はリポジトリに保持しない。`.env.example` を正本として保持し、案件ごとに `.env` を作成して実値を設定する。
@@ -1134,7 +1134,7 @@ Dataverse Web API で作成したフローは **直接接続（Embedded）** モ
 
 ## 6. Copilot Studio エージェント開発
 
-本節の `bots` テーブルや GPT YAML を用いる API 手順は既存アーキテクチャ（v1）を採用した場合の例。Teams / Microsoft 365 Copilot 単独向けの新アーキテクチャ（cliagent / v2）では [copilot-studio-v2](../../copilot-studio-v2/SKILL.md) を優先し、v1 の API・トピック設定を流用しない。作成手段・利用権は採用構成で確認する。
+本節の `bots` テーブルや GPT YAML を用いる API 手順は既存アーキテクチャ（v1）を採用した場合の例。本パッケージでは Teams / Microsoft 365 Copilot 単独利用でも **Standard ハーネスの v1 を既定**とする。別ハーネスの新アーキテクチャ（cliagent / v2）を例外採用した場合だけ [copilot-studio-v2](../../copilot-studio-v2/SKILL.md) を参照し、v1 の API・トピック設定を流用しない。作成手段・利用権・費用とポータル上のハーネス表示を確認する。
 
 ### 6.1 開発方針
 

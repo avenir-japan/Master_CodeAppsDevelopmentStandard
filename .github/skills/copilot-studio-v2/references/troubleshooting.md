@@ -7,6 +7,7 @@
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
+| Standard ハーネスを意図したのに別ハーネスになった | `pac copilot init --authoring-mode cli-copilot` の作成結果を、`cliagent-1.0.0` や Provisioned という読み戻しだけで Standard と誤判定した | ハーネスは作成時に選び、作成後にポータルの表示を確認する。Standard が必要なら [Standard の作成経路](https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/switch-experiences)で**別のエージェントを新規作成**する。既存エージェントの切替や再インポートで直ると想定しない。誤作成分は対象を特定し、所有者の了承と影響確認を得てから片付ける |
 | `0x8004023b "Connection State is closed"` | Bot プロビジョニング直後で認可セッション未確立 | 数秒待って **リトライ**（一時エラー） |
 | `undeclared property 'parentbotcomponentid'` | 親ナビ名が誤り | `ParentBotComponentId`（Pascalケース）を使う |
 | `bot $select` で 400 | 新アーキに存在しない列を指定 | 全列取得してから必要列をフィルタ |

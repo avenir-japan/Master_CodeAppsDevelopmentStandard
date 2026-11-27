@@ -106,7 +106,7 @@ triggers: # スキル発動条件キーワード（必須）
 | スキル                                          | 説明                                                                                                         |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [copilot-studio](copilot-studio/SKILL.md)       | 既存アーキテクチャ（v1）のエージェントを構築・運用する。生成オーケストレーションは利用権を確認して適用する。 |
-| [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。単独利用時の判断基準。    |
+| [copilot-studio-v2](copilot-studio-v2/SKILL.md) | Copilot Studio の新アーキテクチャ（cliagent）の制約・構造・手動運用手順を整理する。Standard 既定からの例外候補。    |
 | [power-automate](power-automate/SKILL.md)       | Power Automate クラウドフローをソリューション対応で作成・デプロイする。                                      |
 
 ### ai — AI / プロンプト
@@ -130,7 +130,7 @@ triggers: # スキル発動条件キーワード（必須）
 | Dataverse のテーブル・列・権限から固めたい    | [dataverse](dataverse/SKILL.md) / [Conversation Transcript 分析](dataverse/references/conversation-transcript-analysis.md)                                                                                                                                          |
 | 画面 UI が本当に必要                          | [architecture](architecture/SKILL.md) で要否・利用条件を確認し、[canvas-app](canvas-app/SKILL.md) を基本案に検討。難しい場合のみ [code-apps](code-apps/SKILL.md) / [model-driven-app](model-driven-app/SKILL.md) を実現性・ライセンス・費用と承認を確認して代替検討 |
 | 自動化・通知・外部トリガーを作りたい          | [power-automate](power-automate/SKILL.md) でフロー種別を確認。エージェント連携時は [architecture](architecture/SKILL.md) で方式・例外条件を判断する                                                                                                                 |
-| エージェントや AI ツールを作りたい            | [architecture](architecture/SKILL.md) で連携利用か単独利用かを判断し、[copilot-studio](copilot-studio/SKILL.md)（v1）または [copilot-studio-v2](copilot-studio-v2/SKILL.md)（v2）を選ぶ。AI Builder は要件・ライセンス確認後の候補                                  |
+| エージェントや AI ツールを作りたい            | [architecture](architecture/SKILL.md) でハーネスを先に判断する。既定は Standard ハーネスの [copilot-studio](copilot-studio/SKILL.md)（v1）。[copilot-studio-v2](copilot-studio-v2/SKILL.md) は機能・費用の確認後に例外検討。AI Builder は要件・ライセンス確認後の候補                                  |
 
 ---
 
@@ -142,8 +142,8 @@ triggers: # スキル発動条件キーワード（必須）
 1. architecture       → 全体設計・コンポーネント選定（Teams / M365 Copilot 優先。画面 UI が必要なら Canvas App を基本案とし、要件実現が難しい場合は Code Apps / Model-Driven Apps も代替候補として提案。実現性・ライセンス・費用と承認を確認）
 2. standard           → 共通基盤の確認（.env・認証）
 3. dataverse          → カスタムテーブルが必要な場合、設計承認後にテーブル構築・セキュリティロール設定（依存するアプリ・フローより先）
-4. copilot-studio     → エージェントが必要な場合のみ。連携利用や既存トリガー資産を使う構成
-  OR copilot-studio-v2 → エージェントが必要な場合のみ。Teams / M365 Copilot 単独利用向けの新アーキ構成
+4. copilot-studio     → エージェントが必要な場合の既定。Standard ハーネスを作成時・作成後に確認する
+  OR copilot-studio-v2 → 新アーキ固有の機能を要する場合のみ。ハーネス・利用権・費用を確認して例外採用する
 5. canvas-app         → 画面 UI が必要な場合のみ Canvas App（MCP + coauthoring / Git Integration / single app・package の使い分けと、添付・staging・Flow 中継）を検討
   OR code-apps        → Canvas App では難しい場合、実現性・ライセンス・費用を確認し明示承認後に代替採用
   OR model-driven-app → Canvas App では難しい場合、実現性・ライセンス・費用を確認し明示承認後に代替採用

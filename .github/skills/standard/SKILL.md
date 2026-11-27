@@ -46,6 +46,7 @@ triggers:
 - **採用の条件**: 案件の確定要件を初期提案で上書きしない。明らかに追加利用権・費用を要する方式は条件を示して採用を判断する。
 
 - 既定の UI / チャネル候補は **Teams / Microsoft 365 Copilot** とし、利用可能性と要件適合を確認する
+- このパッケージで Copilot Studio エージェントを作る場合の既定は **Standard ハーネス**。利用チャネルや `cliagent` という構成名だけでハーネスを選ばず、作成後はポータルで表示を確認する（[architecture の選定手順](../architecture/SKILL.md#copilot-studio-の-v1--v2-の選び分け)）
 - **Canvas App（標準コネクタ）** は画面 UI が必要な場合の初期候補とし、既存資産、データソース・コネクタのライセンス条件と工数を確認する
 - Code Apps、Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは既定提案から外す。明らかな追加利用権・費用は採用時に示し、不明な費用を無料と断定しない
 - Power Automate クラウドフローからエージェントを呼び出す自律型の構成・実装は、Credits 非消費の条件を満たす場合でも標準スコープに含めず、必要時のみ例外的な代替案として検討する（[条件と根拠](references/license-requirements.md#1-基本方針)）
@@ -110,7 +111,7 @@ Dataverse カスタムテーブルの作成は初期化の必須工程ではな�
 
 ```env
 # === 必須（全フェーズ共通）===
-DATAVERSE_URL=https://{org}.crm7.dynamics.com/   # セッション詳細: Instance URL
+DATAVERSE_URL=https://{org}.crm7.dynamics.com/   # PPAC: 管理 > 環境 > 対象環境 > 詳細の URL（またはセッション詳細: Instance URL）
 TENANT_ID={your-tenant-id}                       # セッション詳細: Tenant ID
 SOLUTION_NAME={YourSolutionName}
 PUBLISHER_PREFIX={prefix}

@@ -51,6 +51,7 @@ triggers:
 このマスターリポジトリでは、検証導入パッケージの既定提案を **ベースライセンス（Microsoft 365 + Copilot）の範囲内** に置く。
 
 - 既定の UI / チャネルは **Teams / Microsoft 365 Copilot** を優先する
+- Copilot Studio エージェントは **Standard ハーネスを既定**とし、チャネルや `cliagent` の構成名からハーネスを推定しない。別ハーネスは採用機能と費用を示して例外判断する
 - **Canvas Apps** は画面 UI が本当に必要な場合の基本案とし、利用するデータソース・コネクタのライセンス条件を確認する
 - Canvas Apps では仕様・技術要件を満たせない場合、**Code Apps / Model-Driven Apps** も代替候補として提案する。実現性・ライセンス・費用を確認し、ユーザー承認後に採否を決める
 - Dataverse カスタムテーブル、AI Builder、プレミアム / カスタムコネクタ、Credits 消費が見込まれる Copilot Studio パターンは既定提案から外す。明らかな追加利用権・費用は採用時に示し、不明な費用を無料と断定しない
@@ -136,7 +137,7 @@ triggers:
 - **文書・ページの第一候補：SharePoint サイト URL 参照** — 元の SharePoint 権限と検索を利用。文書のコピー・索引に Dataverse 保存容量を使わない。検索品質と鮮度を検証する。
 - **SharePoint リストは保留して経路別に判定** — 公式の登録手順は「ファイルのアップロード」欄からの Dataverse 取り込み・索引化を記載する一方、公式比較表は容量消費 `No` の SharePoint 接続方式もリスト対応とする。両記述の関係は未解決であり、容量ゼロとも一律消費とも断定しない。顧客環境を確認できない納品では未確定事項として引き継ぎ、最新行や正確な件数が必要ならナレッジ以外の取得経路も比較する。
 - **文書の代替** — 固定資料の直接アップロード、または SharePoint ファイル／フォルダーの取り込み。いずれも Dataverse 容量を消費し、同期・権限・利用権を別途確認する。意味検索だけで高精度と決めない。
-- **採用時の確認** — Standard ハーネスは実行・課金の区分、v1 / cliagent（v2）は構成、Teams / Microsoft 365 Copilot は利用入口であり別軸。まず対象業務に必要な文書１サイト、リストが必要なら１リストで回答・引用・鮮度を検証する。明らかな追加利用権・費用は採用時に示すが、顧客固有の容量や Credits 非消費の証明を着手ゲートにしない。
+- **採用時の確認** — ハーネスは作成時に決まる実行・課金の区分、v1 / cliagent（v2）は構成、Teams / Microsoft 365 Copilot は利用入口であり別軸。ただし本パッケージの Standard 既定を優先し、`cliagent` が Standard で動くと推定しない。まず対象業務に必要な文書１サイト、リストが必要なら１リストで回答・引用・鮮度を検証する。明らかな追加利用権・費用は採用時に示すが、顧客固有の容量や Credits 非消費の証明を着手ゲートにしない。
 
 保存先・権限・更新・公式根拠と比較手順は [ナレッジソースの選定](../copilot-studio/references/knowledge-source-selection.md) を参照。
 
@@ -152,31 +153,29 @@ triggers:
 
 ### 構築モード: 採用したアーキテクチャに合わせる
 
-v1 を採用した案件では生成オーケストレーションを使う（[v1 の手順](../copilot-studio/SKILL.md)）。Teams / Microsoft 365 Copilot 単独向けの cliagent（v2）は [v2 の手順](../copilot-studio-v2/SKILL.md) を優先し、v1 のトピック・設定手順を流用しない。いずれも採用機能の利用権を先に確認する。
+このパッケージでは先に Standard ハーネスを選び、Teams / Microsoft 365 Copilot 単独利用でも [v1 の手順](../copilot-studio/SKILL.md)を既定とする。採用した v1 構成では生成オーケストレーションを使う。cliagent（v2）はハーネスの実際の表示・利用権・費用と重要経路を確認して例外採用した場合に限り [v2 の手順](../copilot-studio-v2/SKILL.md)を使い、v1 のトピック・設定手順を流用しない。
 
 ### Copilot Studio の v1 / v2 の選び分け
 
-Copilot Studio を採用すると決まったら、**v1（既存 `copilot-studio`）と v2（新アーキ `copilot-studio-v2`）のどちらで作るかを必ず確認する**。
+Copilot Studio を採用すると決まったら、**まずハーネスを選び、その後 v1（既存 `copilot-studio`）と v2（新アーキ `copilot-studio-v2`）を検討する**。本パッケージの既定は Standard ハーネスの v1。ハーネスを作成後に切り替えられると想定しない（[Microsoft Learn: ハーネスの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/overview)）。
 
 このマスターでは、次の基準で使い分ける:
 
 | シナリオ                                                                     | 推奨   | 使用スキル                                         |
 | ---------------------------------------------------------------------------- | ------ | -------------------------------------------------- |
-| **連携利用**（Code Apps / Web 埋め込み / 他システム連携 / 外部トリガー活用） | **v1** | [copilot-studio](../copilot-studio/SKILL.md)       |
-| **単独利用**（Teams / Microsoft 365 Copilot での対話が中心）                 | **v2** | [copilot-studio-v2](../copilot-studio-v2/SKILL.md) |
+| **パッケージの既定**（Teams / Microsoft 365 Copilot 単独利用を含む）         | **Standard ハーネスの v1** | [copilot-studio](../copilot-studio/SKILL.md)       |
+| **例外**（v2 固有機能が必要で、実際のハーネス・利用権・費用と重要経路を確認済み） | **v2 を条件付きで検討** | [copilot-studio-v2](../copilot-studio-v2/SKILL.md) |
 
-判断の起点は **「そのエージェントを外部から呼び出すか」**。「単独利用」はナレッジや内部ツールを使わないことではない。エージェントフローは、選んだハーネスで利用できるかを個別に確認する（[Microsoft Learn: エージェントフローをツールとして作成](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) の手順は Standard ハーネス向け）。選定結果には v1 / v2 の別だけでなく、**誰がどの入口からフローを呼ぶか、入力・出力、接続と実行主体、ライセンス・Credits の判定、未確認事項と顧客確認事項**を残す。承認済みの方式に対応する下記専門スキルを読み、フローの種類に応じて [power-automate](../power-automate/SKILL.md) へ引き継ぐ。
+単独利用か外部から呼び出すかは必要な機能の判断材料だが、**単独利用だけを理由に v2 を選ばない**。エージェントフローは、選んだハーネスで利用できるかを個別に確認する（[Microsoft Learn: エージェントフローをツールとして作成](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create) の手順は Standard ハーネス向け）。選定結果には構成・ハーネスの別と、**誰がどの入口からフローを呼ぶか、入力・出力、接続と実行主体、ライセンス・Credits の判定、未確認事項と顧客確認事項**を残す。承認済みの方式に対応する下記専門スキルを読み、フローの種類に応じて [power-automate](../power-automate/SKILL.md) へ引き継ぐ。
 
 - **外部から呼び出す場合**: v1 を選ぶ。v2（cliagent）は Code Apps の `ExecuteCopilotAsyncV2` 連携では呼び出せず、Web 埋め込みにも向かない。外部公開、ニュース配信、既存トリガー資産の流用も v1 を前提にする。
-- **Teams / Microsoft 365 Copilot 単独利用の場合**: 新アーキの制約を許容できるなら v2 を選ぶ。構成が明確で保守しやすい。
+- **Teams / Microsoft 365 Copilot 単独利用の場合**: Standard ハーネスの v1 が既定。別ハーネスの固有機能が必要なら採用前に例外として比較する。
 
 AskUserQuestion の確認文言例:
 
-> Copilot Studio エージェントは 2 つの構成を選べます。
+> このパッケージでは Standard ハーネスの既存構成を既定とします。
 >
-> - v1: Code Apps や Web 埋め込みなど他サービスと連携する構成向け
-> - v2: Teams / Microsoft 365 Copilot 単独利用向け
->   今回はどちらの前提で進めますか？
+> 別のハーネス固有の機能が必要ですか？ 必要なら利用権・費用と連携への影響を確認して例外案を提示します。
 
 ---
 

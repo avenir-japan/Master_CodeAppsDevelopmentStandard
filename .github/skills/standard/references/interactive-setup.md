@@ -71,7 +71,9 @@ pac auth create --name {ProfileName}
 
 ### PAC profile が作成できない場合（セッション詳細から手動取得）
 
-PAC CLI が未インストール、または `pac auth create` が実行できない環境では、**Power Apps ポータルのセッション詳細** から必要な値を直接取得する。
+PAC CLI が未インストール、または `pac auth create` が実行できない環境では、**Power Platform 管理センターの対象環境の詳細**または **Power Apps ポータルのセッション詳細**から必要な値を取得する。
+
+Dataverse URL は [Power Platform 管理センター](https://admin.powerplatform.microsoft.com/) → **管理 → 環境 → 対象環境 → 詳細の「URL」** で確認する（[Microsoft Learn: 環境のプロパティ](https://learn.microsoft.com/en-us/power-platform/admin/edit-properties-environment#edit-an-environment)）。これが `DATAVERSE_URL` と PAC CLI の `--environment` に渡せる URL。**Copilot Studio のブラウザ画面の `/environments/{id}/...` は環境 ID を含む画面 URL であり、Dataverse URL とは異なる**。URL が同じ対象環境のものか、環境名・ID と合わせて確認する。実値は `.env` 等の除外済み設定にだけ置き、スキルやリポジトリへ記録しない。管理センターに入れない場合は以下のセッション詳細または認証済み PAC プロファイルから確認する。
 
 1. [make.powerapps.com](https://make.powerapps.com) を開く
 2. 右上の **⚙（設定）** → **セッション詳細** をクリック
