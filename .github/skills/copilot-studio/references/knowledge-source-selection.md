@@ -1,6 +1,12 @@
 # ナレッジソースの登録方式と選定（Standard ハーネス）
 
-確認日: 2026-11-06。以下は Copilot Studio の **Standard ハーネス**向け公式資料の比較。**Standard ハーネス（実行・課金の区分）と v1 / cliagent（v2、このリポジトリで扱うエージェント構成）は同じ選択軸ではない**。Teams / Microsoft 365 Copilot は利用者の入口。採用する構成で該当するナレッジ登録画面・検索経路・公開後の動作と課金条件を確認し、v2 に同じ手順が使えると推定しない（[ハーネスの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview)）。
+確認日: 2026-11-06（公開 Web サイトの検索経路は 2026-11-27 に確認）。以下は Copilot Studio の **Standard ハーネス**向け公式資料の比較。**Standard ハーネス（実行・課金の区分）と v1 / cliagent（v2、このリポジトリで扱うエージェント構成）は同じ選択軸ではない**。Teams / Microsoft 365 Copilot は利用者の入口。採用する構成で該当するナレッジ登録画面・検索経路・公開後の動作と課金条件を確認し、v2 に同じ手順が使えると推定しない（[ハーネスの概要](https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview)）。
+
+## 公開 Web サイトのナレッジと広域 Web Search
+
+公開サイトの URL をナレッジとして登録すると、指定 URL の範囲に結果を絞るが、検索時には質問全文と関連する会話文脈を踏まえたクエリを **Bing に送信する**。別設定の **Use information from the web / Web Search** は Bing が索引化する公開 Web 全体を追加検索する機能であり、有効なら登録済み公開サイトの検索と並行して実行される。広域 Web Search を OFF にしても、登録済み公開サイトの Bing 検索は停止しない（[公開サイトを追加する](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-public-website#search-query-length)、[ナレッジ設定](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio#use-information-from-the-web)）。
+
+公開サイト URL と、認証された利用者の権限で検索する **SharePoint URL** は別のナレッジ方式。上記をすべての URL 登録へ一般化しない。公開サイトの検索クエリを含むリクエストは最大 2,048 文字で、長い質問や会話、日本語のエンコードによって結果が返らない場合がある。検索語が常に短いとは説明せず、送信条件・登録 URL の範囲・長文での検索可否を検討する。対象のエージェント構成と最終利用チャネルで実際の応答・参照元を確認し、公式資料の確認を実機検証済みと扱わない。
 
 ## 文書と SharePoint リストの登録方式
 
