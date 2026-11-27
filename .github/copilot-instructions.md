@@ -26,6 +26,8 @@ GitHub Copilot は、開発・レビュー・修正の際に次の方針で動�
 4. 重要な矛盾、複数の正本候補、判断に影響する情報不足がある場合は、
    対象ファイルと論点を示して確認する。
 5. 作業内容に関係するスキルだけを選び、必要な範囲で参照する。
+   `SPEC.md` を作成・更新する場合は、`.github/skills/spec-builder/SKILL.md` と
+   `.github/skills/spec-builder/references/requirements-discovery.md` を参照し、更新時も該当節全体の構造と判断状態を点検する。
 6. Copilot Studio の ConversationTranscript 分析では読み取り専用を既定とし、対象環境・対象エージェント・対象期間が不足している場合は実行前に確認する。
 7. 未確認のテーブル論理名・列名・ JSON 構造を推測せず、先にメタデータを確認してからクエリを作る。
 8. 会話ログ分析では取得件数を制限し、書き込み・更新・削除を実行しない。
